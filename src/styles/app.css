@@ -1,0 +1,12 @@
+.app-container {
+  font-family: var(--ff-400);
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-clr);
+  color: var(--font-clr);
+
+  display: grid;
+  grid-template-columns: 1fr 6fr;
+  grid-template-rows: 1fr 6fr;
+  gap: var(--gap);
+}
