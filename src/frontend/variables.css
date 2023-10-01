@@ -1,0 +1,52 @@
+@font-face {
+  font-family: 'Urbanist-VariableFont_wght';
+  src: url('../frontend/assets/fonts/Urbanist-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ff-400: 'Urbanist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  
+  --fsz-12: clamp(1.2rem, calc(1.1rem + 0.3vw), 1.8rem);
+  --fsz-14: clamp(1.4rem, calc(1.3rem + 0.3vw), 2.0rem);
+  --fsz-16: clamp(1.6rem, calc(1.5rem + 0.3vw), 2.2rem);
+  --fsz-18: clamp(1.8rem, calc(1.7rem + 0.3vw), 2.4rem);
+  --fsz-20: clamp(2.0rem, calc(1.9rem + 0.3vw), 2.6rem);
+
+  --font-clr: hsl(0, 0%, 100%);
+  --font-clr-05: hsla(0, 0%, 100%, 0.5);
+
+  --bg-clr: hsla(0, 0%, 18%, 1);
+  --card-clr: hsla(0, 0%, 12%, 1);
+  --thistle: hsla(290, 35%, 83%, 1);
+  --lemon-chiffon: hsla(58, 74%, 85%, 1);
+
+  --thistle-03: hsla(290, 35%, 83%, 0.3);
+  --thistle-01: hsla(290, 35%, 83%, 0.1);
+  --lemon-chiffon-0025: hsla(58, 74%, 85%, 0.025);
+
+  --p-inline: 2vw;
+  --p-block: 1vw;
+
+  --gap: 1vw;
+}
+
+h1 {
+  font-size: var(--fsz-20);
+}
+
+h2 {
+  font-size: var(--fsz-18);
+  color: var(--font-clr-05);
+}
+
+h3 {
+  font-size: var(--fsz-16);
+}
+
+body {
+  font-size: var(--fsz-14);
+  background: var(--bg-clr);
+}

@@ -1,0 +1,84 @@
+.dashboard-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--padding-block) var(--padding-inline);
+
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+
+  & .dashboard-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: var(--gap);
+    padding: var(--gap);
+
+    & .card-link {
+      text-decoration: none;
+    }
+
+    & .dashboard-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--padding-block);
+      border-radius: 1rem;
+      height: clamp(100px, calc(100px + 10vw), 400px);
+      width: clamp(100px, calc(100px + 10vw), 400px);
+
+      background: var(--card-clr);
+      z-index: 2;
+
+      & .card-text {
+        text-align: center;
+      }
+
+      & .card-icon {
+        height: 150px;
+        width: 150px;
+      }
+    }
+
+    & .dashboard-card:hover {
+      background-image: radial-gradient(
+        circle at var(--x, 0) var(--y, 0),
+        var(--thistle-01) 5rem,
+        var(--lemon-chiffon-0025) 8rem
+      );
+      background-attachment: fixed;
+    }
+
+    & .dashboard-card::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 1rem;
+
+      background-attachment: fixed;
+      background-image: radial-gradient(
+        circle at var(--x, 0) var(--y, 0),
+        var(--thistle-03),
+        transparent 8rem
+      );
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    & .dashboard-card:focus-visible {
+      outline: 3px solid var(--lemon-chiffon);
+    }
+  }
+}
+
+@media (width < 460px) {
+  .dashboard-container {
+    & .dashboard-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}

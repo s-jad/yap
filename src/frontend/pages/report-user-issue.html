@@ -1,0 +1,26 @@
+<div id="report-user-issue-form-container">
+ <h1 class="report-title">Report an Issue</h1>
+ <form class="report-form">
+   <label for="r-description">
+     Please provide a detailed description of the incident
+     <textarea class="report-form-item report-description" name="r-description"></textarea>
+   </label>
+    <p class="r-form-info">Choose the mosts relevant category for the incident</p>
+    <label for"radio-bullying">
+     <input id="radio-bullying" type="radio" class="r-form-radio" name="r-type" value="r-type"> 
+    </label>
+    <label for"radio-hacking">
+     <input id="radio-hacking" type="radio" class="r-form-radio" name="r-type" value="r-type"> 
+    </label>
+    <label for"radio-scam">
+     <input id="radio-scam" type="radio" class="r-form-radio" name="r-type" value="r-type"> 
+    </label>
+  <label for "r-select-members">
+    If someone was involded, please add their username
+    <input type="text" id="r-user" name="r-user">
+    <button type="button" class="r-form-btn" id="add-user-btn">Add User</button>
+    <div id="involved-user-list"></div>
+  </label>
+  <input type="submit" value="reportSubmission">
+ </form>
+</div> 
