@@ -1,9 +1,10 @@
 import './reset.css';
 import './variables.css';
-import '../src/styles/app.css';
-import '../src/styles/header.css';
-import '../src/styles/dashboard.css';
-import '../src/styles/sidebar.css';
-import App from './components/app.js';
+import './styles/app.css';
+import './styles/header.css';
+import './styles/dashboard.css';
+import './styles/sidebar.css';
+import './styles/hamburger-btn.css';
+import App from './components/app';
 
 document.body.appendChild(App());
