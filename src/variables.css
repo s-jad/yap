@@ -19,10 +19,17 @@
   --font-clr-05: hsla(0, 0%, 100%, 0.5);
 
   --bg-clr: hsla(0, 0%, 18%, 1);
+  --card-clr: hsla(0, 0%, 12%, 1);
   --thistle: hsla(290, 35%, 83%, 1);
+  --lemon-chiffon: hsla(58, 74%, 85%, 1);
+
+  --thistle-03: hsla(290, 35%, 83%, 0.3);
+  --thistle-01: hsla(290, 35%, 83%, 0.1);
+  --lemon-chiffon-0025: hsla(58, 74%, 85%, 0.025);
 
   --p-inline: 2vw;
   --p-block: 1vw;
+
   --gap: 1vw;
 }
 
@@ -32,7 +39,7 @@ h1 {
 
 h2 {
   font-size: var(--fsz-18);
-  color: var(--font-color-05);
+  color: var(--font-clr-05);
 }
 
 h3 {
@@ -41,5 +48,5 @@ h3 {
 
 body {
   font-size: var(--fsz-14);
-  background: var(--jet);
+  background: var(--bg-clr);
 }
