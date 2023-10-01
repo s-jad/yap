@@ -16,16 +16,16 @@ createDistDirectory();
 module.exports = {
   mode: 'development',
   entry: {
-    index: './src/index.js',
+    index: './src/frontend/index.js',
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'Development',
+      title: 'Dashboard',
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'src/assets/fonts', to: 'fonts' },
-        { from: 'src/assets/imgs', to: 'imgs' },
+        { from: 'src/frontend/assets/imgs', to: 'imgs' },
+        { from: 'src/frontend/assets/fonts', to: 'fonts' },
       ],
     }),
   ],
