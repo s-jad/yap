@@ -20,7 +20,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'Dashboard',
+      title: 'Yapp',
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -34,7 +34,18 @@ module.exports = {
     static: './dist',
   },
   optimization: {
-    runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        apiInterface: {
+          test: /[\\/]report-user-form[\\/]/,
+          name: 'report-user-form',
+          chunks: 'all',
+          priority: 10,
+          enforce: true,
+        },
+      },
+    },
+  runtimeChunk: 'single',
   },
   output: {
     filename: '[name].bundle.js',
