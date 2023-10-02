@@ -9,5 +9,31 @@
   padding-block: 3rem;
   grid-column: 1 / 2;
   grid-row: 1 / 3;
+  gap: calc(var(--gap) * 2);
   opacity: 1;
+
+  & .sidebar-list-flex {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    gap: var(--gap);
+    padding: 0;
+    margin: 0;
+
+    & .sidebar-list-item {
+
+      & .sidebar-list-icon {
+        height: 3rem;
+        width: 3rem;
+        scale: 1;
+        transition: scale 300ms ease-in-out;
+      }
+      
+      & .sidebar-list-icon:hover {
+        scale: 1.05;
+      }
+    }
+  }
 }
