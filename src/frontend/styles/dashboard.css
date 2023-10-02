@@ -1,4 +1,4 @@
-.dashboard-container {
+#dashboard-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,7 +76,7 @@
 }
 
 @media (width < 460px) {
-  .dashboard-container {
+  #dashboard-container {
     & .dashboard-grid {
       grid-template-columns: repeat(2, 1fr);
     }
