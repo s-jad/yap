@@ -1,23 +1,6 @@
-import fetchPage from './fetch_apis';
+import { handleLinks } from './fetch_apis';
 import logoSVG from '../assets/imgs/logo.svg';
-import homeSVG from '../assets/imgs/home.svg';
-import messagesSVG from '../assets/imgs/envelope.svg';
-
-
-function getIcons() {
-  const home = new Image();
-  home.src = homeSVG;
-  home.alt = 'A house';
-
-  const messages = new Image();
-  messages.src = messagesSVG;
-  messages.alt = 'An envelope';
-
-  return [
-    home,
-    messages,
-  ];
-}
+import { getSidebarIcons } from './icons';
 
 export default function Sidebar() {
   const sidebarContainer = document.createElement('div');
@@ -34,12 +17,12 @@ export default function Sidebar() {
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" href="#"></a></li>
   `;
 
-  const icons = getIcons();
-  const listItems = Array.from(sidebarListFlex.querySelectorAll('.sidebar-list-anchor'));
+  const icons = getSidebarIcons();
+  const listItems = Array.from(sidebarListFlex.querySelectorAll('[data-link]'));
 
   listItems.forEach((item, index) => {
     item.addEventListener('click', () => {
-      fetchPage(item.getAttribute('data-link'));
+      handleLinks(item.getAttribute('data-link'));
     });
 
     icons[index].className = 'sidebar-list-icon';
@@ -51,3 +34,4 @@ export default function Sidebar() {
 
   return sidebarContainer;
 }
+
