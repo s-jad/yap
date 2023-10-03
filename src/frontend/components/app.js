@@ -1,7 +1,29 @@
 import Header from './header';
-import Dashboard from './dashboard';
 import Sidebar from './sidebar';
 import HamburgerBtn from './hamburger-btn';
+
+import Dashboard from './dashboard';
+import ReportUserIncidentForm from './report-user-form';
+
+function clientRouting() {
+  const currentRoute = window.location.pathname;
+  let component;
+
+  switch (currentRoute) {
+
+    case '/dashboard':
+      component = Dashboard();
+      return component;
+
+    case '/report-user-issue':
+      component = ReportUserIncidentForm();
+      return component;
+
+    default:
+      component = Dashboard();
+      return component;
+  }
+}
 
 export default function App() {
   const appContainer = document.createElement('div');
@@ -9,7 +31,7 @@ export default function App() {
   appContainer.id = 'app';
 
   appContainer.appendChild(Header());
-  appContainer.appendChild(Dashboard());
+  appContainer.appendChild(clientRouting());
   appContainer.appendChild(Sidebar());
   appContainer.appendChild(HamburgerBtn());
 
