@@ -1,4 +1,4 @@
-import { handleLinks } from './fetch_apis';
+import { handleClientSideLinks } from './fetch_apis';
 import logoSVG from '../assets/imgs/logo.svg';
 import { getSidebarIcons } from './icons';
 
@@ -13,20 +13,23 @@ export default function Sidebar() {
   const sidebarListFlex = document.createElement('ul');
   sidebarListFlex.className = 'sidebar-list-flex';
   sidebarListFlex.innerHTML = `
-    <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/dashboard" href="#"></a></li>
+    <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/" href="/"></a></li>
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" href="#"></a></li>
   `;
 
   const icons = getSidebarIcons();
-  const listItems = Array.from(sidebarListFlex.querySelectorAll('[data-link]'));
+  const links = Array.from(sidebarListFlex.querySelectorAll('[data-link]'));
 
-  listItems.forEach((item, index) => {
-    item.addEventListener('click', () => {
-      handleLinks(item.getAttribute('data-link'));
+  links.forEach((link, index) => {
+    link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const url = link.getAttribute('data-link');
+      history.pushState(null, null, url);
+      handleClientSideLinks(url);
     });
 
     icons[index].className = 'sidebar-list-icon';
-    item.appendChild(icons[index]);
+    link.appendChild(icons[index]);
   });
 
   sidebarContainer.appendChild(logo);
