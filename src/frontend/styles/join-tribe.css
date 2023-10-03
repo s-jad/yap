@@ -1,0 +1,58 @@
+#join-tribe-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--p-block) var(--p-inline);
+
+  & .tribe-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: var(--gap);
+    padding: var(--p-block) var(--p-inline);
+    height: 100%;
+    width: 100%;
+
+    & .tribe-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      box-shadow: var(--shadow-inset), var(--shadow);
+      border-radius: 1rem;
+      padding: var(--p-block);
+      height: 300px;
+
+      outline: 0px solid var(--lemon-chiffon-03);
+
+      & .tribe-card-upper-flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg-clr);
+
+
+        & .tribe-icon {
+          height: 64px;
+          width: 64px;
+        }
+
+        & .tribe-name {
+          color: var(--thistle);
+        }
+      }
+
+      & .tribe-cta {
+        color: var(--thistle);
+      }
+
+      & .tribe-description {
+        color: var(--font-clr);
+      }
+    }
+
+    & .tribe-card:hover,
+    & .tribe-card:focus-visible {
+      outline: 2px solid var(--lemon-chiffon-03);
+    }
+  }
+}
