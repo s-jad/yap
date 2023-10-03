@@ -1,10 +1,14 @@
+import JoinTribe from './join-a-tribe';
+
 const importedList = {
   reportUserForm: false,
+  joinTribe: false,
 };
 
 const importedComponents = {
   dashboard: false,
   reportUserForm: false,
+  joinTribe: false,
 }
 
 function getComponent(fn) {
@@ -16,7 +20,7 @@ function importModules(page) {
   return new Promise((resolve, reject) => {
     let component;
     switch (page) {
-      case '/dashboard':
+      case '/':
         component = getComponent(importedComponents.dashboard);
         resolve(component);
         break;
@@ -44,14 +48,37 @@ function importModules(page) {
         }
         break;
 
-      default: 
+      case '/join-a-tribe':
+        if (importedList.joinTribe !== true) {
+          import(/* webpackChunkName: "join-a-tribe" */ './join-a-tribe')
+            .then((module) => {
+              return module.default;
+            })
+            .then((ReportUserIncidentForm) => {
+              const fn = JoinTribe;
+              importedList.joinTribe = true;
+              importedComponents.joinTribe = fn;
+              component = getComponent(fn)
+              resolve(component);
+            })
+            .catch((error) => {
+              console.error(error);
+              reject(error);
+            });
+        } else {
+          component = getComponent(importedComponents.joinTribe);
+          resolve(component);
+        }
+        break;
+
+      default:
         resolve(null);
         break;
     }
   });
 }
 
-function handleLinks(page) {
+function handleClientSideLinks(page) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
 
@@ -68,6 +95,6 @@ function handleLinks(page) {
 }
 
 export {
-  handleLinks,
+  handleClientSideLinks,
   importedComponents,
 };
