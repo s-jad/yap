@@ -35,7 +35,7 @@ export default function Dashboard() {
         <p class="card-text">Join a gathering</p>
       </div>    
     </a>
-    <a class="card-link report-link" href="#" data-link="/report-user-issue" tabindex="7">
+    <a class="card-link report-link" href="/report-user-issue" data-link="/report-user-issue" tabindex="7">
       <div class="dashboard-card">
         <p class="card-text">Report an issue</p>
       </div>    
@@ -47,9 +47,11 @@ export default function Dashboard() {
   const links = Array.from(dashboardGrid.querySelectorAll('[data-link]'));
 
   links.forEach((link) => {
-    link.addEventListener('click', () => {
-      const page = link.getAttribute('data-link');
-      handleLinks(page);
+    link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const url = link.getAttribute('data-link');
+      history.pushState(null, null, url);
+      handleLinks(url);
     });
   });
 
