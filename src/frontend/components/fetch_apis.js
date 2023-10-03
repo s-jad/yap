@@ -1,5 +1,3 @@
-import JoinTribe from './join-a-tribe';
-
 const importedList = {
   reportUserForm: false,
   joinTribe: false,
@@ -54,7 +52,7 @@ function importModules(page) {
             .then((module) => {
               return module.default;
             })
-            .then((ReportUserIncidentForm) => {
+            .then((JoinTribe) => {
               const fn = JoinTribe;
               importedList.joinTribe = true;
               importedComponents.joinTribe = fn;
@@ -97,4 +95,5 @@ function handleClientSideLinks(page) {
 export {
   handleClientSideLinks,
   importedComponents,
+  getComponent,
 };

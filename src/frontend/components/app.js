@@ -1,10 +1,8 @@
 import Header from './header';
 import Sidebar from './sidebar';
 import HamburgerBtn from './hamburger-btn';
-
 import Dashboard from './dashboard';
-import ReportUserIncidentForm from './report-user-form';
-import JoinTribe from './join-a-tribe';
+import { importedComponents, getComponent } from './fetch_apis';
 
 function clientRouting() {
   const currentRoute = window.location.pathname;
@@ -17,12 +15,12 @@ function clientRouting() {
       return component;
 
     case '/join-a-tribe':
-      component = JoinTribe();
+      component = getComponent(importedComponents.joinTribe);
       return component;
 
 
     case '/report-user-issue':
-      component = ReportUserIncidentForm();
+      component = getComponent(importedComponents.reportUserForm);
       return component;
 
     default:
