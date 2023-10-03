@@ -4,6 +4,7 @@ import HamburgerBtn from './hamburger-btn';
 
 import Dashboard from './dashboard';
 import ReportUserIncidentForm from './report-user-form';
+import JoinTribe from './join-a-tribe';
 
 function clientRouting() {
   const currentRoute = window.location.pathname;
@@ -11,9 +12,14 @@ function clientRouting() {
 
   switch (currentRoute) {
 
-    case '/dashboard':
+    case '/':
       component = Dashboard();
       return component;
+
+    case '/join-a-tribe':
+      component = JoinTribe();
+      return component;
+
 
     case '/report-user-issue':
       component = ReportUserIncidentForm();

@@ -1,4 +1,4 @@
-import { importedComponents, handleLinks } from './fetch_apis';
+import { importedComponents, handleClientSideLinks } from './fetch_apis';
 import { getDashboardIcons } from './icons';
 
 export default function Dashboard() {
@@ -20,7 +20,7 @@ export default function Dashboard() {
         <p class="card-text">Form your own tribe</p>
       </div>    
     </a>
-    <a class="card-link join-tribe-link" href="#" tabindex="4">
+    <a class="card-link join-tribe-link" href="/join-a-tribe" data-link="/join-a-tribe" tabindex="4">
       <div class="dashboard-card">
         <p class="card-text">Join an existing tribe</p>
       </div>    
@@ -51,7 +51,7 @@ export default function Dashboard() {
       ev.preventDefault();
       const url = link.getAttribute('data-link');
       history.pushState(null, null, url);
-      handleLinks(url);
+      handleClientSideLinks(url);
     });
   });
 

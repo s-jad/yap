@@ -1,3 +1,5 @@
+const url = process.env.SERVER_URL;
+
 function addUserBtnEvent(addUserBtn, addUserInput, involvedUserList) {
 
   addUserBtn.addEventListener('click', () => {
@@ -15,28 +17,31 @@ export default function ReportUserIncidentForm() {
 
   reportFormContainer.innerHTML = `
    <h1 class="report-title">Report an Issue</h1>
-   <form class="report-form">
+   <form action="${url}/report-user-issue" method="POST" class="report-form">
+    <div class="form-border">
      <label for="r-description">
        Please provide a detailed description of the incident
        <textarea class="report-form-item report-description" name="r-description"></textarea>
      </label>
-      <p class="r-form-info">Choose the mosts relevant category for the incident</p>
-      <div class="radio-flex">
-        <label for="radio-bullying">
-          Bullying
-          <input id="radio-bullying" type="radio" class="r-form-radio" name="r-type"
+      <div class="radio-outer-flex">
+        <p class="r-form-info">Choose the mosts relevant category for the incident</p>
+        <div class="radio-flex">
+          <label for="radio-bullying">
+            Bullying
+            <input id="radio-bullying" type="radio" class="r-form-radio" name="r-type"
           value="bullying"> 
-        </label>
-        <label for="radio-hacking">
-          Hacking
-          <input id="radio-hacking" type="radio" class="r-form-radio" name="r-type"
+          </label>
+          <label for="radio-hacking">
+            Hacking
+            <input id="radio-hacking" type="radio" class="r-form-radio" name="r-type"
           value="hacking"> 
-        </label>
-        <label for="radio-scam">
-          Scam
-          <input id="radio-scam" type="radio" class="r-form-radio" name="r-type" value="scam"> 
-        </label>
-      </div>
+          </label>
+          <label for="radio-scam">
+            Scam
+            <input id="radio-scam" type="radio" class="r-form-radio" name="r-type" value="scam"> 
+          </label>
+       </div>
+    </div>
     <label for="r-select-members">
       If someone was involded, please add their username
       <div class="input-btn-flex">
@@ -45,6 +50,7 @@ export default function ReportUserIncidentForm() {
       </div>
       <div id="involved-user-list"></div>
     </label>
+    </div>
     <input class="form-submit-input" type="submit" value="Submit report">
    </form>
   `;
