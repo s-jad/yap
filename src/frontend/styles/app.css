@@ -1,4 +1,4 @@
-#home-page-container {
+#app {
   position: relative;
   font-family: var(--ff-400);
   width: 100vw;
@@ -13,6 +13,6 @@
   transition: grid-template-columns 300ms ease-in-out;
 }
 
-#home-page-container.hide {
+#app.hide {
   grid-template-columns: 0px 6fr;
 }
