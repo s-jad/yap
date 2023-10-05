@@ -2,9 +2,9 @@ import Header from './header';
 import Sidebar from './sidebar';
 import HamburgerBtn from './hamburger-btn';
 import Dashboard from './dashboard';
-import { importedComponents, getComponent } from './fetch_apis';
+import { importedComponents, getComponent, getAsyncComponent } from './fetch_apis';
 
-function clientRouting() {
+async function clientRouting() {
   const currentRoute = window.location.pathname;
   let component;
 
@@ -15,7 +15,8 @@ function clientRouting() {
       return component;
 
     case '/join-a-tribe':
-      component = getComponent(importedComponents.joinTribe);
+      component = await getAsyncComponent(importedComponents.joinTribe);
+      console.log(component);
       return component;
 
 
@@ -29,15 +30,24 @@ function clientRouting() {
   }
 }
 
-export default function App() {
+export default async function App() {
   const appContainer = document.createElement('div');
   appContainer.classList.add('app-container');
   appContainer.id = 'app';
 
+  const currentRoute = await clientRouting();
+  
   appContainer.appendChild(Header());
-  appContainer.appendChild(clientRouting());
+  appContainer.appendChild(currentRoute);
   appContainer.appendChild(Sidebar());
   appContainer.appendChild(HamburgerBtn());
+
+  window.addEventListener('popstate', async() => {
+    const toRemove = appContainer.querySelector('.removable');
+    appContainer.removeChild(toRemove);
+    const toAdd = await clientRouting();
+    appContainer.appendChild(toAdd);
+  });
 
   return appContainer;
 }

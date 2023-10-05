@@ -8,4 +8,5 @@ import './styles/hamburger-btn.css';
 import './styles/report-user-form.css';
 import App from './components/app';
 
-document.body.appendChild(App());
+const app = await App();
+document.body.appendChild(app);

@@ -1,20 +1,24 @@
-import getTribes from './tribes-db-access';
-
 const importedList = {
   reportUserForm: false,
   joinTribe: false,
 };
 
 const importedComponents = {
-  dashboard: false,
-  reportUserForm: false,
-  joinTribe: false,
+  dashboard: () => {},
+  reportUserForm: () => {},
+  joinTribe: () => {},
 }
 
 function getComponent(fn) {
   const component = fn();
   return component;
 }
+
+async function getAsyncComponent(fn) {
+  const component = await fn();
+  return component;
+}
+
 
 function importModules(page) {
   return new Promise((resolve, reject) => {
@@ -58,7 +62,7 @@ function importModules(page) {
               const fn = JoinTribe;
               importedList.joinTribe = true;
               importedComponents.joinTribe = fn;
-              component = getComponent(fn)
+              component = getAsyncComponent(fn)
               resolve(component);
             })
             .catch((error) => {
@@ -66,7 +70,8 @@ function importModules(page) {
               reject(error);
             });
         } else {
-          component = getComponent(importedComponents.joinTribe);
+          component = getAsyncComponent(importedComponents.joinTribe);
+          console.log("importModules::getAsyncComponent => ", component);
           resolve(component);
         }
         break;
@@ -98,4 +103,5 @@ export {
   handleClientSideLinks,
   importedComponents,
   getComponent,
+  getAsyncComponent,
 };
