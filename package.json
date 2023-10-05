@@ -4,8 +4,7 @@
     "private": true,
     "scripts": {
         "build": "webpack",
-        "server": "node dev-server.js",
-        "start": "webpack serve --open",
+        "start": "node -r dotenv/config server.cjs",
         "watch": "webpack --watch",
         "test": "echo \"Error: no test specified\" && exit 1",
         "gh-deploy-init": "git push origin && git subtree push --prefix dist origin gh-pages",
@@ -15,12 +14,18 @@
     "author": "Sam Donaldson <sjadonaldson000@gmail.com>",
     "license": "GPL-3",
     "dependencies": {
+        "body-parser": "^1.20.2",
         "cors": "^2.8.5",
-        "express": "^4.18.2"
+        "express": "^4.18.2",
+        "pg": "^8.11.3"
     },
     "devDependencies": {
+        "@babel/cli": "^7.23.0",
+        "@babel/core": "^7.23.0",
+        "@babel/preset-env": "^7.22.20",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.8.1",
+        "dotenv": "^16.3.1",
         "eslint": "^8.50.0",
         "eslint-config-airbnb": "^19.0.4",
         "eslint-plugin-import": "^2.28.1",
