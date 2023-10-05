@@ -1,3 +1,5 @@
+import getTribes from './tribes-db-access';
+
 const importedList = {
   reportUserForm: false,
   joinTribe: false,
