@@ -22,6 +22,14 @@ async function clientRouting() {
       }
       return component;
 
+    case '/create-a-tribe':
+      component = getComponent(importedComponents.createTribe);
+
+      if (component === undefined) {
+        component = await importModules(currentRoute);
+      }
+      return component;
+
     case '/report-user-issue':
       component = getComponent(importedComponents.reportUserForm);
 
@@ -29,7 +37,7 @@ async function clientRouting() {
         component = await importModules(currentRoute);
       }
       return component;
-
+  
     default:
       component = Dashboard();
       return component;
