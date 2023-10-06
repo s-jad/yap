@@ -29,7 +29,7 @@
   --lemon-chiffon-0025: hsla(58, 74%, 85%, 0.025);
 
   --p-inline: 2vw;
-  --p-block: 1vw;
+  --p-block: 1vh;
 
   --gap: 1vw;
 
@@ -39,6 +39,13 @@
   --shadow-inset: inset 0 0 3px var(--thistle), inset 0 0 8px var(--thistle-03);
   --shadow-inset-hl: inset 0 0 3px var(--lemon-chiffon), inset 0 0 8px var(--lemon-chiffon-03);
   --shadow: 0 0 5px var(--card-clr);
+
+  --btn-width: clamp(fit-content, calc(fit-content + 2vw), 300px);
+  --btn-height: clamp(fit-content, calc(fit-content + 2vh), 150px);
+
+  --margin-small: 1rem;
+  --margin-mid: 2rem;
+  --margin-big: 3rem;
 }
 
 h1 {
