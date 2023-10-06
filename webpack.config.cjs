@@ -1,4 +1,5 @@
 const fs = require('fs');
+const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -19,6 +20,9 @@ module.exports = {
     index: './src/frontend/index.js',
   },
   plugins: [
+    new webpack.DefinePlugin({
+        'process.env.SERVER_URL': JSON.stringify(process.env.SERVER_URL),
+    }),
     new HtmlWebpackPlugin({
       title: 'Yapp',
     }),
@@ -32,17 +36,33 @@ module.exports = {
   devtool: 'inline-source-map',
   devServer: {
     static: './dist',
+    historyApiFallback: true,
   },
   optimization: {
     splitChunks: {
       cacheGroups: {
-        apiInterface: {
+        reportUserForm: {
           test: /[\\/]report-user-form[\\/]/,
           name: 'report-user-form',
           chunks: 'all',
           priority: 10,
           enforce: true,
         },
+        joinTribe: {
+          test: /[\\/]join-a-tribe[\\/]/,
+          name: 'join-a-tribe',
+          chunks: 'all',
+          priority: 10,
+          enforce: true,
+        },
+        createTribe: {
+          test: /[\\/]create-a-tribe[\\/]/,
+          name: 'create-a-tribe',
+          chunks: 'all',
+          priority: 10,
+          enforce: true,
+        },
+
       },
     },
   runtimeChunk: 'single',
