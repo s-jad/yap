@@ -1,0 +1,16 @@
+#create-tribe-form {
+  & .yapp-form {
+    
+    & .form-border {
+
+      & textarea.create-tribe-input {
+        margin-bottom: 2rem;
+      }
+    }
+  }
+
+  #submit-new-tribe {
+    margin-block: var(--margin-mid);
+  }
+}
+
