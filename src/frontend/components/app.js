@@ -2,7 +2,7 @@ import Header from './header';
 import Sidebar from './sidebar';
 import HamburgerBtn from './hamburger-btn';
 import Dashboard from './dashboard';
-import { importedComponents, getComponent, getAsyncComponent } from './fetch_apis';
+import { importedComponents, getComponent, getAsyncComponent, importModules } from './fetch_apis';
 
 async function clientRouting() {
   const currentRoute = window.location.pathname;
@@ -16,12 +16,18 @@ async function clientRouting() {
 
     case '/join-a-tribe':
       component = await getAsyncComponent(importedComponents.joinTribe);
-      console.log(component);
-      return component;
 
+      if (component === undefined) {
+        component = await importModules(currentRoute);
+      }
+      return component;
 
     case '/report-user-issue':
       component = getComponent(importedComponents.reportUserForm);
+
+      if (component === undefined) {
+        component = await importModules(currentRoute);
+      }
       return component;
 
     default:
