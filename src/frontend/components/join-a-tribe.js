@@ -1,5 +1,5 @@
 import '../styles/join-tribe.css';
-import getTribes from './tribes-db-access';
+import { getTribes } from './tribes-db-access';
 
 export default async function JoinTribe() {
   const joinTribeContainer = document.createElement('div');
