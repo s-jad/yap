@@ -74,7 +74,7 @@ function importModules(page) {
         break;
 
       case '/create-a-tribe':
-        if (importedList.joinTribe !== true) {
+        if (importedList.createTribe !== true) {
           try {
             const createTribeModule = await import(/* webpackChunkName: "create-a-tribe" */ './create-a-tribe')
             const CreateTribe =  createTribeModule.default;
