@@ -2,6 +2,7 @@ const importedList = {
   reportUserForm: false,
   joinTribe: false,
   createTribe: false,
+  tribeChat: false,
 };
 
 const importedComponents = {
@@ -9,6 +10,7 @@ const importedComponents = {
   reportUserForm: () => {},
   joinTribe: () => {},
   createTribe: () => {},
+  tribeChat: () => {},
 }
 
 function getComponent(fn) {
@@ -16,11 +18,41 @@ function getComponent(fn) {
   return component;
 }
 
+
+function getChatroom(fn, tribe) {
+  const chatroom = fn(tribe);
+  return chatroom;
+}
+
 async function getAsyncComponent(fn) {
   const component = await fn();
   return component;
 }
 
+function importChatroom(tribe) {
+  return new Promise(async (resolve, reject) => {
+    let chatroom;
+      if (importedList.tribeChat !== true) {
+        try {
+          const tribeChatModule = await import(/* webpackChunkName: "get-tribe-chatroom" */ './get-tribe-chatroom.js')
+          const TribeChat =  tribeChatModule.default;
+          const fn = TribeChat;
+          importedList.tribeChat = true;
+          importedComponents.tribeChat = fn;
+          chatroom = getChatroom(fn, tribe)
+          resolve(chatroom);
+        }
+        catch (error) {
+            console.error(error);
+            reject(error);
+        }
+      } else {
+        chatroom = getChatroom(importedComponents.tribeChat, tribe);
+        console.log("importModules::getComponent => ", chatroom);
+        resolve(chatroom);
+      }
+  });
+}
 
 function importModules(page) {
   return new Promise(async (resolve, reject) => {
@@ -95,12 +127,28 @@ function importModules(page) {
         }
         break;
 
-
       default:
         resolve(null);
         break;
     }
   });
+}
+
+function handleChatroomLinks(tribe) {
+  const app = document.body.querySelector('#app');
+  const toRemove = app.querySelector('.removable');
+
+  importChatroom(tribe)
+    .then((toAdd) => {
+      if (toAdd) {
+        app.removeChild(toRemove);
+        console.log("component to add => ", toAdd);
+        app.appendChild(toAdd);
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
 
 function handleClientSideLinks(page) {
@@ -111,6 +159,7 @@ function handleClientSideLinks(page) {
     .then((toAdd) => {
       if (toAdd) {
         app.removeChild(toRemove);
+        console.log("component to add => ", toAdd);
         app.appendChild(toAdd);
       }
     })
@@ -121,8 +170,10 @@ function handleClientSideLinks(page) {
 
 export {
   handleClientSideLinks,
+  handleChatroomLinks,
   importModules,
   importedComponents,
   getComponent,
   getAsyncComponent,
+  getChatroom,
 };
