@@ -1,5 +1,6 @@
 import '../styles/join-tribe.css';
 import { getTribes } from './tribes-db-access';
+import { handleChatroomLinks } from './fetch_apis';
 
 export default async function JoinTribe() {
   const joinTribeContainer = document.createElement('div');
@@ -16,10 +17,10 @@ export default async function JoinTribe() {
         .toLowerCase()
         .replaceAll(' ', '-');
 
-    const tribeCard = document.createElement('a');
-    tribeCard.className = 'tribe-link';
+    const tribeCard = document.createElement('div');
+    tribeCard.className = 'tribe-card-container';
     tribeCard.innerHTML = `
-      <a class="tribe-link" href="/api/${tribeUrl}" tabindex="${i + 1}">
+      <a class="tribe-link" href="/api/tribe-chat/${tribeUrl}" data-link="/tribe-chat/${tribeUrl}" tabindex="${i + 1}">
         <div class="tribe-card">
           <div class="tribe-card-upper-flex">
             <h2 class="tribe-name">${tribes[i].tribe_name}</h2>
@@ -42,6 +43,10 @@ export default async function JoinTribe() {
   tribeCardLinks.forEach((link) => {
     link.addEventListener('click', (ev) => {
       ev.preventDefault();
+      const linkUrl = link.getAttribute('data-link');
+      const urlSplit = linkUrl.split('/');
+      const tribeUrl = `/${urlSplit[2]}`;
+      handleChatroomLinks(tribeUrl);
     });
   });
 
