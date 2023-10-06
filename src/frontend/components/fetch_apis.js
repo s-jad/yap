@@ -21,7 +21,7 @@ async function getAsyncComponent(fn) {
 
 
 function importModules(page) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     let component;
     switch (page) {
       case '/':
@@ -31,21 +31,18 @@ function importModules(page) {
 
       case '/report-user-issue':
         if (importedList.reportUserForm !== true) {
-          import(/* webpackChunkName: "report-user-form" */ './report-user-form')
-            .then((module) => {
-              return module.default;
-            })
-            .then((ReportUserIncidentForm) => {
-              const fn = ReportUserIncidentForm;
-              importedList.reportUserForm = true;
-              importedComponents.reportUserForm = fn;
-              component = getComponent(fn)
-              resolve(component);
-            })
-            .catch((error) => {
-              console.error(error);
-              reject(error);
-            });
+          try {
+            const reportUserModule = await import(/* webpackChunkName: "report-user-form" */ './report-user-form');
+            const ReportUserIncidentForm = reportUserModule.default;
+            const fn = ReportUserIncidentForm;
+            importedList.reportUserForm = true;
+            importedComponents.reportUserForm = fn;
+            component = getComponent(fn)
+            resolve(component);
+          } catch(error) {
+            console.error(error);
+            reject(error);
+          }
         } else {
           component = getComponent(importedComponents.reportUserForm);
           resolve(component);
@@ -54,21 +51,19 @@ function importModules(page) {
 
       case '/join-a-tribe':
         if (importedList.joinTribe !== true) {
-          import(/* webpackChunkName: "join-a-tribe" */ './join-a-tribe')
-            .then((module) => {
-              return module.default;
-            })
-            .then((JoinTribe) => {
-              const fn = JoinTribe;
-              importedList.joinTribe = true;
-              importedComponents.joinTribe = fn;
-              component = getAsyncComponent(fn)
-              resolve(component);
-            })
-            .catch((error) => {
+          try {
+            const joinTribeModule = await import(/* webpackChunkName: "join-a-tribe" */ './join-a-tribe')
+            const JoinTribe =  joinTribeModule.default;
+            const fn = JoinTribe;
+            importedList.joinTribe = true;
+            importedComponents.joinTribe = fn;
+            component = getAsyncComponent(fn)
+            resolve(component);
+          }
+          catch (error) {
               console.error(error);
               reject(error);
-            });
+          }
         } else {
           component = getAsyncComponent(importedComponents.joinTribe);
           console.log("importModules::getAsyncComponent => ", component);
@@ -101,6 +96,7 @@ function handleClientSideLinks(page) {
 
 export {
   handleClientSideLinks,
+  importModules,
   importedComponents,
   getComponent,
   getAsyncComponent,
