@@ -1,3 +1,5 @@
+import '../styles/create-a-tribe.css';
+
 const url = process.env.SERVER_URL;
 
 function handlePostTribe(form) {
@@ -18,14 +20,13 @@ function handlePostTribe(form) {
       body: JSON.stringify(valuesArr),
     })
       .then((response) => {
-        console.log("setPostTribe::response => ", response);
         response.json();
       })
       .then((data) => {
-        console.log('Success:', data);
+        console.log('handlePostTribe::Success:', data);
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error('handlePostTribe::Error:', error);
       });
   });
 }
@@ -33,27 +34,21 @@ function handlePostTribe(form) {
 export default function CreateTribe() {
   const createTribeContainer = document.createElement('div');
   createTribeContainer.id = 'create-tribe-container';
-  createTribeContainer.className = 'removable';
+  createTribeContainer.className = 'yapp-form-container removable';
 
   createTribeContainer.innerHTML = `
-    <div class="create-tribe-inner-container">
-      <h1 class="create-tribe-title">Create Your Own Tribe</h1>
-      <form action="${url}/api/create-a-tribe" id="create-tribe-form" method="POST">
-        <label for="tribeName">
-          Tribe Name:
+      <h1 class="form-title">Create Your Own Tribe</h1>
+      <form action="${url}/api/create-a-tribe" id="create-tribe-form" method="POST" class="yapp-form">
+        <div class="form-border">
+          <label for="tribeName">Tribe Name:</label> 
           <input class="create-tribe-input" name="tribeName" type="text" maxLength="50" required/>
-        </label> 
-        <label for="tribeCta">
-          Explain why people might want to join your tribe.
+          <label for="tribeCta">Explain why people might want to join your tribe.</label> 
           <input class="create-tribe-input" name="tribeCta" type="text" maxLength="50" required/>
-        </label> 
-        <label for="tribeDescription">
-          Write a short description explaining what your tribe is about.
+          <label for="tribeDescription">Write a short description explaining what your tribe is about.</label> 
           <textarea class="create-tribe-input" name="tribeDescription" maxLength="150" required></textarea>
-        </label> 
-        <input type="submit" value="Submit"/>
+        </div>
+        <input class="form-input-submit" type="submit" id="submit-new-tribe" value="Submit"/>
       </form> 
-    </div>
   `;
 
   const form = createTribeContainer.querySelector('#create-tribe-form');
