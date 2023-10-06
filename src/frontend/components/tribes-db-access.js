@@ -1,4 +1,4 @@
-export default async function getTribes() {
+async function getTribes() {
   return fetch('/api/join-a-tribe')
     .then(response => {
       if (!response.ok) {
@@ -15,3 +15,26 @@ export default async function getTribes() {
       });
     });
 }
+
+async function createTribe() {
+  return fetch('/api/create-a-tribe')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (error) {
+          console.error('createTribe::Error parsing JSON', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
+    });
+}
+
+export {
+  getTribes,
+  createTribe,
+};

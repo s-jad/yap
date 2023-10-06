@@ -15,7 +15,7 @@ export default function Dashboard() {
         <p class="card-text">Connect with members</p>
       </div>    
     </a>
-    <a class="card-link form-tribe-link" href="#" tabindex="3">
+    <a class="card-link form-tribe-link" href="/api/create-a-tribe" data-link="/create-a-tribe" tabindex="3">
       <div class="dashboard-card">
         <p class="card-text">Form your own tribe</p>
       </div>    

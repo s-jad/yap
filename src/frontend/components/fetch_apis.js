@@ -1,12 +1,14 @@
 const importedList = {
   reportUserForm: false,
   joinTribe: false,
+  createTribe: false,
 };
 
 const importedComponents = {
   dashboard: () => {},
   reportUserForm: () => {},
   joinTribe: () => {},
+  createTribe: () => {},
 }
 
 function getComponent(fn) {
@@ -70,6 +72,29 @@ function importModules(page) {
           resolve(component);
         }
         break;
+
+      case '/create-a-tribe':
+        if (importedList.joinTribe !== true) {
+          try {
+            const createTribeModule = await import(/* webpackChunkName: "create-a-tribe" */ './create-a-tribe')
+            const CreateTribe =  createTribeModule.default;
+            const fn = CreateTribe;
+            importedList.createTribe = true;
+            importedComponents.createTribe = fn;
+            component = getComponent(fn)
+            resolve(component);
+          }
+          catch (error) {
+              console.error(error);
+              reject(error);
+          }
+        } else {
+          component = getComponent(importedComponents.createTribe);
+          console.log("importModules::getAsyncComponent => ", component);
+          resolve(component);
+        }
+        break;
+
 
       default:
         resolve(null);
