@@ -1,0 +1,99 @@
+.welcome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  & .login-container {
+    grid-template-rows: 50px 50px 100px 0px 0px;
+    transition: grid-template-rows 300ms ease-in-out;
+  }
+
+  & .login-container.login-expanded {
+    grid-template-rows: 50px 50px 0px 400px 0px;
+  }
+
+  & .login-container.create-account-expanded {
+    grid-template-rows: 50px 50px 0px 0px 400px;
+  }
+
+  & input,
+  & button {
+    background: var(--card-clr);
+    color: var(--font-clr);
+    border-radius: 1rem;
+    box-shadow: var(--shadow), var(--inset-shadow);
+  }
+
+  & button {
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  & button.hide {
+    pointer-events: none;
+  }
+
+  & .login-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+
+    & .welcome-title {
+      grid-column: 2 / 5;
+      grid-row: 1 / 2;
+      text-align: center;
+    }
+
+    & .welcome-subtitle {
+      grid-column: 2 / 5;
+      grid-row: 2 / 3;
+      text-align: center;
+    }
+
+    & .login-wrapper-btn {
+      grid-column: 2 / 3;
+    }
+
+    & .create-account-wrapper-btn {
+      grid-column: 4 / 5;
+    }
+
+    & .login-wrapper-btn,
+    & .create-account-wrapper-btn {
+      grid-row: 3 / 4;
+      opacity: 1;
+      transition: opacity 300ms ease-in-out;
+    }
+
+    & .login-wrapper-btn.hide,
+    & .create-account-wrapper-btn.hide {
+      opacity: 0;
+    }
+
+    & .login-wrapper {
+      grid-column: 2 / 5;
+      grid-row: 4 / 5;
+    }
+
+    & .create-account-wrapper {
+      grid-column: 2 / 5;
+      grid-row: 4 / 5;
+    }
+
+    & .login-wrapper,
+    & .create-account-wrapper {
+      display: none;
+      flex-direction: column;
+      gap: var(--gap);
+      opacity: 1;
+      transition: opacity 300ms ease-in-out;
+
+    }
+
+    & .login-wrapper.hide,
+    & .create-account-wrapper.hide {
+      opacity: 0;
+    }
+  }
+}
