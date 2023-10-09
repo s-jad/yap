@@ -1,15 +1,23 @@
 import '../styles/general-chatroom-styling.css';
+import { getMessages } from './tribes-db-access';
 
-function postMessage(message) {
+function createMessage(message, dbTime) {
   if (message === "") {
     return;
   }
-
   const newMessage = document.createElement('div');
-  const date = new Date().toISOString();
-  const time = date.slice(date.indexOf('T') + 1, date.indexOf('.'))
-  newMessage.className = `message-wrapper message-${date}`;
+  let time;
+  let date;
+  
+  if (dbTime === undefined) {
+    date = new Date().toISOString();
+    time = date.slice(date.indexOf('T') + 1, date.indexOf('.'))
+  } else {
+    date = dbTime;
+    time = dbTime.slice(dbTime.indexOf('T') + 1, dbTime.indexOf('.'));
+  }
 
+  newMessage.className = `message-wrapper message-${date}`;
   newMessage.innerHTML = `
     <img src="" alt="Icon" class="user-icon"/>
     <p class="user-message">${message}</p>
@@ -21,6 +29,7 @@ function postMessage(message) {
   return {
     newMessage,
     timeStamp,
+    date
   };
 }
 
@@ -28,14 +37,20 @@ function handleUserInput(message) {
   const messageView = document.querySelector('.message-view');
   const messageTimeline = document.querySelector('.message-timeline');
 
-  const { newMessage, timeStamp } = postMessage(message);
-  console.log("Message => ", newMessage);
-  console.log("timestamp => ", timeStamp);
+  const { newMessage, timeStamp, date } = createMessage(message);
   messageView.appendChild(newMessage);
   messageTimeline.appendChild(timeStamp);
 }
 
-export default function TribeChat(tribeName) {
+function handleDbReturn(messages, msgView, msgTimeline) {
+  messages.forEach((msg) => {
+    const { newMessage, timeStamp, date } = createMessage(msg.message_content, msg.message_timestamp);
+    msgView.appendChild(newMessage);
+    msgTimeline.appendChild(timeStamp);
+  });
+}
+
+export default async function TribeChat(tribeName) {
   const tribeChatContainer = document.createElement('div');
   tribeChatContainer.id = 'tribe-chat-container';
   tribeChatContainer.className = 'chat-container removable';
@@ -61,6 +76,11 @@ export default function TribeChat(tribeName) {
   const messageInput = tribeChatContainer.querySelector('.send-message-input');
   const messageBtn = tribeChatContainer.querySelector('.send-message-btn');
   const messagesScrollWrapper = tribeChatContainer.querySelector('.messages-scroll-wrapper');
+  const msgView = tribeChatContainer.querySelector('.message-view');
+  const msgTimeline = tribeChatContainer.querySelector('.message-timeline');
+
+  const messages = await getMessages(tribeName);
+  handleDbReturn(messages, msgView, msgTimeline);
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
