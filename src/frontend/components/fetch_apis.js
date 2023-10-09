@@ -19,8 +19,8 @@ function getComponent(fn) {
 }
 
 
-function getChatroom(fn, tribe) {
-  const chatroom = fn(tribe);
+async function getChatroom(fn, tribe) {
+  const chatroom = await fn(tribe);
   return chatroom;
 }
 
@@ -142,7 +142,6 @@ function handleChatroomLinks(tribe) {
     .then((toAdd) => {
       if (toAdd) {
         app.removeChild(toRemove);
-        console.log("component to add => ", toAdd);
         app.appendChild(toAdd);
       }
     })
@@ -159,7 +158,6 @@ function handleClientSideLinks(page) {
     .then((toAdd) => {
       if (toAdd) {
         app.removeChild(toRemove);
-        console.log("component to add => ", toAdd);
         app.appendChild(toAdd);
       }
     })
@@ -172,6 +170,7 @@ export {
   handleClientSideLinks,
   handleChatroomLinks,
   importModules,
+  importChatroom,
   importedComponents,
   getComponent,
   getAsyncComponent,
