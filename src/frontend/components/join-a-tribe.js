@@ -44,6 +44,7 @@ export default async function JoinTribe() {
     link.addEventListener('click', (ev) => {
       ev.preventDefault();
       const linkUrl = link.getAttribute('data-link');
+      history.pushState(null, null, linkUrl);
       const urlSplit = linkUrl.split('/');
       const tribeUrl = `/${urlSplit[2]}`;
       handleChatroomLinks(tribeUrl);
