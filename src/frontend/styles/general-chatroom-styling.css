@@ -72,7 +72,7 @@
             }
 
             & .user-message {
-              color: var(--lemon-chiffon);
+              color: var(--font-clr);
             }
           }
         }
