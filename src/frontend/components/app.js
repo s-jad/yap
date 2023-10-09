@@ -2,11 +2,31 @@ import Header from './header';
 import Sidebar from './sidebar';
 import HamburgerBtn from './hamburger-btn';
 import Dashboard from './dashboard';
-import { importedComponents, getComponent, getAsyncComponent, importModules } from './fetch_apis';
+import {
+  importedComponents,
+  getComponent,
+  getAsyncComponent,
+  importModules,
+  importChatroom,
+  getChatroom, 
+} from './fetch_apis';
 
 async function clientRouting() {
   const currentRoute = window.location.pathname;
+  
   let component;
+
+  if (currentRoute.includes('tribe-chat')) {
+    const urlSplit = currentRoute.split('/');
+    const tribeUrl = `/${urlSplit[2]}`;
+    component = await getChatroom(importedComponents.tribeChat, tribeUrl);
+
+    if (component === undefined) {
+      component = importChatroom(tribeUrl);
+    }
+
+    return component;
+  }
 
   switch (currentRoute) {
 
@@ -37,7 +57,7 @@ async function clientRouting() {
         component = await importModules(currentRoute);
       }
       return component;
-  
+    
     default:
       component = Dashboard();
       return component;
