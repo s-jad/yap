@@ -17,7 +17,8 @@ app.use(
   })
 );
 
-app.use('/', express.static(path.join(__dirname, 'src/frontend')));
+app.use('/', express.static(path.join(__dirname, '/')));
+app.use('/assets/imgs', express.static(path.join(__dirname, '/assets/imgs')));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -26,6 +27,14 @@ app.use(bodyParser.json());
 app.get('/api/join-a-tribe', async (req, res) => {
   const tribes = await tribesMac('get-tribes');
   res.send(tribes);
+});
+
+app.get('/api/get-chatroom-messages', async (req, res) => {
+  const tribeUrl = req.query.tribeUrl;
+  console.log("SERVER::tribeUrl => ", tribeUrl);
+  
+  const messages = await tribesMac('get-messages', tribeUrl);
+  res.send(messages);
 });
 
 // CREATE A TRIBE
