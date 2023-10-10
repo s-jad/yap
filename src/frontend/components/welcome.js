@@ -33,8 +33,11 @@ export default function Welcome() {
           placeholder="Password..." 
           required
         />
-        <button type="button" class="login-btn">Login</button>
-        <button type="button" class="login-cancel-btn">Cancel</button>
+        <div class="btn-wrapper">
+          <button type="button" class="login-btn">Login</button>
+          <button type="button" class="login-cancel-btn">Cancel</button>
+        </div>
+        <p class="display-error login-error"></p>
       </div>
       <div class="create-account-wrapper hide">
         <label for="create-account-username">
@@ -61,8 +64,11 @@ export default function Welcome() {
           maxlength="30"
           required
         />
-        <button type="button" class="create-account-btn">Create Account</button>
-        <button type="button" class="create-account-cancel-btn">Cancel</button>
+        <div class="btn-wrapper">
+          <button type="button" class="create-account-btn">Create Account</button>
+          <button type="button" class="create-account-cancel-btn">Cancel</button>
+        </div>
+        <p class="display-error create-account-error"></p>
       </div>
     </div>
   `;
@@ -94,19 +100,26 @@ export default function Welcome() {
   const loginBtn = welcomeContainer.querySelector('.login-btn');
   const loginUsername = welcomeContainer.querySelector('#login-username');
   const loginPassword = welcomeContainer.querySelector('#login-password');
+  const displayLoginError = welcomeContainer.querySelector('.login-error');
 
   loginBtn.addEventListener('click', async() => {
     const username = loginUsername.value;
     const password = loginPassword.value;
+  
+    try {
+      const authenticated = await authenticateUser(username, password);
 
-    const authenticated = await authenticateUser(username, password);
-    if (authenticated) {
-      history.pushState(null, null, '/dashboard');
-      document.body.removeChild(welcomeContainer);
-      const app = await App();
-      document.body.appendChild(app);
-    } else {
-      console.log("Wrong password");
+      if (authenticated) {
+        displayLoginError.textContent = '';
+        history.pushState(null, null, '/dashboard');
+        document.body.removeChild(welcomeContainer);
+        const app = await App();
+        document.body.appendChild(app);
+      } else {
+        displayLoginError.textContent = 'Incorrect username or password.';
+      }
+    } catch (error) {
+      displayLoginError.textContent = error;
     }
   });
 
