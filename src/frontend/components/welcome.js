@@ -1,4 +1,5 @@
-import { authenticateUser } from "./tribes-db-access";
+import { authenticateUser, createUser } from "./tribes-db-access";
+import { updateState } from "./app-state";
 import App from "./app";
 
 export default function Welcome() {
@@ -113,6 +114,7 @@ export default function Welcome() {
         displayLoginError.textContent = '';
         history.pushState(null, null, '/dashboard');
         document.body.removeChild(welcomeContainer);
+        updateState('username', username);
         const app = await App();
         document.body.appendChild(app);
       } else {
@@ -126,11 +128,26 @@ export default function Welcome() {
   const createAccountBtn = welcomeContainer.querySelector('.create-account-btn');
   const createAccountUsername = welcomeContainer.querySelector('#create-account-username');
   const createAccountPassword = welcomeContainer.querySelector('#create-account-password');
+  const displayCreateAccountError = welcomeContainer.querySelector('.create-account-error');
 
-  createAccountBtn.addEventListener('click', () => {
+  createAccountBtn.addEventListener('click', async () => {
     const username = createAccountUsername.value;
     const password = createAccountPassword.value;
-    console.log("hi, ", username, password);
+    const joined = new Date().toISOString();
+
+    try {
+      const res = await createUser(username, password, joined);
+      console.log(res);
+      displayCreateAccountError.textContent = '';      
+      history.pushState(null, null, '/dashboard');
+      updateState('username', username);
+      document.body.removeChild(welcomeContainer);
+      const app = await App();
+      document.body.appendChild(app);
+    } catch (error) {
+      console.error(error);
+      displayCreateAccountError.textContent = error;      
+    }
   });
 
   const loginCancelBtn = welcomeContainer.querySelector('.login-cancel-btn');
