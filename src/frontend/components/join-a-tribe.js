@@ -2,16 +2,9 @@ import '../styles/join-tribe.css';
 import { getTribes } from './tribes-db-access';
 import { handleChatroomLinks } from './fetch_apis';
 
-export default async function JoinTribe() {
-  const joinTribeContainer = document.createElement('div');
-  joinTribeContainer.id = 'join-tribe-container';
-  joinTribeContainer.className = 'removable';
-
-  const tribeGrid = document.createElement('div');
-  tribeGrid.className = 'tribe-grid';
-
+async function populateTribesGrid(tribeGrid) {
   const tribes = await getTribes();
-  
+
   for (let i = 0; i < tribes.length; i += 1) {
     const tribeUrl = tribes[i].tribe_name
         .toLowerCase()
@@ -20,7 +13,7 @@ export default async function JoinTribe() {
     const tribeCard = document.createElement('div');
     tribeCard.className = 'tribe-card-container';
     tribeCard.innerHTML = `
-      <a class="tribe-link" href="/api/tribe-chat/${tribeUrl}" data-link="/tribe-chat/${tribeUrl}" tabindex="${i + 1}">
+      <a class="tribe-link" href="/api/protected/tribe-chat/${tribeUrl}" data-link="/tribe-chat/${tribeUrl}" tabindex="${i + 1}">
         <div class="tribe-card">
           <div class="tribe-card-upper-flex">
             <h2 class="tribe-name">${tribes[i].tribe_name}</h2>
@@ -34,11 +27,21 @@ export default async function JoinTribe() {
 
     tribeGrid.appendChild(tribeCard);
   };
+}
+
+export default async function JoinTribe() {
+  const joinTribeContainer = document.createElement('div');
+  joinTribeContainer.id = 'join-tribe-container';
+  joinTribeContainer.className = 'removable';
+
+  const tribeGrid = document.createElement('div');
+  tribeGrid.className = 'tribe-grid';
+
+  populateTribesGrid(tribeGrid);
 
   joinTribeContainer.appendChild(tribeGrid);
 
   const tribeCardLinks = Array.from(joinTribeContainer.querySelectorAll('.tribe-link'));
-
 
   tribeCardLinks.forEach((link) => {
     link.addEventListener('click', (ev) => {
