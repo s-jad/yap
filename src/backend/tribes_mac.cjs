@@ -61,6 +61,24 @@ function createTribe(newTribeData) {
   });
 }
 
+function getPwHash(user) {
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: 'SELECT password FROM members WHERE user_name = \$1',
+      values: [user],
+    };
+    
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+      } else {
+        resolve(res.rows[0].password);
+      }
+    });
+  });
+}
+
 async function tribesMac(req, data) {
   switch (req) {
     case 'get-tribes':
@@ -74,6 +92,11 @@ async function tribesMac(req, data) {
     case 'get-messages':
       const messages = await getChatroomMessages(data);
       return messages;
+
+    case 'get-password':
+      const passwordHash = await getPwHash(data);
+      return passwordHash;
+
     default:
       break;
   }
