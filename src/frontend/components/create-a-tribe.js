@@ -2,7 +2,7 @@ import '../styles/create-a-tribe.css';
 
 const url = process.env.SERVER_URL;
 
-function handlePostTribe(form) {
+function handleCreateTribe(form) {
   form.addEventListener('submit', (event) => {
     event.preventDefault();
 
@@ -53,7 +53,7 @@ export default function CreateTribe() {
 
   const form = createTribeContainer.querySelector('#create-tribe-form');
 
-  handlePostTribe(form);
+  handleCreateTribe(form);
 
   return createTribeContainer;
 }
