@@ -1,35 +1,7 @@
 import '../styles/create-a-tribe.css';
+import { handleCreateTribe } from './fetch_apis';
 
 const url = process.env.SERVER_URL;
-
-function handleCreateTribe(form) {
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(form);
-    const tribeData = Object.fromEntries(formData.entries());
-    const formationDate = new Date().toISOString().slice(0, 10);
-
-    const valuesArr = [tribeData.tribeName, tribeData.tribeCta, tribeData.tribeDescription, formationDate]; 
-
-    fetch('/api/protected/create-a-tribe', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(valuesArr),
-    })
-      .then((response) => {
-        response.json();
-      })
-      .then((data) => {
-        console.log('handlePostTribe::Success:', data);
-      })
-      .catch((error) => {
-        console.error('handlePostTribe::Error:', error);
-      });
-  });
-}
 
 export default function CreateTribe() {
   const createTribeContainer = document.createElement('div');
