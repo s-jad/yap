@@ -4,8 +4,17 @@ import gathering from '../assets/imgs/gathering.svg';
 import planGathering from '../assets/imgs/plan_gathering.svg';
 import formTribe from '../assets/imgs/form_tribe.svg';
 import reportIssue from '../assets/imgs/report_issue.svg';
+import logoSVG from '../assets/imgs/logo.svg';
 import homeSVG from '../assets/imgs/home.svg';
 import messagesSVG from '../assets/imgs/envelope.svg';
+
+function getLogo() {
+  const logo = new Image();
+  logo.src = logoSVG;
+  logo.alt = 'Yapp logo';
+
+  return logo;
+}
 
 function getSidebarIcons() {
   const home = new Image();
@@ -64,6 +73,7 @@ function getDashboardIcons(dashboardGrid) {
 export {
   getDashboardIcons,
   getSidebarIcons,
+  getLogo,
 };
 
 
