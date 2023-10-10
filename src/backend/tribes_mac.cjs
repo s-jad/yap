@@ -41,11 +41,37 @@ function getChatroomMessages(tribeUrl) {
   });
 }
 
+function createUser(newUserData) {
+  const { user, pw, joined } = newUserData;
+  const query = {
+    text: `
+      INSERT into users (user_name, password, joined)
+      VALUES (\$1, \$2, \$3)
+      RETURNING *; 
+    `,
+    values: [user, pw, joined],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        console.error(err);
+        reject(new Error('Cant create user.'));
+      } else if (res.rows.length === 0) {
+        console.error(err);
+        reject(new Error('Cant create user.'));
+      } else {
+        console.log("createUser::res.rows => ", res.rows[0]);
+        resolve(res.rows[0].user_name);
+      }
+    })
+  });
+}
 function createTribe(newTribeData) {
   const values = newTribeData;
   const query = `
-    INSERT into tribes (tribe_name, tribe_cta, tribe_description, formation_date)
-    VALUES (\$1, \$2, \$3, \$4)
+    INSERT into tribes (tribe_name, tribe_cta, tribe_description, formation_date, founding_member)
+    VALUES (\$1, \$2, \$3, \$4, (SELECT user_id FROM users WHERE user_name = \$5))
     RETURNING *; 
   `;
 
@@ -53,12 +79,13 @@ function createTribe(newTribeData) {
     pg_client.query(query, values, (err, res) => {
       if (err) {
         console.error(err);
-        reject(new Error('Username or password are incorrect'));
+        reject(new Error('Cant create tribe.'));
       } else if (res.rows.length === 0) {
         console.error(err);
-        reject(new Error('Username or password are incorrect'));
+        reject(new Error('Cant create tribe'));
       } else {
-        resolve(res.rows[0]);
+        const newTribeName = values[0];
+        resolve(newTribeName);
       }
     })
   });
@@ -67,16 +94,16 @@ function createTribe(newTribeData) {
 function getPwHash(user) {
   return new Promise((resolve, reject) => {
     const query = {
-      text: 'SELECT password FROM members WHERE user_name = \$1',
+      text: 'SELECT password FROM users WHERE user_name = \$1',
       values: [user],
     };
 
     pg_client.query(query, (err, res) => {
       if (err) {
         console.error(err);
-        reject(new Error('User does not exist'));
+        reject(new Error('User with that password does not exist'));
       } else if (res.rows.length === 0) {
-        reject(new Error('User does not exist'));
+        reject(new Error('User with that password does not exist'));
       } else {
         resolve(res.rows[0].password);
       }
@@ -93,6 +120,10 @@ async function tribesMac(req, data) {
     case 'create-tribe':
       const tribe = await createTribe(data);
       return tribe;
+
+    case 'create-user':
+      const user = await createUser(data);
+      return user;
 
     case 'get-messages':
       const messages = await getChatroomMessages(data);
