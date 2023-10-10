@@ -1,14 +1,11 @@
 import { handleClientSideLinks } from './fetch_apis';
-import logoSVG from '../assets/imgs/logo.svg';
-import { getSidebarIcons } from './icons';
+import { getSidebarIcons, getLogo } from './icons';
 
 export default function Sidebar() {
   const sidebarContainer = document.createElement('div');
   sidebarContainer.className = 'sidebar-container hideable';
 
-  const logo = new Image();
-  logo.className = 'logo';
-  logo.src = logoSVG;
+  const logo = getLogo();
 
   const sidebarListFlex = document.createElement('ul');
   sidebarListFlex.className = 'sidebar-list-flex';
