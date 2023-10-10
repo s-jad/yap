@@ -12,7 +12,7 @@ function handlePostTribe(form) {
 
     const valuesArr = [tribeData.tribeName, tribeData.tribeCta, tribeData.tribeDescription, formationDate]; 
 
-    fetch('/api/create-a-tribe', {
+    fetch('/api/protected/create-a-tribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
