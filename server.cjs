@@ -56,7 +56,7 @@ app.post('/api/authenticate-user', async (req, res) => {
           sameSite: 'strict',
         });
 
-        res.status(200).json({ token });
+        res.status(200).json({ message: 'Login Succesful.' });
       } 
     } catch (error) {
       if (error.message === 'Password does not match.') {
@@ -77,31 +77,66 @@ app.post('/api/authenticate-user', async (req, res) => {
   }
 });
 
-// SEND TRIBE_DB DATA TO TO GRID
-app.get('/api/protected/join-a-tribe', async (req, res) => {
-  const tribes = await tribesMac('get-tribes');
+app.post('/api/create-user', async (req, res) => {
+  try {
+    const username = await tribesMac('create-user', req.body);
 
-  res.send(tribes);
+    const token = jwt.sign({ id: username }, jwtSecret, { expiresIn: '3h' });
+    const parts = token.split('.');
+    // Set JWT header and signature in HttpOnly cookie
+    res.cookie('jwt_signature', `${parts[0]}.${parts[1]}`, { 
+      httpOnly: true,
+      sameSite: 'strict',
+    });
+    // Set JWT payload in a JavaScript-accessible cookie
+    res.cookie('jwt_payload', parts[2], { 
+      httpOnly: false,
+      sameSite: 'strict',
+    });
+    res.status(200).json({ message: 'User succesfully created.' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occured while creating the user.' });
+  }
+});
+
+// PROTECTED ROUTES
+
+app.get('/api/protected/join-a-tribe', async (req, res) => {
+  try {
+    const tribes = await tribesMac('get-tribes');
+    res.send(tribes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occured while getting tribes.' })
+  }
 });
 
 app.get('/api/protected/get-chatroom-messages', async (req, res) => {
   const tribeUrl = req.query.tribeUrl;
-  const messages = await tribesMac('get-messages', tribeUrl);
 
-  res.send(messages);
+  try {
+    const messages = await tribesMac('get-messages', tribeUrl);
+    res.send(messages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occured while getting chatroom messages.'})
+  }
 });
 
 
-// CREATE A TRIBE
 app.post('/api/protected/create-a-tribe', async (req, res) => {
   try {
     const tribe = await tribesMac('create-tribe', req.body);
-    res.status(201).json(tribe);
+
+    res.status(200).json({ tribe });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'An error occurred while creating the tribe.' });
   }
 });
+
 
 app.post('/api/protected/report-user-issue', (req, res) => {
   console.log(req.body);
@@ -110,6 +145,7 @@ app.post('/api/protected/report-user-issue', (req, res) => {
 
 app.get('*', (req, res) => {
   if (req.url.startsWith('/api')) {
+    console.error('User tried to access unknow API route');
     res.status(404).send('API route not found');
   } else {
     res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
@@ -117,7 +153,7 @@ app.get('*', (req, res) => {
 });
 
 app.use(function(err, req, res, next) {
-  console.warn("Request failed => req");
+  console.warn("Request failed => ", req);
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
