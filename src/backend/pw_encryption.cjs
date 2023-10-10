@@ -13,10 +13,13 @@ async function testHashPassword() {
 async function comparePwHash(password, hash) {
   try {
     const result = await bcrypt.compare(password, hash);
+    if (!result) {
+      throw new Error('Password does not match.');
+    }
     return result;
   } catch (err) {
     console.error(err);
-    return false;
+    throw err;
   }
 } 
 
