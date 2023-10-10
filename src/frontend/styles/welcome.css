@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   color: var(--font-clr);
 
   & .login-container {
@@ -24,17 +24,29 @@
     background: var(--card-clr);
     color: var(--font-clr);
     border-radius: 1rem;
-    box-shadow: var(--shadow), var(--inset-shadow);
+    box-shadow: var(--shadow), var(--shadow-inset);
+    transition: box-shadow 300ms ease-in-out;
+  }
+
+  & input:hover,
+  & button:hover,
+  & input:focus-visible,
+  & button:focus-visible {
+    box-shadow: var(--shadow-hover), var(--shadow-inset-hl), var(--shadow-inset-hover);
   }
 
   & .input {
-    min-height: 50px;
+    height: 50px;
     padding-inline: 1rem;
   }
 
   & button {
     cursor: pointer;
     pointer-events: auto;
+    min-height: 50px;
+    max-height: 80px;
+    width: clamp(100px, 10rem + 10vw, 250px);
+    padding: var(--p-block) var(--p-inline);
   }
 
   & button.hide {
@@ -48,6 +60,7 @@
     & .welcome-title {
       grid-column: 2 / 5;
       grid-row: 1 / 2;
+      font-size: var(--fsz-30);
       text-align: center;
     }
 
