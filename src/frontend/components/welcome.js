@@ -1,4 +1,7 @@
-export default async function Welcome() {
+import { authenticateUser } from "./tribes-db-access";
+import App from "./app";
+
+export default function Welcome() {
   const welcomeContainer = document.createElement('div');
   welcomeContainer.id = 'welcome-container';
   welcomeContainer.className = 'welcome';
@@ -91,15 +94,26 @@ export default async function Welcome() {
   const loginBtn = welcomeContainer.querySelector('.login-btn');
   const loginUsername = welcomeContainer.querySelector('#login-username');
   const loginPassword = welcomeContainer.querySelector('#login-password');
-  loginBtn.addEventListener('click', () => {
+
+  loginBtn.addEventListener('click', async() => {
     const username = loginUsername.value;
     const password = loginPassword.value;
-    console.log("hi, ", username, password);
+
+    const authenticated = await authenticateUser(username, password);
+    if (authenticated) {
+      history.pushState(null, null, '/dashboard');
+      document.body.removeChild(welcomeContainer);
+      const app = await App();
+      document.body.appendChild(app);
+    } else {
+      console.log("Wrong password");
+    }
   });
 
   const createAccountBtn = welcomeContainer.querySelector('.create-account-btn');
   const createAccountUsername = welcomeContainer.querySelector('#create-account-username');
   const createAccountPassword = welcomeContainer.querySelector('#create-account-password');
+
   createAccountBtn.addEventListener('click', () => {
     const username = createAccountUsername.value;
     const password = createAccountPassword.value;
@@ -107,6 +121,7 @@ export default async function Welcome() {
   });
 
   const loginCancelBtn = welcomeContainer.querySelector('.login-cancel-btn');
+
   loginCancelBtn.addEventListener('click', () => {
     loginContainer.classList.remove('login-expanded');
     loginWrapperBtn.classList.remove('hide');
@@ -119,6 +134,7 @@ export default async function Welcome() {
   });
 
   const createAccountCancelBtn = welcomeContainer.querySelector('.create-account-cancel-btn');
+
   createAccountCancelBtn.addEventListener('click', () => {
     loginContainer.classList.remove('create-account-expanded');
     loginWrapperBtn.classList.remove('hide');
