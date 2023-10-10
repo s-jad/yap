@@ -30,7 +30,7 @@ async function clientRouting() {
 
   switch (currentRoute) {
 
-    case '/':
+    case '/dashboard':
       component = Dashboard();
       return component;
 
@@ -69,10 +69,10 @@ export default async function App() {
   appContainer.classList.add('app-container');
   appContainer.id = 'app';
 
-  const currentRoute = await clientRouting();
+  const currentComponent = await clientRouting();
   
   appContainer.appendChild(Header());
-  appContainer.appendChild(currentRoute);
+  appContainer.appendChild(currentComponent);
   appContainer.appendChild(Sidebar());
   appContainer.appendChild(HamburgerBtn());
 
