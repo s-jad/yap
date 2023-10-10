@@ -48,7 +48,6 @@ function importChatroom(tribe) {
         }
       } else {
         chatroom = getChatroom(importedComponents.tribeChat, tribe);
-        console.log("importModules::getComponent => ", chatroom);
         resolve(chatroom);
       }
   });
@@ -58,7 +57,7 @@ function importModules(page) {
   return new Promise(async (resolve, reject) => {
     let component;
     switch (page) {
-      case '/':
+      case '/dashboard':
         component = getComponent(importedComponents.dashboard);
         resolve(component);
         break;
@@ -100,7 +99,6 @@ function importModules(page) {
           }
         } else {
           component = getAsyncComponent(importedComponents.joinTribe);
-          console.log("importModules::getAsyncComponent => ", component);
           resolve(component);
         }
         break;
