@@ -10,7 +10,7 @@ export default function Sidebar() {
   const sidebarListFlex = document.createElement('ul');
   sidebarListFlex.className = 'sidebar-list-flex';
   sidebarListFlex.innerHTML = `
-    <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/" href="/"></a></li>
+    <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/dashboard" href="/dashboard"></a></li>
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" href="#"></a></li>
   `;
 
