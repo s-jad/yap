@@ -40,6 +40,8 @@ function handleUserInput(message) {
   const { newMessage, timeStamp, date } = createMessage(message);
   messageView.appendChild(newMessage);
   messageTimeline.appendChild(timeStamp);
+
+  return date;
 }
 
 function handleDbReturn(messages, msgView, msgTimeline) {
@@ -48,6 +50,11 @@ function handleDbReturn(messages, msgView, msgTimeline) {
     msgView.appendChild(newMessage);
     msgTimeline.appendChild(timeStamp);
   });
+}
+
+function handleDbPost(message, date) {
+  console.log("Message => ", message);
+  console.log("Date => ", date);
 }
 
 export default async function TribeChat(tribeName) {
@@ -84,18 +91,21 @@ export default async function TribeChat(tribeName) {
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
-      handleUserInput(messageInput.value);
+      const date = handleUserInput(messageInput.value);
       messageInput.value = '';
       messageInput.focus();
       messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+      handleDbPost(messageInput.value, date);
     }
   });
 
   messageBtn.addEventListener('click', () => {
-    handleUserInput(messageInput.value);
+    const date = handleUserInput(messageInput.value);
     messageInput.value = '';
     messageInput.focus();
     messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+
+    handleDbPost(messageInput.value, date);
   });
 
   return tribeChatContainer;
