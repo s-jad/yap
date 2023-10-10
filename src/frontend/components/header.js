@@ -1,3 +1,5 @@
+import { getState } from "./app-state";
+
 function getNotifications() {
   const notificationsFlex = document.createElement('div');
   notificationsFlex.className = 'notifications-flex';
@@ -23,9 +25,9 @@ function getGroupsLinks() {
 
   groupLinksContainer.innerHTML = `
     <ul class='group-list'>
-      <li class='group-list-item'>Gaming</li>
-      <li class='group-list-item'>Animal lovers</li>
-      <li class='group-list-item'>House Music</li>
+      <li class='group-list-item'>Politics</li>
+      <li class='group-list-item'>Animal Collective</li>
+      <li class='group-list-item'>House music lovers</li>
     </ul>
   `;
 
@@ -38,7 +40,7 @@ export default function Header() {
 
   const userName = document.createElement('h1');
   userName.className = 'username-title';
-  userName.textContent = 'Sammy D';
+  userName.textContent = getState('username');
 
   headerContainer.appendChild(userName);
   headerContainer.appendChild(getGroupsLinks());
