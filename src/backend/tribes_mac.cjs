@@ -52,8 +52,11 @@ function createTribe(newTribeData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, values, (err, res) => {
       if (err) {
-        console.log(err);
-        reject(err);
+        console.error(err);
+        reject(new Error('Username or password are incorrect'));
+      } else if (res.rows.length === 0) {
+        console.error(err);
+        reject(new Error('Username or password are incorrect'));
       } else {
         resolve(res.rows[0]);
       }
@@ -67,11 +70,13 @@ function getPwHash(user) {
       text: 'SELECT password FROM members WHERE user_name = \$1',
       values: [user],
     };
-    
+
     pg_client.query(query, (err, res) => {
       if (err) {
         console.error(err);
-        reject(err);
+        reject(new Error('User does not exist'));
+      } else if (res.rows.length === 0) {
+        reject(new Error('User does not exist'));
       } else {
         resolve(res.rows[0].password);
       }
