@@ -27,6 +27,20 @@ async function populateTribesGrid(tribeGrid) {
 
     tribeGrid.appendChild(tribeCard);
   };
+
+  const tribeCardLinks = Array.from(tribeGrid.querySelectorAll('.tribe-link'));
+  tribeCardLinks.forEach((link) => {
+    link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const linkUrl = link.getAttribute('data-link');
+      history.pushState(null, null, linkUrl);
+      const urlSplit = linkUrl.split('/');
+      const tribeUrl = `/${urlSplit[2]}`;
+      handleChatroomLinks(tribeUrl);
+    });
+  });
+
+  return tribeGrid;
 }
 
 export default async function JoinTribe() {
@@ -40,19 +54,6 @@ export default async function JoinTribe() {
   populateTribesGrid(tribeGrid);
 
   joinTribeContainer.appendChild(tribeGrid);
-
-  const tribeCardLinks = Array.from(joinTribeContainer.querySelectorAll('.tribe-link'));
-
-  tribeCardLinks.forEach((link) => {
-    link.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      const linkUrl = link.getAttribute('data-link');
-      history.pushState(null, null, linkUrl);
-      const urlSplit = linkUrl.split('/');
-      const tribeUrl = `/${urlSplit[2]}`;
-      handleChatroomLinks(tribeUrl);
-    });
-  });
 
   return joinTribeContainer;
 }
