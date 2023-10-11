@@ -14,9 +14,13 @@
   --fsz-16: clamp(1.6rem, calc(1.5rem + 0.3vw), 2.2rem);
   --fsz-18: clamp(1.8rem, calc(1.7rem + 0.3vw), 2.4rem);
   --fsz-20: clamp(2.0rem, calc(1.9rem + 0.3vw), 2.6rem);
+  --fsz-30: clamp(3.0rem, calc(2.9rem + 0.3vw), 3.6rem);
 
   --font-clr: hsl(0, 0%, 100%);
   --font-clr-05: hsla(0, 0%, 100%, 0.5);
+
+  --error-clr: hsl(0, 80%, 70%, 1);
+  --success-clr: hsl(150, 80%, 70%, 1);
 
   --bg-clr: hsla(0, 0%, 18%, 1);
   --card-clr: hsla(0, 0%, 12%, 1);
@@ -35,11 +39,13 @@
   --gap: 1vw;
 
 
-  --shadow-inset-hover: inset 0 0 6px var(--thistle), inset 0 0 14px var(--thistle-03);
-  --shadow-inset-hl-hover: inset 0 0 6px var(--lemon-chiffon), inset 0 0 14px var(--lemon-chiffon-03);
+  --shadow: 0 0 5px var(--card-clr);
   --shadow-inset: inset 0 0 3px var(--thistle), inset 0 0 8px var(--thistle-03);
   --shadow-inset-hl: inset 0 0 3px var(--lemon-chiffon), inset 0 0 8px var(--lemon-chiffon-03);
-  --shadow: 0 0 5px var(--card-clr);
+
+  --shadow-hover: 0 0 8px var(--card-clr);
+  --shadow-inset-hover: inset 0 0 6px var(--thistle), inset 0 0 14px var(--thistle-03);
+  --shadow-inset-hl-hover: inset 0 0 6px var(--lemon-chiffon), inset 0 0 14px var(--lemon-chiffon-03);
 
   --btn-width: clamp(fit-content, calc(fit-content + 2vw), 300px);
   --btn-height: clamp(fit-content, calc(fit-content + 2vh), 150px);
