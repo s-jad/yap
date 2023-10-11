@@ -1,4 +1,4 @@
-import { getState } from './app-state';
+import { getAppState } from './app-state';
 
 const importedList = {
   reportUserForm: false,
@@ -140,7 +140,7 @@ function handleCreateTribe(form) {
     const formData = new FormData(form);
     const tribeData = Object.fromEntries(formData.entries());
     const formationDate = new Date().toISOString().slice(0, 10);
-    const foundingMember = getState('username');
+    const foundingMember = getAppState('username');
     const valuesArr = [
       tribeData.tribeName,
       tribeData.tribeCta,
