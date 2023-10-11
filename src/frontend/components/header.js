@@ -1,4 +1,4 @@
-import { getState } from "./app-state";
+import { getAppState } from "./app-state";
 
 function getNotifications() {
   const notificationsFlex = document.createElement('div');
@@ -40,7 +40,7 @@ export default function Header() {
 
   const userName = document.createElement('h1');
   userName.className = 'username-title';
-  userName.textContent = getState('username');
+  userName.textContent = getAppState('username');
 
   headerContainer.appendChild(userName);
   headerContainer.appendChild(getGroupsLinks());
