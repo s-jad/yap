@@ -23,7 +23,7 @@ function createNewMessage(message) {
   const timeText = timestamp.slice(timestamp.indexOf('T') + 1, timestamp.indexOf('.'))
   newMessage.className = `message-wrapper message-${timestamp}`;
 
-  if (messageState.receiver !== '') {
+  if (messageState.receiver === 'global') {
     newMessage.setAttribute('data-receiver', 'global');
     newMessage.innerHTML = `
       <img src="" alt="Icon" class="user-icon"/>
@@ -130,7 +130,7 @@ function createDbMessage(msg) {
     } else {
       newMessage.classList.add('replying-to');
       messageState.global = false;
-      messageState.receiver = ev.target.getAttribute('data-sender');
+      messageState.receiver = ev.currentTarget.getAttribute('data-sender');
       messageState.replyTo = newMessage.classList.item(1);
       memberState.replying = true;
     }
