@@ -62,18 +62,31 @@
             align-items: center;
             width: 100%;
             gap: calc(var(--gap) * 2);
+            border-radius: 1rem;
             padding-inline: calc(var(--p-inline) / 2);
+            cursor: pointer;
 
             & .user-icon {
               height: 30px;
               width: 30px;
               border-radius: 50%;
               border: 1px solid var(--thistle-03);
+              padding-right: 1rem;
+            }
+            
+            & .user-replying-to {
+              opacity: 0.5;
+              color: var(--font-clr);
+              padding-right: 1rem;
             }
 
             & .user-message {
               color: var(--font-clr);
             }
+          }
+
+          & .message-wrapper.replying-to {
+            box-shadow: var(--shadow-inset-hl);
           }
         }
       } 
