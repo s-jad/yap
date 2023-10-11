@@ -1,14 +1,14 @@
-const state = new Map();
+const appState = new Map();
 
-function updateState(key, value) {
-  state.set(key, value);
+function updateAppState(key, value) {
+  appState.set(key, value);
 }
 
-function getState(key) {
-  return state.get(key);
+function getAppState(key) {
+  return appState.get(key);
 }
 
 export {
-  updateState,
-  getState,
+  updateAppState,
+  getAppState,
 }
