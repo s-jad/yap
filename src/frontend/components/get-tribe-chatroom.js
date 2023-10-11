@@ -125,13 +125,13 @@ function createDbMessage(msg) {
       newMessage.classList.remove('replying-to');
       messageState.global = true;
       messageState.receiver = '';
-      messageState.replyTo = newMessage.classList.item(1);
+      messageState.replyTo = '';
       memberState.replying = false;
     } else {
       newMessage.classList.add('replying-to');
       messageState.global = false;
       messageState.receiver = ev.target.getAttribute('data-sender');
-      messageState.replyTo = '';
+      messageState.replyTo = newMessage.classList.item(1);
       memberState.replying = true;
     }
   });
