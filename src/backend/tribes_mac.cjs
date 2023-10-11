@@ -26,7 +26,21 @@ function getChatroomMessages(tribeUrl) {
 
   return new Promise((resolve, reject) => {
     const query = {
-      text: 'SELECT message_content, message_timestamp FROM messages WHERE tribe_name = \$1',
+      text: `
+        SELECT 
+          msg.message_content, 
+          msg.message_timestamp, 
+          sender.user_name AS sender_name, 
+          receiver.user_name AS receiver_name 
+        FROM 
+          messages msg 
+        INNER JOIN 
+          users sender ON msg.sender_id = sender.user_id
+        INNER JOIN 
+          users receiver ON msg.receiver_id = receiver.user_id
+        WHERE 
+          msg.tribe_name = \$1
+      `,
       values: [tribe],
     };
 
@@ -35,6 +49,7 @@ function getChatroomMessages(tribeUrl) {
         console.error(err);
         reject(err);
       } else {
+        console.log(res.rows);
         resolve(res.rows);
       }
     });
@@ -45,11 +60,11 @@ function createUser(newUserData) {
   const { user, pw, joined } = newUserData;
   const query = {
     text: `
-      INSERT into users (user_name, password, joined)
-      VALUES (\$1, \$2, \$3)
+      INSERT into users (user_name, password, joined, last_login)
+      VALUES (\$1, \$2, \$3, \$4)
       RETURNING *; 
     `,
-    values: [user, pw, joined],
+    values: [user, pw, joined, joined],
   };
 
   return new Promise((resolve, reject) => {
@@ -62,11 +77,12 @@ function createUser(newUserData) {
         reject(new Error('Cant create user.'));
       } else {
         console.log("createUser::res.rows => ", res.rows[0]);
-        resolve(res.rows[0].user_name);
+        resolve(res.rows[0]);
       }
     })
   });
 }
+
 function createTribe(newTribeData) {
   const values = newTribeData;
   const query = `
