@@ -52,6 +52,36 @@ async function getMessages(tribeUrl) {
     });
 }
 
+async function postMessage(tribe, message, sender, receiver, timestamp) {
+  return fetch('/api/protected/post-message', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      tribe,
+      message,
+      sender,
+      receiver,
+      timestamp,
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to post message.')
+    }
+    return response.text().then(text => {
+      try {
+        const json = JSON.parse(text);
+        return json;
+      } catch (error) {
+        console.error('postMessage::ERROR => ', error);
+        throw new Error('Error posting message.')
+      }
+    })
+  })
+}
+
 async function createUser(username, password, joined) {
   return fetch('/api/create-user', {
     method: 'POST',
