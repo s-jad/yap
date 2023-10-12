@@ -65,6 +65,7 @@
       padding-block: 1rem;
       margin: 0;
       list-style: none;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: space-evenly;
@@ -80,7 +81,7 @@
   width: 2rem;
   bottom: -2rem;
   left: 0;
-  z-index: 2;
+  z-index: 3;
   background-image: radial-gradient(
     circle at 100% 100%, 
     transparent 66%,
@@ -95,7 +96,7 @@
   width: 2rem;
   bottom: -2rem;
   right: 0;
-  z-index: 2;
+  z-index: 3;
   background-image: radial-gradient(
     circle at 0% 100%, 
     transparent 66%,
