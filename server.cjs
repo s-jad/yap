@@ -34,8 +34,10 @@ app.use('/api/protected', authorization);
 app.post('/api/authenticate-user', async (req, res) => {
   const username = req.body.user;
   const password = req.body.pw;
+
   try {
-    const passwordHash = await tribesMac('get-password', username);
+    const userData = await tribesMac('get-password', username);
+    const { userId, passwordHash } = userData;
 
     try {
       const authenticated = await comparePwHash(password, passwordHash);
@@ -56,7 +58,10 @@ app.post('/api/authenticate-user', async (req, res) => {
           sameSite: 'strict',
         });
 
-        res.status(200).json({ message: 'Login Succesful.' });
+        res.status(200).json({ 
+          message: 'Login Succesful.',
+          userId,
+        });
       } 
     } catch (error) {
       if (error.message === 'Password does not match.') {
@@ -79,7 +84,7 @@ app.post('/api/authenticate-user', async (req, res) => {
 
 app.post('/api/create-user', async (req, res) => {
   try {
-    const username = await tribesMac('create-user', req.body);
+    const { username, userId } = await tribesMac('create-user', req.body);
 
     const token = jwt.sign({ id: username }, jwtSecret, { expiresIn: '3h' });
     const parts = token.split('.');
@@ -93,7 +98,10 @@ app.post('/api/create-user', async (req, res) => {
       httpOnly: false,
       sameSite: 'strict',
     });
-    res.status(200).json({ message: 'User succesfully created.' });
+    res.status(200).json({ 
+      message: 'User succesfully created.',
+      userId
+    });
 
   } catch (error) {
     console.error(error);
@@ -121,9 +129,19 @@ app.get('/api/protected/get-chatroom-messages', async (req, res) => {
     res.send(messages);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'An error occured while getting chatroom messages.'})
+    res.status(500).json({ message: 'An error occured while getting chatroom messages.'});
   }
 });
+
+app.post('/api/protected/post-message', async (req, res) => {
+  try {
+    await tribesMac('post-message', req.body);
+    res.status(201).json({ message: 'Message succesfully posted.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occured while posting message.' });
+  }
+})
 
 
 app.post('/api/protected/create-a-tribe', async (req, res) => {
