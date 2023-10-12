@@ -13,7 +13,7 @@ async function populateTribesGrid(tribeGrid) {
     const tribeCard = document.createElement('div');
     tribeCard.className = 'tribe-card-container';
     tribeCard.innerHTML = `
-      <a class="tribe-link" href="/api/protected/tribe-chat/${tribeUrl}" data-link="/tribe-chat/${tribeUrl}" tabindex="${i + 1}">
+      <a class="tribe-link" href="/api/protected/tribe-chat/${tribeUrl}" data-link="/tribe-chat/${tribeUrl}" tabindex="${i + 4}">
         <div class="tribe-card">
           <div class="tribe-card-upper-flex">
             <h2 class="tribe-name">${tribes[i].tribe_name}</h2>
