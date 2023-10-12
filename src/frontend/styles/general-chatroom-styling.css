@@ -7,16 +7,21 @@
     height: var(--mco-height);
     display: flex;
     flex-direction: column;
-
+    position: relative;
+   
     & .chatroom-title {
-      grid-row: 1 / 2;
+      position: absolute;
+      top: 0;
+      border-top-left-radius: 1.5rem;
+      z-index: 2;
+      width: 100%;
       color: var(--lemon-chiffon);
-      height: 50px;
+      background-image: linear-gradient(180deg, var(--bg-clr) 35%, transparent 80%);
+      height: 80px;
       padding: var(--p-block) calc(var(--p-inline) / 2);
     }
     
     & .messages-scroll-wrapper {
-      grid-row: 2 / 3;
       min-height: calc(var(--mco-height) - 100px);
       overflow-y: scroll;
 
@@ -61,23 +66,19 @@
             display: flex;
             align-items: center;
             width: 100%;
-            gap: calc(var(--gap) * 2);
+            min-height: 30px;
+            gap: var(--gap);
             border-radius: 1rem;
             padding-inline: calc(var(--p-inline) / 2);
             cursor: pointer;
 
-            & .user-icon {
-              height: 30px;
-              width: 30px;
-              border-radius: 50%;
-              border: 1px solid var(--thistle-03);
-              padding-right: 1rem;
-            }
-            
+            & .msg-sender {
+              color: var(--lemon-chiffon);
+            } 
+
             & .user-replying-to {
               opacity: 0.5;
               color: var(--font-clr);
-              padding-right: 1rem;
             }
 
             & .user-message {
