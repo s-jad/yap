@@ -1,9 +1,10 @@
 import '../styles/general-chatroom-styling.css';
 import { getAppState } from './app-state';
-import { getMessages } from './tribes-db-access';
+import { getMessages, postChatMessage } from './tribes-db-access';
 
-const memberState = {
+const chatState = {
   replying: false,
+  tribeName: '',
 }
 
 const messageState = {
@@ -45,7 +46,7 @@ function createNewMessage(message) {
   newMessage.addEventListener('click', (ev) => {
     // If the user has already clicked a message to reply to 
     // and the message being clicked is NOT the one that was already clicked
-    if (memberState.replying 
+    if (chatState.replying 
       && messageState.replyTo !== newMessage.classList.item(1)
     ) {
       return;
@@ -56,13 +57,13 @@ function createNewMessage(message) {
       messageState.global = true;
       messageState.receiver = '';
       messageState.replyTo = newMessage.classList.item(1);
-      memberState.replying = false;
+      chatState.replying = false;
     } else {
       newMessage.classList.add('replying-to');
       messageState.global = false;
       messageState.receiver = ev.target.getAttribute('data-sender');
       messageState.replyTo = '';
-      memberState.replying = true;
+      chatState.replying = true;
     }
   });
 
@@ -115,7 +116,7 @@ function createDbMessage(msg) {
   newMessage.addEventListener('click', (ev) => {
     // If the user has already clicked a message to reply to 
     // and the message being clicked is NOT the one that was already clicked
-    if (memberState.replying 
+    if (chatState.replying 
       && messageState.replyTo !== newMessage.classList.item(1)
     ) {
       return;
@@ -126,13 +127,13 @@ function createDbMessage(msg) {
       messageState.global = true;
       messageState.receiver = '';
       messageState.replyTo = '';
-      memberState.replying = false;
+      chatState.replying = false;
     } else {
       newMessage.classList.add('replying-to');
       messageState.global = false;
       messageState.receiver = ev.currentTarget.getAttribute('data-sender');
       messageState.replyTo = newMessage.classList.item(1);
-      memberState.replying = true;
+      chatState.replying = true;
     }
   });
 
@@ -150,24 +151,59 @@ function handleDbReturn(messages, msgView, msgTimeline) {
   });
 }
 
-async function populateWithMessages(tribeName, msgView, msgTimeline) {
+async function populateWithMessages(msgView, msgTimeline) {
+  const tribeName = chatState.tribeName;
   const messages = await getMessages(tribeName);
   handleDbReturn(messages, msgView, msgTimeline);
 }
 
+function handleMessagePost(message) {
+  const tribeChatContainer = document.getElementById('tribe-chat-container');
+  const tribeName = chatState.tribeName;
+  const timestamp = handleUserInput(message);
+  const replyToMsg = tribeChatContainer.querySelector('.replying-to');
+  const userId = getAppState('userId');
 
-function handleDbPost(message, timestamp) {
-  console.log(message);
+  if (replyToMsg) {
+    console.log("handling reply message");
+    postChatMessage(
+      tribeName,
+      message,
+      userId,
+      messageState.receiver,
+      timestamp,
+      messageState.global
+    );
+
+    replyToMsg.classList.remove('replying-to');
+    messageState.receiver = '';
+    messageState.replyTo = '';
+    chatState.replying = false;
+    messageState.global = true;
+  } else {
+    console.log("handling global message");
+    postChatMessage(
+      tribeName,
+      message,
+      userId,
+      userId,
+      timestamp,
+      messageState.global
+    );
+  }
+
 }
 
-export default async function TribeChat(tribeName) {
+export default async function TribeChat(tribe) {
+  chatState.tribeName = tribe.charAt(1).toUpperCase() + tribe.slice(2).replaceAll('-', ' ');
+
   const tribeChatContainer = document.createElement('div');
   tribeChatContainer.id = 'tribe-chat-container';
   tribeChatContainer.className = 'chat-container removable';
 
   tribeChatContainer.innerHTML = `
     <div class="messages-container-outer">
-      <h1 class="chatroom-title">${tribeName}</h1>
+      <h1 class="chatroom-title">${chatState.tribeName}</h1>
       <div class="messages-scroll-wrapper">
         <div class="messages-container-inner">
           <div class="message-timeline"></div>
@@ -189,23 +225,11 @@ export default async function TribeChat(tribeName) {
   const msgView = tribeChatContainer.querySelector('.message-view');
   const msgTimeline = tribeChatContainer.querySelector('.message-timeline');
 
-  await populateWithMessages(tribeName, msgView, msgTimeline);
+  await populateWithMessages(msgView, msgTimeline);
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
-      const timestamp = handleUserInput(messageInput.value);
-      const replyToMsg = tribeChatContainer.querySelector('.replying-to');
-
-      if (replyToMsg) {
-        replyToMsg.classList.remove('replying-to');
-        messageState.receiver = '';
-        messageState.global = true;
-        messageState.replyTo = '';
-        memberState.replying = false;
-      }
-
-      const user = getAppState('username');
-      handleDbPost(messageInput.value, timestamp);
+      handleMessagePost(messageInput.value);
 
       messageInput.value = '';
       messageInput.focus();
@@ -214,22 +238,11 @@ export default async function TribeChat(tribeName) {
   });
 
   messageBtn.addEventListener('click', () => {
-    const timestamp = handleUserInput(messageInput.value);
-    const replyToMsg = tribeChatContainer.querySelector('.replying-to');
-    
-    if (replyToMsg) {
-      replyToMsg.classList.remove('replying-to');
-      messageState.receiver = '';
-      messageState.global = true;
-      messageState.replyTo = '';
-      memberState.replying = false;
-    }
+    handleMessagePost(messageInput.value);
 
-    handleDbPost(messageInput.value, timestamp);
-
-    messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
-    messageInput.focus();
     messageInput.value = '';
+    messageInput.focus();
+    messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
   });
 
   return tribeChatContainer;
