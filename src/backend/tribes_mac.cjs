@@ -13,6 +13,48 @@ function getTribes() {
   });
 }
 
+function getLastTribeLogin(userId) {
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: `
+        SELECT 
+          t.tribe_name, 
+          tm.last_login
+        FROM 
+          tribe_members tm
+        JOIN 
+          tribes t ON tm.tribe_id = t.tribe_id
+        WHERE 
+          tm.member_id = \$1 
+          AND tm.last_login IN (
+            SELECT 
+              last_login 
+            FROM 
+              tribe_members 
+            WHERE 
+              member_id = \$1 
+            ORDER BY 
+              last_login DESC 
+            LIMIT 
+              3
+          )
+        ORDER BY 
+          tm.last_login DESC;
+      `,
+      values: [userId],
+    };
+    
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        console.log(err);
+        reject(err);
+      } else {
+        resolve(res.rows);
+      }
+    });
+  });
+}
+
 function formatTribeUrl(tribeUrl) {
   let formattedTribeUrl = tribeUrl.replace(/-/g, ' ');
   formattedTribeUrl = formattedTribeUrl.replace('/', '');
@@ -40,6 +82,8 @@ function getChatroomMessages(tribeUrl) {
           users receiver ON msg.receiver_id = receiver.user_id
         WHERE 
           msg.tribe_name = \$1
+          AND msg.message_timestamp >= CURRENT_DATE::timestamp
+          AND msg.message_timestamp < (CURRENT_DATE + INTERVAL '1 day')::timestamp;
       `,
       values: [tribe],
     };
@@ -212,6 +256,10 @@ async function tribesMac(req, data) {
     case 'get-tribes':
       const tribes = await getTribes();
       return tribes;
+
+    case 'get-last-tribe-logins':
+      const lastLogins = await getLastTribeLogin(data);
+      return lastLogins;
 
     case 'create-tribe':
       const tribe = await createTribe(data);
