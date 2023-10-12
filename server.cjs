@@ -45,7 +45,7 @@ app.post('/api/authenticate-user', async (req, res) => {
       if (!authenticated) {
         res.status(401).json({ message: 'Incorrect Password.' })    
       } else {
-        const token = jwt.sign({ id: username }, jwtSecret, { expiresIn: '3h' });
+        const token = jwt.sign({ userName: username, id: userId }, jwtSecret, { expiresIn: '3h' });
         const parts = token.split('.');
         // Set JWT header and signature in HttpOnly cookie
         res.cookie('jwt_signature', `${parts[0]}.${parts[1]}`, { 
@@ -86,7 +86,7 @@ app.post('/api/create-user', async (req, res) => {
   try {
     const { username, userId } = await tribesMac('create-user', req.body);
 
-    const token = jwt.sign({ id: username }, jwtSecret, { expiresIn: '3h' });
+    const token = jwt.sign({ userName: username, id: userId }, jwtSecret, { expiresIn: '3h' });
     const parts = token.split('.');
     // Set JWT header and signature in HttpOnly cookie
     res.cookie('jwt_signature', `${parts[0]}.${parts[1]}`, { 
@@ -110,6 +110,26 @@ app.post('/api/create-user', async (req, res) => {
 });
 
 // PROTECTED ROUTES
+
+app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+      console.log("get-last-tribe-logins::payload => ", payload);
+    } catch (error) {
+      console.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    const lastLogins = await tribesMac('get-last-tribe-logins', userId);
+    res.send(lastLogins);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occured while getting last tribe logins.' });
+  }
+});
 
 app.get('/api/protected/join-a-tribe', async (req, res) => {
   try {
