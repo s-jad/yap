@@ -34,6 +34,27 @@ async function createTribe() {
     });
 }
 
+async function getLastTribeLogins() {
+  return fetch(`/api/protected/get-last-tribe-logins`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to get last tribe logins');
+      }
+      return response.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (error) {
+          console.error('getLastTribeLogins::Error parsing JSON => ', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
+    });
+}
+
 async function getMessages(tribeUrl) {
   return fetch(`/api/protected/get-chatroom-messages?tribeUrl=${encodeURIComponent(tribeUrl)}`)
     .then(response => {
@@ -139,6 +160,7 @@ async function authenticateUser(username, password) {
 export {
   getTribes,
   getMessages,
+  getLastTribeLogins,
   createTribe,
   createUser,
   authenticateUser,
