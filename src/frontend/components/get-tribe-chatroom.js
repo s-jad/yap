@@ -27,13 +27,12 @@ function createNewMessage(message) {
   if (messageState.receiver === 'global') {
     newMessage.setAttribute('data-receiver', 'global');
     newMessage.innerHTML = `
-      <img src="" alt="Icon" class="user-icon"/>
       <p class="user-message">${message}</p>
     `;
   } else {
     newMessage.setAttribute('data-receiver', messageState.receiver);
     newMessage.innerHTML = `
-      <img src="" alt="Icon" class="user-icon"/>
+      <p class="msg-sender">${getAppState('username')}</p>
       <p class="user-replying-to">@${messageState.receiver}</p>
       <p class="user-message">${message}</p>
     `;
@@ -93,13 +92,13 @@ function createDbMessage(msg) {
   if (msg.sender_name === msg.receiver_name) {
     newMessage.setAttribute('data-receiver', 'global');
     newMessage.innerHTML = `
-      <img src="" alt="Icon" class="user-icon"/>
+      <p class="msg-sender">${msg.sender_name}</p>
       <p class="user-message">${msg.message_content}</p>
     `;
   } else {
     newMessage.setAttribute('data-receiver', msg.receiver_name);
     newMessage.innerHTML = `
-      <img src="" alt="Icon" class="user-icon"/>
+      <p class="msg-sender">${msg.sender_name}</p>
       <p class="user-replying-to">@${msg.receiver_name}</p>
       <p class="user-message">${msg.message_content}</p>
     `;
@@ -165,7 +164,6 @@ function handleMessagePost(message) {
   const userId = getAppState('userId');
 
   if (replyToMsg) {
-    console.log("handling reply message");
     postChatMessage(
       tribeName,
       message,
@@ -181,7 +179,6 @@ function handleMessagePost(message) {
     chatState.replying = false;
     messageState.global = true;
   } else {
-    console.log("handling global message");
     postChatMessage(
       tribeName,
       message,
@@ -203,8 +200,8 @@ export default async function TribeChat(tribe) {
 
   tribeChatContainer.innerHTML = `
     <div class="messages-container-outer">
-      <h1 class="chatroom-title">${chatState.tribeName}</h1>
       <div class="messages-scroll-wrapper">
+        <h1 class="chatroom-title">${chatState.tribeName}</h1>
         <div class="messages-container-inner">
           <div class="message-timeline"></div>
           <div class="message-view"></div>
