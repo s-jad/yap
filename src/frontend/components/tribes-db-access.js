@@ -52,7 +52,7 @@ async function getMessages(tribeUrl) {
     });
 }
 
-async function postMessage(tribe, message, sender, receiver, timestamp) {
+async function postChatMessage(tribe, message, sender, receiver, timestamp, global) {
   return fetch('/api/protected/post-message', {
     method: 'POST',
     headers: {
@@ -64,20 +64,19 @@ async function postMessage(tribe, message, sender, receiver, timestamp) {
       sender,
       receiver,
       timestamp,
+      global,
     })
   })
   .then(response => {
     if (!response.ok) {
-      throw new Error('Unable to post message.')
+      console.log(response);
+      throw new Error('Unable to post message.');
     }
-    return response.text().then(text => {
-      try {
-        const json = JSON.parse(text);
-        return json;
-      } catch (error) {
-        console.error('postMessage::ERROR => ', error);
-        throw new Error('Error posting message.')
+    return response.json().then(json => {
+      if (json.message === 'Data was posted successfully.') {
+        console.log('Message posted successfully.');
       }
+      return json;
     })
   })
 }
@@ -109,6 +108,7 @@ async function createUser(username, password, joined) {
     });
   });
 }
+
 async function authenticateUser(username, password) {
   return fetch('/api/authenticate-user', {
     method: 'POST',
@@ -142,4 +142,5 @@ export {
   createTribe,
   createUser,
   authenticateUser,
+  postChatMessage,
 };
