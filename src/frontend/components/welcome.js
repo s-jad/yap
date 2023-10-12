@@ -1,5 +1,5 @@
 import { authenticateUser, createUser } from "./tribes-db-access";
-import { updateAppState } from "./app-state";
+import { getAppState, updateAppState } from "./app-state";
 import App from "./app";
 
 export default function Welcome() {
@@ -115,6 +115,7 @@ export default function Welcome() {
         history.pushState(null, null, '/dashboard');
         document.body.removeChild(welcomeContainer);
         updateAppState('username', username);
+        updateAppState('userId', authenticated.userId);
         const app = await App();
         document.body.appendChild(app);
       } else {
@@ -136,12 +137,11 @@ export default function Welcome() {
     const joined = new Date().toISOString();
 
     try {
-      const res = await createUser(username, password, joined);
-      console.log("res => ", res);
+      const { userId } = await createUser(username, password, joined);
       displayCreateAccountError.textContent = '';      
       history.pushState(null, null, '/dashboard');
-     // updateAppState('userId', user_id);
-     // updateAppState('username', user_name);
+      updateAppState('username', username);
+      updateAppState('userId', userId);
       document.body.removeChild(welcomeContainer);
       const app = await App();
       document.body.appendChild(app);
