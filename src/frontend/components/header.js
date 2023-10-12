@@ -1,4 +1,5 @@
 import { getAppState } from "./app-state";
+import { handleChatroomLinks } from "./fetch_apis";
 
 function getNotifications() {
   const notificationsFlex = document.createElement('div');
@@ -23,13 +24,32 @@ function getGroupsLinks() {
   const groupLinksContainer = document.createElement('div');
   groupLinksContainer.className = 'group-links-container';
 
+  const lastLogins = getAppState('last-tribe-logins');
   groupLinksContainer.innerHTML = `
     <ul class='group-list'>
-      <li class='group-list-item'>Politics</li>
-      <li class='group-list-item'>Animal Collective</li>
-      <li class='group-list-item'>House music lovers</li>
+      <a class="recently-viewed-tribe-link"><li class='group-list-item'></li></a>
+      <a class="recently-viewed-tribe-link"><li class='group-list-item'></li></a>
+      <a class="recently-viewed-tribe-link"><li class='group-list-item'></li></a>
     </ul>
   `;
+
+  const anchors = Array.from(groupLinksContainer.querySelectorAll('a'));
+  const links = Array.from(groupLinksContainer.querySelectorAll('li'));
+
+  anchors.forEach((a, index) => {
+    links[index].textContent = lastLogins[index].tribe_name;
+    const tribeUrl = `/${lastLogins[index].tribe_name.toLowerCase().replaceAll(' ', '-')}`;
+    a.href = `/api/protected/tribe-chat${tribeUrl}`;
+    a.setAttribute('data-link', `/tribe-chat${tribeUrl}`);
+    a.tabIndex = index + 1;
+
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const linkUrl = a.getAttribute('data-link');
+      history.pushState(null, null, linkUrl);
+      handleChatroomLinks(tribeUrl);
+    });
+  });
 
   return groupLinksContainer;
 }
@@ -42,8 +62,10 @@ export default function Header() {
   userName.className = 'username-title';
   userName.textContent = getAppState('username');
 
+  const groupLinksContainer = getGroupsLinks();
+
   headerContainer.appendChild(userName);
-  headerContainer.appendChild(getGroupsLinks());
+  headerContainer.appendChild(groupLinksContainer);
   headerContainer.appendChild(getNotifications());
 
   return headerContainer;
