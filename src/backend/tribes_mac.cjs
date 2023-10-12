@@ -49,11 +49,89 @@ function getChatroomMessages(tribeUrl) {
         console.error(err);
         reject(err);
       } else {
-        console.log(res.rows);
         resolve(res.rows);
       }
     });
   });
+}
+
+function postGlobalMessage(messageData) {
+  const { tribe, message, sender, _, timestamp, global } = messageData;
+  const query = {
+    text: `
+      INSERT into messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
+      VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
+      RETURNING *;
+    `,
+    values: [tribe, message, sender, sender, timestamp, global],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        console.error(err);
+        reject(new Error('Error posting message.'));
+      } else if (res.rows.length === 0) {
+        console.error(err);
+        reject(new Error('Error posting message.'));
+      } else {
+        console.log("postGlobalMessage::res.rows => ", res.rows[0]);
+        resolve(res.rows[0]);
+      }
+    })
+  })
+}
+
+function postPersonalMessage(messageData) {
+  const { tribe, message, sender, receiver, timestamp, global } = messageData;
+  const receiverIdQuery = {
+    text: `
+      SELECT user_id FROM users WHERE user_name = \$1;
+    `,
+    values: [receiver],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(receiverIdQuery)
+      .then(res => {
+        if (res.rows.length === 0) {
+          console.error(err);
+          reject(new Error('Error executing receiverIdQuery.'));
+        } else {
+          const receiverId = res.rows[0].user_id;
+          console.log("tribesMac::receiverId => ", receiverId);
+          const postMessageQuery = {
+            text: `
+              INSERT into messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
+              VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
+              RETURNING *;
+            `,
+            values: [tribe, message, sender, receiverId, timestamp, global],
+          };
+
+          return pg_client.query(postMessageQuery);
+        }
+      })
+      .then(res => {
+        console.log("postPersonalMessage::res.rows => ", res.rows[0]);
+        resolve(res.rows[0]);
+      })
+      .catch(err => {
+        console.error(err);
+        reject(new Error('Error executing postMessageQuery.'));
+      });
+  });
+}
+
+function postMessage(messageData) {
+  const { global } = messageData;
+  if (global) {
+    console.log("Posting global message");
+    postGlobalMessage(messageData);
+  } else {
+    console.log("Posting personal message");
+    postPersonalMessage(messageData);
+  }
 }
 
 function createUser(newUserData) {
@@ -77,7 +155,8 @@ function createUser(newUserData) {
         reject(new Error('Cant create user.'));
       } else {
         console.log("createUser::res.rows => ", res.rows[0]);
-        resolve(res.rows[0]);
+        const row = res.rows[0];
+        resolve({ username: row.user_name, userId: row.user_id });
       }
     })
   });
@@ -110,7 +189,7 @@ function createTribe(newTribeData) {
 function getPwHash(user) {
   return new Promise((resolve, reject) => {
     const query = {
-      text: 'SELECT password FROM users WHERE user_name = \$1',
+      text: 'SELECT user_id, password FROM users WHERE user_name = \$1',
       values: [user],
     };
 
@@ -121,7 +200,8 @@ function getPwHash(user) {
       } else if (res.rows.length === 0) {
         reject(new Error('User with that password does not exist'));
       } else {
-        resolve(res.rows[0].password);
+        const row = res.rows[0];
+        resolve({ userId: row.user_id, passwordHash: row.password });
       }
     });
   });
@@ -145,9 +225,13 @@ async function tribesMac(req, data) {
       const messages = await getChatroomMessages(data);
       return messages;
 
+    case 'post-message':
+      const msg = await postMessage(data);
+      return msg;
+
     case 'get-password':
-      const passwordHash = await getPwHash(data);
-      return passwordHash;
+      const result = await getPwHash(data);
+      return result;
 
     default:
       break;
