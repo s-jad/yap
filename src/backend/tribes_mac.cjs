@@ -55,6 +55,24 @@ function getLastTribeLogin(userId) {
   });
 }
 
+function getRandomTribeSuggestions() {
+  const query = `
+    SELECT tribe_name FROM tribes TABLESAMPLE BERNOULLI (3);
+  `;
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        console.log(err);
+        reject(err)
+      } else {
+        console.log("getRandomTribeSuggestions::res.rows => ", res.rows);
+        resolve(res.rows);
+      }
+    });
+  });
+}
+
 function formatTribeUrl(tribeUrl) {
   let formattedTribeUrl = tribeUrl.replace(/-/g, ' ');
   formattedTribeUrl = formattedTribeUrl.replace('/', '');
@@ -260,6 +278,10 @@ async function tribesMac(req, data) {
     case 'get-last-tribe-logins':
       const lastLogins = await getLastTribeLogin(data);
       return lastLogins;
+
+    case 'get-random-tribe-suggestions':
+      const suggestions = await getRandomTribeSuggestions();
+      return suggestions;
 
     case 'create-tribe':
       const tribe = await createTribe(data);
