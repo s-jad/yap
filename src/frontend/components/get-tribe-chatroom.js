@@ -53,13 +53,13 @@ function createNewMessage(message) {
       <p class="user-message">${message}</p>
 
     `;
-    const msgReceiver = newMessage.querySelector('.user-replying-to');
+    const msgReceiverEl = newMessage.querySelector('.user-replying-to');
     const receiver = activeMembers.find(member => member.username === messageState.receiver);
-    msgReceiver.style.color = `hsl(${receiver.color}, 100%, 70%)`;
+    msgReceiverEl.style.color = `hsl(${receiver.color}, 100%, 70%)`;
   }
   
-  const msgSender = newMessage.querySelector('.msg-sender');
-  msgSender.style.color = `hsl(${getAppState('userColor')}, 100%, 70%)`;
+  const msgSenderEl = newMessage.querySelector('.msg-sender');
+  msgSenderEl.style.color = `hsl(${getAppState('userColor')}, 100%, 70%)`;
 
   const timeStampEl = document.createElement('div');
   timeStampEl.className = 'timestamp-wrapper';
@@ -126,6 +126,9 @@ function createDbMessage(msg) {
       <p class="user-message">${msg.message_content}</p>
     `;
 
+    const receiverInfo = activeMembers.find(member => member.username === msg.receiver_name);
+    const msgReceiver = newMessage.querySelector('.user-replying-to');
+    msgReceiver.style.color = `hsl(${receiverInfo.color}, 100%, 70%)`;
   }
   newMessage.className = `message-wrapper message-${timestamp}`;
   
@@ -172,7 +175,10 @@ function createDbMessage(msg) {
 function handleDbReturn(messages, msgView, msgTimeline) {
   messages.forEach((msg) => {
     if (!activeMembers.includes(msg.sender_name)) {
-      activeMembers.push(getMemberState(msg.sender_name));
+      activeMembers.push(getMemberState(msg.sender_name, msg.sender_color));
+    }
+    if (!activeMembers.includes(msg.receiver_name)) {
+      activeMembers.push(getMemberState(msg.receiver_name, msg.receiver_color));
     }
     const { newMessage, timeStampEl } = createDbMessage(msg);
     msgView.appendChild(newMessage);
@@ -253,13 +259,13 @@ export default async function TribeChat(tribe) {
   const msgView = tribeChatContainer.querySelector('.message-view');
   const msgTimeline = tribeChatContainer.querySelector('.message-timeline');
 
-  await populateWithMessages(msgView, msgTimeline);
-  
   const memberPresent = activeMembers.includes(member => member.username === getAppState('username'));
 
   if (!memberPresent) {
     activeMembers.push(getMemberState(getAppState('username'), getAppState('userColor')));
   }
+
+  await populateWithMessages(msgView, msgTimeline);
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
