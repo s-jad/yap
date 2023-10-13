@@ -24,7 +24,7 @@ function getGroupsLinks() {
   const groupLinksContainer = document.createElement('div');
   groupLinksContainer.className = 'group-links-container';
 
-  const lastLogins = getAppState('last-tribe-logins');
+  const tribeSuggestions = getAppState('header-tribe-suggestions');
   groupLinksContainer.innerHTML = `
     <ul class='group-list'>
       <a class="recently-viewed-tribe-link"><li class='group-list-item'></li></a>
@@ -37,8 +37,8 @@ function getGroupsLinks() {
   const links = Array.from(groupLinksContainer.querySelectorAll('li'));
 
   anchors.forEach((a, index) => {
-    links[index].textContent = lastLogins[index].tribe_name;
-    const tribeUrl = `/${lastLogins[index].tribe_name.toLowerCase().replaceAll(' ', '-')}`;
+    links[index].textContent = tribeSuggestions[index].tribe_name;
+    const tribeUrl = `/${tribeSuggestions[index].tribe_name.toLowerCase().replaceAll(' ', '-')}`;
     a.href = `/api/protected/tribe-chat${tribeUrl}`;
     a.setAttribute('data-link', `/tribe-chat${tribeUrl}`);
     a.tabIndex = index + 1;
