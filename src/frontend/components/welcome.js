@@ -1,4 +1,4 @@
-import { authenticateUser, createUser, getLastTribeLogins } from "./tribes-db-access";
+import { authenticateUser, createUser, getLastTribeLogins, getRandomTribeSuggestions } from "./tribes-db-access";
 import { updateAppState } from "./app-state";
 import App from "./app";
 
@@ -119,7 +119,7 @@ export default function Welcome() {
         updateAppState('userId', authenticated.userId);
 
         const lastTribeLogins = await getLastTribeLogins();
-        updateAppState('last-tribe-logins', lastTribeLogins);
+        updateAppState('header-tribe-suggestions', lastTribeLogins);
 
         const app = await App();
         document.body.appendChild(app);
@@ -145,9 +145,8 @@ export default function Welcome() {
       const { userId } = await createUser(username, password, joined);
       displayCreateAccountError.textContent = '';      
       history.pushState(null, null, '/dashboard');
-      // TODO
-      // const randomTribeSuggestions = await getRandomTribeSuggestions();
-      // updateAppState('last-tribe-logins', lastTribeLogins);
+      const randomTribeSuggestions = await getRandomTribeSuggestions();
+      updateAppState('header-tribe-suggestions', randomTribeSuggestions);
       updateAppState('username', username);
       updateAppState('userId', userId);
 
