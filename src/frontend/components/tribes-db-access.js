@@ -34,25 +34,46 @@ async function createTribe() {
     });
 }
 
+async function getRandomTribeSuggestions() {
+  return fetch(`/api/protected/get-random-tribe-suggestions`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to get random tribe suggestions');
+    }
+    return response.text().then(text => {
+      try {
+        const json = JSON.parse(text);
+        return json;
+      } catch (error) {
+        console.error('getRandomTribeSuggestions::Error parsing JSON => ', error);
+        throw new Error('Error parsing JSON');
+      }
+    });
+  });
+}
+
 async function getLastTribeLogins() {
   return fetch(`/api/protected/get-last-tribe-logins`, {
     method: 'GET',
     credentials: 'include',
   })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Unable to get last tribe logins');
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to get last tribe logins');
+    }
+    return response.text().then(text => {
+      try {
+        const json = JSON.parse(text);
+        return json;
+      } catch (error) {
+        console.error('getLastTribeLogins::Error parsing JSON => ', error);
+        throw new Error('Error parsing JSON');
       }
-      return response.text().then(text => {
-        try {
-          const json = JSON.parse(text);
-          return json;
-        } catch (error) {
-          console.error('getLastTribeLogins::Error parsing JSON => ', error);
-          throw new Error('Error parsing JSON');
-        }
-      });
     });
+  });
 }
 
 async function getMessages(tribeUrl) {
@@ -161,6 +182,7 @@ export {
   getTribes,
   getMessages,
   getLastTribeLogins,
+  getRandomTribeSuggestions,
   createTribe,
   createUser,
   authenticateUser,
