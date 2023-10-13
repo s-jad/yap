@@ -22,11 +22,11 @@
     }
     
     & .messages-scroll-wrapper {
-      min-height: calc(var(--mco-height) - 100px);
+      min-height: calc(var(--mco-height) - 50px);
       overflow-y: scroll;
 
       & .messages-container-inner {
-        min-height: calc(var(--mco-height) - 100px);
+        min-height: calc(var(--mco-height) - 50px);
         padding-inline: calc(var(--p-inline) / 2);
         padding-bottom: var(--p-block);
         display: flex;
@@ -95,6 +95,7 @@
 
     & .send-message-footer {
       height: 50px;
+      width: 100%;
       grid-row: 3 / 4;
       padding: var(--p-block) calc(var(--p-inline) / 2);
       border-top: 1px solid var(--thistle-03);
