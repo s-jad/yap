@@ -27,6 +27,7 @@ function createNewMessage(message) {
   if (messageState.receiver === 'global') {
     newMessage.setAttribute('data-receiver', 'global');
     newMessage.innerHTML = `
+      <p class="msg-sender">${getAppState('username')}:</p>
       <p class="user-message">${message}</p>
     `;
   } else {
@@ -54,7 +55,7 @@ function createNewMessage(message) {
     if (newMessage.classList.contains('replying-to')) {
       newMessage.classList.remove('replying-to');
       messageState.global = true;
-      messageState.receiver = '';
+      messageState.receiver = 'global';
       messageState.replyTo = newMessage.classList.item(1);
       chatState.replying = false;
     } else {
@@ -174,7 +175,7 @@ function handleMessagePost(message) {
     );
 
     replyToMsg.classList.remove('replying-to');
-    messageState.receiver = '';
+    messageState.receiver = 'global';
     messageState.replyTo = '';
     chatState.replying = false;
     messageState.global = true;
@@ -191,7 +192,9 @@ function handleMessagePost(message) {
 }
 
 export default async function TribeChat(tribe) {
-  chatState.tribeName = tribe.charAt(1).toUpperCase() + tribe.slice(2).replaceAll('-', ' ');
+  chatState.tribeName = tribe
+    .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
+    .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
 
   const tribeChatContainer = document.createElement('div');
   tribeChatContainer.id = 'tribe-chat-container';
