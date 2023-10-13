@@ -117,6 +117,8 @@ export default function Welcome() {
 
         updateAppState('username', username);
         updateAppState('userId', authenticated.userId);
+        console.log("authenticated.userColor => ", authenticated.userColor);
+        updateAppState('userColor', authenticated.userColor);
 
         const lastTribeLogins = await getLastTribeLogins();
         updateAppState('header-tribe-suggestions', lastTribeLogins);
@@ -140,15 +142,17 @@ export default function Welcome() {
     const username = createAccountUsername.value;
     const password = createAccountPassword.value;
     const joined = new Date().toISOString();
+    const userColor = Math.floor(Math.random() * 360);
 
     try {
-      const { userId } = await createUser(username, password, joined);
+      const { userId } = await createUser(username, password, joined, userColor);
       displayCreateAccountError.textContent = '';      
       history.pushState(null, null, '/dashboard');
       const randomTribeSuggestions = await getRandomTribeSuggestions();
       updateAppState('header-tribe-suggestions', randomTribeSuggestions);
       updateAppState('username', username);
       updateAppState('userId', userId);
+      updateAppState('userColor', userColor);
 
       document.body.removeChild(welcomeContainer);
       const app = await App();
