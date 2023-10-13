@@ -1,10 +1,11 @@
 const { pg_client } = require("./tribes_db.cjs");
+const { logger } = require('./logging.cjs');
 
 function getTribes() {
   return new Promise((resolve, reject) => {
     pg_client.query('SELECT tribe_name, tribe_cta, tribe_description FROM tribes', (err, res) => {
       if (err) {
-        console.error(err);
+        logger.error(err);
         reject(err);
       } else {
         resolve(res.rows);
@@ -46,7 +47,7 @@ function getLastTribeLogin(userId) {
     
     pg_client.query(query, (err, res) => {
       if (err) {
-        console.log(err);
+        logger.error(err);
         reject(err);
       } else {
         resolve(res.rows);
@@ -57,16 +58,17 @@ function getLastTribeLogin(userId) {
 
 function getRandomTribeSuggestions() {
   const query = `
-    SELECT tribe_name FROM tribes TABLESAMPLE BERNOULLI (3);
+    SELECT tribe_name FROM tribes
+    ORDER BY RANDOM()
+    LIMIT 3;
   `;
 
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        console.log(err);
+        logger.error(err);
         reject(err)
       } else {
-        console.log("getRandomTribeSuggestions::res.rows => ", res.rows);
         resolve(res.rows);
       }
     });
@@ -108,7 +110,7 @@ function getChatroomMessages(tribeUrl) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        console.error(err);
+        logger.error(err);
         reject(err);
       } else {
         resolve(res.rows);
@@ -131,13 +133,12 @@ function postGlobalMessage(messageData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        console.error(err);
+        logger.error(err);
         reject(new Error('Error posting message.'));
       } else if (res.rows.length === 0) {
-        console.error(err);
+        logger.error(err);
         reject(new Error('Error posting message.'));
       } else {
-        console.log("postGlobalMessage::res.rows => ", res.rows[0]);
         resolve(res.rows[0]);
       }
     })
@@ -157,11 +158,10 @@ function postPersonalMessage(messageData) {
     pg_client.query(receiverIdQuery)
       .then(res => {
         if (res.rows.length === 0) {
-          console.error(err);
+          logger.warn('postPersonalMessage::res.rows.length === 0');
           reject(new Error('Error executing receiverIdQuery.'));
         } else {
           const receiverId = res.rows[0].user_id;
-          console.log("tribesMac::receiverId => ", receiverId);
           const postMessageQuery = {
             text: `
               INSERT into messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
@@ -175,11 +175,10 @@ function postPersonalMessage(messageData) {
         }
       })
       .then(res => {
-        console.log("postPersonalMessage::res.rows => ", res.rows[0]);
         resolve(res.rows[0]);
       })
-      .catch(err => {
-        console.error(err);
+      .catch((err) => {
+        logger.error(err);
         reject(new Error('Error executing postMessageQuery.'));
       });
   });
@@ -188,10 +187,10 @@ function postPersonalMessage(messageData) {
 function postMessage(messageData) {
   const { global } = messageData;
   if (global) {
-    console.log("Posting global message");
+    logger.info("Posting global message");
     postGlobalMessage(messageData);
   } else {
-    console.log("Posting personal message");
+    logger.info("Posting personal message");
     postPersonalMessage(messageData);
   }
 }
@@ -210,13 +209,13 @@ function createUser(newUserData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        console.error(err);
+        logger.error(err);
         reject(new Error('Cant create user.'));
       } else if (res.rows.length === 0) {
-        console.error(err);
+        logger.error(err);
         reject(new Error('Cant create user.'));
       } else {
-        console.log("createUser::res.rows => ", res.rows[0]);
+        logger.info(`createUser::res.rows => ${res.rows[0]}`);
         const row = res.rows[0];
         resolve({ username: row.user_name, userId: row.user_id });
       }
@@ -235,10 +234,10 @@ function createTribe(newTribeData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, values, (err, res) => {
       if (err) {
-        console.error(err);
+        logger.error(err);
         reject(new Error('Cant create tribe.'));
       } else if (res.rows.length === 0) {
-        console.error(err);
+        logger.error(err);
         reject(new Error('Cant create tribe'));
       } else {
         const newTribeName = values[0];
@@ -257,7 +256,7 @@ function getPwHash(user) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        console.error(err);
+        logger.error(err);
         reject(new Error('User with that password does not exist'));
       } else if (res.rows.length === 0) {
         reject(new Error('User with that password does not exist'));
