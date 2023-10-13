@@ -2,13 +2,11 @@ const { logger } = require('./logging.cjs');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-async function testHashPassword() {
-  const password = '';
-
+async function hashPassword(password) {
   const salt = await bcrypt.genSalt(saltRounds);
   const hash = await bcrypt.hash(password, salt);
-
-  logger.log('TEST::Hash: ', hash);
+  logger.info(`Hash: ${hash}`);
+  return hash;
 }
 
 async function comparePwHash(password, hash) {
@@ -25,5 +23,6 @@ async function comparePwHash(password, hash) {
 } 
 
 module.exports = {
-  comparePwHash
+  comparePwHash,
+  hashPassword
 };
