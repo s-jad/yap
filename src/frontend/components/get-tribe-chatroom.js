@@ -2,6 +2,8 @@ import '../styles/general-chatroom-styling.css';
 import { getAppState } from './app-state';
 import { getMessages, postChatMessage } from './tribes-db-access';
 
+const activeMembers = [];
+
 const chatState = {
   replying: false,
   tribeName: '',
@@ -12,6 +14,19 @@ const messageState = {
   global: true,
   replyTo: '',
 };
+
+function getMemberState(username, memberHue) {
+  let color;
+  if (!memberHue) {
+    color = Math.floor(Math.random() * 360);
+  } else {
+    color = memberHue;
+  }
+  return {
+    username,
+    color,
+  }
+}
 
 function createNewMessage(message) {
   if (message === "") {
@@ -36,8 +51,15 @@ function createNewMessage(message) {
       <p class="msg-sender">${getAppState('username')}:</p>
       <p class="user-replying-to">@${messageState.receiver}</p>
       <p class="user-message">${message}</p>
+
     `;
+    const msgReceiver = newMessage.querySelector('.user-replying-to');
+    const receiver = activeMembers.find(member => member.username === messageState.receiver);
+    msgReceiver.style.color = `hsl(${receiver.color}, 100%, 70%)`;
   }
+  
+  const msgSender = newMessage.querySelector('.msg-sender');
+  msgSender.style.color = `hsl(${getAppState('userColor')}, 100%, 70%)`;
 
   const timeStampEl = document.createElement('div');
   timeStampEl.className = 'timestamp-wrapper';
@@ -93,19 +115,23 @@ function createDbMessage(msg) {
   if (msg.sender_name === msg.receiver_name) {
     newMessage.setAttribute('data-receiver', 'global');
     newMessage.innerHTML = `
-      <p class="msg-sender">${msg.sender_name}</p>
+      <p class="msg-sender">${msg.sender_name}:</p>
       <p class="user-message">${msg.message_content}</p>
     `;
   } else {
     newMessage.setAttribute('data-receiver', msg.receiver_name);
     newMessage.innerHTML = `
-      <p class="msg-sender">${msg.sender_name}</p>
+      <p class="msg-sender">${msg.sender_name}:</p>
       <p class="user-replying-to">@${msg.receiver_name}</p>
       <p class="user-message">${msg.message_content}</p>
     `;
 
   }
   newMessage.className = `message-wrapper message-${timestamp}`;
+  
+  const senderInfo = activeMembers.find(member => member.username === msg.sender_name);
+  const msgSender = newMessage.querySelector('.msg-sender');
+  msgSender.style.color = `hsl(${senderInfo.color}, 100%, 70%)`;
 
   const timeText = timestamp.slice(timestamp.indexOf('T') + 1, timestamp.indexOf('.'))
 
@@ -145,6 +171,9 @@ function createDbMessage(msg) {
 
 function handleDbReturn(messages, msgView, msgTimeline) {
   messages.forEach((msg) => {
+    if (!activeMembers.includes(msg.sender_name)) {
+      activeMembers.push(getMemberState(msg.sender_name));
+    }
     const { newMessage, timeStampEl } = createDbMessage(msg);
     msgView.appendChild(newMessage);
     msgTimeline.appendChild(timeStampEl);
@@ -225,6 +254,12 @@ export default async function TribeChat(tribe) {
   const msgTimeline = tribeChatContainer.querySelector('.message-timeline');
 
   await populateWithMessages(msgView, msgTimeline);
+  
+  const memberPresent = activeMembers.includes(member => member.username === getAppState('username'));
+
+  if (!memberPresent) {
+    activeMembers.push(getMemberState(getAppState('username'), getAppState('userColor')));
+  }
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
