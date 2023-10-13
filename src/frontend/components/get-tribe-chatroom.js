@@ -32,7 +32,7 @@ function createNewMessage(message) {
   } else {
     newMessage.setAttribute('data-receiver', messageState.receiver);
     newMessage.innerHTML = `
-      <p class="msg-sender">${getAppState('username')}</p>
+      <p class="msg-sender">${getAppState('username')}:</p>
       <p class="user-replying-to">@${messageState.receiver}</p>
       <p class="user-message">${message}</p>
     `;
@@ -188,7 +188,6 @@ function handleMessagePost(message) {
       messageState.global
     );
   }
-
 }
 
 export default async function TribeChat(tribe) {
