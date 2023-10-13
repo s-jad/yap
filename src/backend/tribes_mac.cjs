@@ -1,5 +1,6 @@
 const { pg_client } = require("./tribes_db.cjs");
 const { logger } = require('./logging.cjs');
+const { hashPassword } = require("./pw_encryption.cjs");
 
 function getTribes() {
   return new Promise((resolve, reject) => {
@@ -93,7 +94,9 @@ function getChatroomMessages(tribeUrl) {
           msg.message_content, 
           msg.message_timestamp, 
           sender.user_name AS sender_name, 
-          receiver.user_name AS receiver_name 
+          sender.user_color AS sender_color,
+          receiver.user_name AS receiver_name,
+          receiver.user_color AS receiver_color
         FROM 
           messages msg 
         INNER JOIN 
@@ -195,15 +198,17 @@ function postMessage(messageData) {
   }
 }
 
-function createUser(newUserData) {
-  const { user, pw, joined } = newUserData;
+async function createUser(newUserData) {
+  const { user, pw, joined, userColor } = newUserData;
+  const pwHash = await hashPassword(pw);
+
   const query = {
     text: `
-      INSERT into users (user_name, password, joined, last_login)
-      VALUES (\$1, \$2, \$3, \$4)
+      INSERT into users (user_name, password, joined, last_login, user_color)
+      VALUES (\$1, \$2, \$3, \$4, \$5)
       RETURNING *; 
     `,
-    values: [user, pw, joined, joined],
+    values: [user, pwHash, joined, joined, userColor],
   };
 
   return new Promise((resolve, reject) => {
@@ -217,7 +222,11 @@ function createUser(newUserData) {
       } else {
         logger.info(`createUser::res.rows => ${res.rows[0]}`);
         const row = res.rows[0];
-        resolve({ username: row.user_name, userId: row.user_id });
+        resolve({
+          username: row.user_name,
+          userId: row.user_id,
+          userColor: row.user_color
+        });
       }
     })
   });
@@ -249,10 +258,7 @@ function createTribe(newTribeData) {
 
 function getPwHash(user) {
   return new Promise((resolve, reject) => {
-    const query = {
-      text: 'SELECT user_id, password FROM users WHERE user_name = \$1',
-      values: [user],
-    };
+    const query = `SELECT user_id, password, user_color FROM users WHERE user_name = '${user}'`;
 
     pg_client.query(query, (err, res) => {
       if (err) {
@@ -262,7 +268,11 @@ function getPwHash(user) {
         reject(new Error('User with that password does not exist'));
       } else {
         const row = res.rows[0];
-        resolve({ userId: row.user_id, passwordHash: row.password });
+        resolve({
+          userId: row.user_id,
+          passwordHash: row.password,
+          userColor: row.user_color
+        });
       }
     });
   });
