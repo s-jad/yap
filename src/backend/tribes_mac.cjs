@@ -130,6 +130,44 @@ function getChatroomMessages(tribeUrl) {
   });
 }
 
+function getInboxMessages(userId) {
+  const query = {
+    text: `
+      SELECT
+        msg.message_content,
+        msg.message_timestamp,
+        sender.user_name as sender_name,
+        sender.user_color as sender_color,
+        receiver.user_name as receiver_name,
+        receiver.user_color as receiver_color
+      FROM
+        messages msg
+      INNER JOIN
+        users sender ON msg.sender_id = sender.user_id
+      INNER JOIN
+        users receiver ON msg.receiver_id = receiver.user_id
+      WHERE
+        msg.receiver_id = \$1
+        OR msg.sender_id = \$1
+      ORDER BY
+        msg.message_timestamp DESC
+    `,
+    values: [userId],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.warn(err);
+        reject(new Error('Error fetching inbox messages'));
+      } else {
+        logger.info(res.rows);
+        resolve(res.rows);
+      }
+    });
+  });
+}
+
 function postGlobalMessage(messageData) {
   const { tribe, message, sender, _, timestamp, global } = messageData;
   const query = {
@@ -311,6 +349,10 @@ async function tribesMac(req, data) {
     case 'get-messages':
       const messages = await getChatroomMessages(data);
       return messages;
+
+    case 'get-inbox-messages':
+      const inboxMessages = await getInboxMessages(data);
+      return inboxMessages;
 
     case 'post-message':
       const msg = await postMessage(data);
