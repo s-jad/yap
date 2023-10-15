@@ -51,7 +51,15 @@ function getLastTribeLogin(userId) {
         logger.error(err);
         reject(err);
       } else {
-        resolve(res.rows);
+        if (res.rows.length < 3) {
+          getRandomTribeSuggestions()
+            .then(tribeSuggestions => {
+              resolve(tribeSuggestions);
+            })
+            .catch(err => reject(err));
+        } else {
+          resolve(res.rows);
+        }
       }
     });
   });
