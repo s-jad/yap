@@ -34,6 +34,10 @@ async function clientRouting() {
       component = Dashboard();
       return component;
 
+    case '/inbox':
+      component = Inbox();
+      return component;
+
     case '/join-a-tribe':
       component = await getAsyncComponent(importedComponents.joinTribe);
 
@@ -70,7 +74,6 @@ export default async function App() {
   appContainer.id = 'app';
 
   const currentComponent = await clientRouting();
-  
   appContainer.appendChild(Header());
   appContainer.appendChild(currentComponent);
   appContainer.appendChild(Sidebar());
