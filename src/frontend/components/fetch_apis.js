@@ -5,6 +5,7 @@ const importedList = {
   joinTribe: false,
   createTribe: false,
   tribeChat: false,
+  inbox: false,
 };
 
 const importedComponents = {
@@ -13,6 +14,7 @@ const importedComponents = {
   joinTribe: () => {},
   createTribe: () => {},
   tribeChat: () => {},
+  inbox: () => {},
 }
 
 function getComponent(fn) {
@@ -104,6 +106,27 @@ function importModules(page) {
         }
         break;
 
+      case '/inbox':
+        if (importedList.inbox !== true) {
+          try {
+            const inboxModule = await import(/* webpackChunkName: "inbox" */ './inbox')
+            const Inbox =  inboxModule.default;
+            const fn = Inbox;
+            importedList.inbox = true;
+            importedComponents.inbox = fn;
+            component = getAsyncComponent(fn)
+            resolve(component);
+          }
+          catch (error) {
+              console.error(error);
+              reject(error);
+          }
+        } else {
+          component = getAsyncComponent(importedComponents.inbox);
+          resolve(component);
+        }
+        break;
+
       case '/create-a-tribe':
         if (importedList.createTribe !== true) {
           try {
@@ -121,7 +144,6 @@ function importModules(page) {
           }
         } else {
           component = getComponent(importedComponents.createTribe);
-          console.log("importModules::getAsyncComponent => ", component);
           resolve(component);
         }
         break;
