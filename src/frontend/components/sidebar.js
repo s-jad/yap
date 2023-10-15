@@ -11,7 +11,7 @@ export default function Sidebar() {
   sidebarListFlex.className = 'sidebar-list-flex';
   sidebarListFlex.innerHTML = `
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/dashboard" href="/dashboard"></a></li>
-    <li class="sidebar-list-item"><a class="sidebar-list-anchor" href="#"></a></li>
+    <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/inbox" href="/inbox"></a></li>
   `;
 
   const icons = getSidebarIcons();
