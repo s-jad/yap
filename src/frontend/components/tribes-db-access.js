@@ -94,6 +94,27 @@ async function getMessages(tribeUrl) {
     });
 }
 
+async function getInboxMessages() {
+  return fetch(`/api/protected/get-inbox-messages`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to get messages.');
+    }
+    return response.text().then(text => {
+      try {
+        const json = JSON.parse(text);
+        return json;
+      } catch (error) {
+        console.error('createTribe::Error parsing JSON', error);
+        throw new Error('Error parsing JSON');
+      }
+    });
+  });
+}
+
 async function postChatMessage(tribe, message, sender, receiver, timestamp, global) {
   return fetch('/api/protected/post-message', {
     method: 'POST',
@@ -123,7 +144,7 @@ async function postChatMessage(tribe, message, sender, receiver, timestamp, glob
   })
 }
 
-async function createUser(username, password, joined) {
+async function createUser(username, password, joined, userColor) {
   return fetch('/api/create-user', {
     method: 'POST',
     headers: {
@@ -132,12 +153,13 @@ async function createUser(username, password, joined) {
     body: JSON.stringify({
       user: username,
       pw: password,
-      joined: joined,
+      joined,
+      userColor
     }),
   })
   .then(response => {
     if (!response.ok) {
-      throw new Error('Unable to create user.');
+      throw new Error(`The username ${username} is not available`);
     }
     return response.text().then(text => {
       try {
@@ -181,6 +203,7 @@ async function authenticateUser(username, password) {
 export {
   getTribes,
   getMessages,
+  getInboxMessages,
   getLastTribeLogins,
   getRandomTribeSuggestions,
   createTribe,
