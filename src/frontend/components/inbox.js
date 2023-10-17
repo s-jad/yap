@@ -3,19 +3,89 @@ import { getAppState } from "./app-state";
 import { getInboxMessages } from "./tribes-db-access";
 
 const messagesDashboardComponents = [];
+const userMessages = [];
+
+async function fetchUserMessages() {
+  const messages = await getInboxMessages();
+  messages.forEach((msg) => {
+      userMessages.push(msg);
+  });
+  console.log("userMsgs => ", userMessages);
+  return messages;
+}
+
+function getReplies(parentMsgId) {
+  const replyChain = [];
+
+  let currentMsgId = parentMsgId;
+  let currentMsg;
+  while(currentMsgId !== null) {
+    console.log("currentMsgId => ", currentMsgId);
+    currentMsg = userMessages.find((msg) => msg.message_id === currentMsgId);
+    console.log("currentMsg => ", currentMsg);
+    currentMsgId = currentMsg.parent_message_id;
+    
+    replyChain.push(currentMsg);
+  }
+
+  return replyChain.reverse();
+}
+
+
+
 
 async function populateInboxOutbox(inbox, outbox) {
-  const messages = await getInboxMessages();
+  const messages = await fetchUserMessages();
+  const currentUser = getAppState('username');
+
+  const populateReplyChains = (msg, msgEl, ev) => {
+    if (ev.currentTarget.classList.contains('expanded')) {
+      msgEl.classList.remove('expanded');
+      const displayedReplyChain = msgEl.querySelector('.reply-chain-container');
+      msgEl.removeChild(displayedReplyChain);
+    } else {
+      msgEl.classList.add('expanded');
+      
+      const replyChainContainer = document.createElement('div');
+      replyChainContainer.className = 'reply-chain-container';
+
+      if (msg.parent_message_id !== null) {
+        console.log("msg => ", msg);
+        const replyTo = document.createElement('p');
+        replyTo.className = 'replying-to';
+        replyTo.textConten = 'Replying to:';
+        msgEl.appendChild(replyTo);
+        const parentMsgs = getReplies(msg.parent_message_id);
+        
+        parentMsgs.forEach((parentMsg) => {
+          const parentMsgEl = document.createElement('div');
+          parentMsgEl.className = 'reply-message-wrapper';
+          parentMsgEl.innerHTML = `
+              <p class="reply-message-sender" 
+            style="color: hsl(${parentMsg.sender_color}, 100%, 70%)">${parentMsg.sender_name}</p>
+              <p class="reply-message-content">${parentMsg.message_content}</p>
+              <p class="reply-message-timestamp">${parentMsg.message_timestamp}</p>
+          `;
+
+          replyChainContainer.appendChild(parentMsgEl);
+        });
+      }
+      msgEl.appendChild(replyChainContainer);
+    }
+  }
 
   messages.forEach((msg) => {
     const fullMsgDate = new Date(msg.message_timestamp).toString();
     const dateParts = fullMsgDate.split(' ');
     const displayMsgDate = `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
     const msgTime = dateParts[4];
-    const currentUser = getAppState('username');
 
     const msgEl = document.createElement('div');
     msgEl.className = 'user-message-wrapper';
+    
+    msgEl.addEventListener('click', (ev) => {
+      populateReplyChains(msg, msgEl, ev);
+    });
 
     if (msg.sender_name === currentUser) {
       msgEl.innerHTML = `
