@@ -106,7 +106,7 @@ function getChatroomMessages(tribeUrl) {
           receiver.user_name AS receiver_name,
           receiver.user_color AS receiver_color
         FROM 
-          messages msg 
+          chatroom_messages msg 
         INNER JOIN 
           users sender ON msg.sender_id = sender.user_id
         INNER JOIN 
@@ -134,14 +134,17 @@ function getInboxMessages(userId) {
   const query = {
     text: `
       SELECT
+        msg.message_id,
         msg.message_content,
         msg.message_timestamp,
         sender.user_name as sender_name,
         sender.user_color as sender_color,
         receiver.user_name as receiver_name,
-        receiver.user_color as receiver_color
+        receiver.user_color as receiver_color,
+        msg.replied,
+        msg.parent_message_id
       FROM
-        messages msg
+        user_messages msg
       INNER JOIN
         users sender ON msg.sender_id = sender.user_id
       INNER JOIN
@@ -150,7 +153,7 @@ function getInboxMessages(userId) {
         msg.receiver_id = \$1
         OR msg.sender_id = \$1
       ORDER BY
-        msg.message_timestamp DESC
+        msg.message_id ASC
     `,
     values: [userId],
   };
@@ -161,7 +164,6 @@ function getInboxMessages(userId) {
         logger.warn(err);
         reject(new Error('Error fetching inbox messages'));
       } else {
-        logger.info(res.rows);
         resolve(res.rows);
       }
     });
@@ -172,7 +174,7 @@ function postGlobalMessage(messageData) {
   const { tribe, message, sender, _, timestamp, global } = messageData;
   const query = {
     text: `
-      INSERT into messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
+      INSERT into chatroom_messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
       VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
       RETURNING *;
     `,
@@ -213,7 +215,7 @@ function postPersonalMessage(messageData) {
           const receiverId = res.rows[0].user_id;
           const postMessageQuery = {
             text: `
-              INSERT into messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
+              INSERT into chatroom_messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
               VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
               RETURNING *;
             `,
