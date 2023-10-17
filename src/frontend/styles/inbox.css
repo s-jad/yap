@@ -1,0 +1,67 @@
+.user-messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+
+  & .user-messages-sidebar {
+    & .options-list {
+      list-style: none;
+      padding-left: 0px;
+      padding-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      gap: var(--gap);
+
+      & .options-list-item {
+        position: relative;
+        color: var(--font-clr);
+        text-align: center;
+        cursor: pointer;
+        min-width: 15rem;
+      }
+
+      & .options-list-item::after {
+        position: absolute;
+        content: "";
+        bottom: -1rem;
+        left: -50%;
+        transform: translateX(50%);
+        scale: 0 1;
+        height: 2px;
+        width: 100%;
+        background: var(--thistle-07);
+        transition: scale 300ms ease-in-out;
+      }
+
+      & .options-list-item:hover::after,
+      & .options-list-item:focus-within::after {
+        scale: 1 1;
+      }
+    }
+  }
+
+  & .inbox-messages-outer,
+  & .outbox-messages-outer {
+    --bmo-height: calc(100vh - calc(150px + var(--p-block)));
+    height: var(--bmo-height);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    
+    & .messages-scroll-wrapper {
+      min-height: calc(var(--bmo-height) - 50px);
+      overflow-y: scroll;
+
+      & .inbox-messages-inner,
+      & .outbox-messages-inner {
+        min-height: calc(var(--bmo-height) - 50px);
+        padding-inline: calc(var(--p-inline) / 2);
+        padding-bottom: var(--p-block);
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+      }
+    }
+  }   
+} 
