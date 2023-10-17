@@ -35,7 +35,11 @@ async function clientRouting() {
       return component;
 
     case '/inbox':
-      component = Inbox();
+      component = await getAsyncComponent(importedComponents.messagesDashboard);
+
+      if (component === undefined) {
+        component = await importModules(currentRoute);
+      }
       return component;
 
     case '/join-a-tribe':
