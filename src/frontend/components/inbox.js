@@ -1,6 +1,9 @@
 import '../styles/inbox.css';
 import { getAppState } from "./app-state";
-import { getInboxMessages } from "./tribes-db-access";
+import { 
+  deleteInboxMessage,
+  getInboxMessages 
+} from "./tribes-db-access";
 
 const messagesDashboardComponents = [];
 const userMessagesArr = [];
@@ -28,7 +31,34 @@ function getReplies(parentMsgId) {
   return replyChain;
 }
 
-function getExpandedMsgBtnContainer(msg) {
+function getReplyIds(parentMsgId) {
+  const replyChain = [];
+
+  let currentMsgId = parentMsgId;
+  replyChain.push(currentMsgId);
+  let currentMsg;
+
+  while(currentMsgId !== null) {
+    currentMsg = userMessagesArr.find((msg) => msg.message_id === currentMsgId);
+    currentMsgId = currentMsg.parent_message_id;
+
+    if (currentMsgId !== null) {
+      replyChain.push(currentMsgId);
+    }
+  }
+
+  return replyChain;
+}
+
+async function deleteMsg(msgId, msgEl) {
+  const parent = msgEl.parentNode;
+  parent.removeChild(msgEl);
+
+  const result = await deleteInboxMessage(msgId);
+  return result;
+}
+
+function getExpandedMsgBtnContainer(msgId, msgEl) {
   const btnContainer = document.createElement('div');
   btnContainer.className = 'expanded-msg-btn-container';
   btnContainer.innerHTML = `
@@ -38,6 +68,13 @@ function getExpandedMsgBtnContainer(msg) {
   `;
   const btns = btnContainer.querySelectorAll('button');
   
+  btns[2].addEventListener('click', async () => {
+    const replyChain = getReplyIds(msgId);
+    console.log("replyChain/msgIds => ", replyChain);
+    const result = await deleteMsg(replyChain, msgEl);
+    console.log("result of deletion => ", result);
+  });
+
   return btnContainer;
 }
 
@@ -82,7 +119,7 @@ async function populateInboxOutbox(inbox, outbox) {
     msgEl.className = 'user-message-wrapper';
     const replyChainContainer = document.createElement('div');
     replyChainContainer.className = 'reply-chain-container';
-    const btnContainer = getExpandedMsgBtnContainer();
+    const btnContainer = getExpandedMsgBtnContainer(msg.message_id, msgEl);
     btnContainer.className = 'expanded-msg-btn-container';
 
     msgEl.addEventListener('click', () => {
