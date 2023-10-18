@@ -225,9 +225,14 @@ function getInboxMessages(userId) {
         users sender ON msg.sender_id = sender.user_id
       INNER JOIN
         users receiver ON msg.receiver_id = receiver.user_id
-      WHERE
+      WHERE (
         msg.receiver_id = \$1
         OR msg.sender_id = \$1
+      )
+      AND NOT (
+        (msg.receiver_id = receiver.user_id AND msg.receiver_deleted = TRUE)
+        OR (msg.sender_id = sender.user_id AND msg.sender_deleted = TRUE)
+      )
       ORDER BY
         msg.message_id ASC
     `,
