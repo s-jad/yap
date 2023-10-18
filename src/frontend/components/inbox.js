@@ -24,6 +24,7 @@ function getReplies(parentMsgId) {
   let currentMsg;
   while(currentMsgId !== null) {
     currentMsg = userMessagesArr.find((msg) => msg.message_id === currentMsgId);
+    console.log("getReplies::currentMsg => ", currentMsg);
     currentMsgId = currentMsg.parent_message_id;
     replyChain.push(currentMsg);
   }
@@ -70,9 +71,13 @@ function getExpandedMsgBtnContainer(msgId, msgEl) {
   
   btns[2].addEventListener('click', async () => {
     const replyChain = getReplyIds(msgId);
-    console.log("replyChain/msgIds => ", replyChain);
+    console.log("replyChain => ", replyChain);
     const result = await deleteMsg(replyChain, msgEl);
-    console.log("result of deletion => ", result);
+    
+    if (result) {
+      // TODO ADD SHORT_LIVED MODAL
+      console.log("Succesfully deleted message!");
+    }
   });
 
   return btnContainer;
@@ -110,6 +115,10 @@ async function populateInboxOutbox(inbox, outbox) {
   }
 
   messages.forEach((msg) => {
+    if (msg.message_read) {
+      console.log("No need to show in inbox => ", msg);
+      return;
+    }
     const fullMsgDate = new Date(msg.message_timestamp).toString();
     const dateParts = fullMsgDate.split(' ');
     const displayMsgDate = `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
@@ -146,6 +155,7 @@ async function populateInboxOutbox(inbox, outbox) {
       msgEl.innerHTML = `
         <p class="user-message-receiver" style="color: hsl(${msg.receiver_color}, 100%, 70%)">${msg.receiver_name}</p>
         <p class="user-message-content">${msg.message_content}</p>
+        
         <p class="user-message-timestamp">${displayMsgDate}</p>
       `;
 
