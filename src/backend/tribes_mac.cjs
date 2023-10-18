@@ -130,46 +130,6 @@ function getChatroomMessages(tribeUrl) {
   });
 }
 
-function getInboxMessages(userId) {
-  const query = {
-    text: `
-      SELECT
-        msg.message_id,
-        msg.message_content,
-        msg.message_timestamp,
-        sender.user_name as sender_name,
-        sender.user_color as sender_color,
-        receiver.user_name as receiver_name,
-        receiver.user_color as receiver_color,
-        msg.replied,
-        msg.parent_message_id
-      FROM
-        user_messages msg
-      INNER JOIN
-        users sender ON msg.sender_id = sender.user_id
-      INNER JOIN
-        users receiver ON msg.receiver_id = receiver.user_id
-      WHERE
-        msg.receiver_id = \$1
-        OR msg.sender_id = \$1
-      ORDER BY
-        msg.message_id ASC
-    `,
-    values: [userId],
-  };
-
-  return new Promise((resolve, reject) => {
-    pg_client.query(query, (err, res) => {
-      if (err) {
-        logger.warn(err);
-        reject(new Error('Error fetching inbox messages'));
-      } else {
-        resolve(res.rows);
-      }
-    });
-  });
-}
-
 function postGlobalMessage(messageData) {
   const { tribe, message, sender, _, timestamp, global } = messageData;
   const query = {
@@ -235,7 +195,7 @@ function postPersonalMessage(messageData) {
   });
 }
 
-function postMessage(messageData) {
+function postChatroomMessage(messageData) {
   const { global } = messageData;
   if (global) {
     logger.info("Posting global message");
@@ -244,6 +204,74 @@ function postMessage(messageData) {
     logger.info("Posting personal message");
     postPersonalMessage(messageData);
   }
+}
+
+function getInboxMessages(userId) {
+  const query = {
+    text: `
+      SELECT
+        msg.message_id,
+        msg.message_content,
+        msg.message_timestamp,
+        sender.user_name as sender_name,
+        sender.user_color as sender_color,
+        receiver.user_name as receiver_name,
+        receiver.user_color as receiver_color,
+        msg.replied,
+        msg.parent_message_id
+      FROM
+        user_messages msg
+      INNER JOIN
+        users sender ON msg.sender_id = sender.user_id
+      INNER JOIN
+        users receiver ON msg.receiver_id = receiver.user_id
+      WHERE
+        msg.receiver_id = \$1
+        OR msg.sender_id = \$1
+      ORDER BY
+        msg.message_id ASC
+    `,
+    values: [userId],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(new Error('Error fetching inbox messages'));
+      } else {
+        resolve(res.rows);
+      }
+    });
+  });
+}
+
+async function deleteInboxMessage(deleteMsgData) {
+  const { msgIds, userId } = deleteMsgData;
+
+  const query = {
+    text: `
+      UPDATE user_messages
+      SET 
+        sender_deleted = CASE WHEN sender_id = \$2 THEN TRUE ELSE sender_deleted END,
+        receiver_deleted = CASE WHEN receiver_id = \$2 THEN TRUE ELSE receiver_deleted END
+      WHERE message_id = ANY(\$1)
+      RETURNING *;
+    `,
+    values: [msgIds, userId],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(new Error('Can not delete user messages'));
+      } else {
+        logger.info(res);
+        resolve(res);
+      }
+    });
+  });
 }
 
 async function createUser(newUserData) {
@@ -268,7 +296,6 @@ async function createUser(newUserData) {
         logger.error(err);
         reject(new Error('Cant create user.'));
       } else {
-        logger.info(`createUser::res.rows => ${res.rows[0]}`);
         const row = res.rows[0];
         resolve({
           username: row.user_name,
@@ -352,12 +379,16 @@ async function tribesMac(req, data) {
       const messages = await getChatroomMessages(data);
       return messages;
 
+    case 'delete-inbox-message':
+      const deleted = await deleteInboxMessage(data);
+      return deleted;
+
     case 'get-inbox-messages':
       const inboxMessages = await getInboxMessages(data);
       return inboxMessages;
 
     case 'post-message':
-      const msg = await postMessage(data);
+      const msg = await postChatroomMessage(data);
       return msg;
 
     case 'get-password':
