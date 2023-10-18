@@ -94,6 +94,25 @@ async function getMessages(tribeUrl) {
     });
 }
 
+async function deleteInboxMessage(msgIds) {
+  console.log("deleteInboxMessage::msgIds => ", msgIds);
+  return fetch(`/api/protected/delete-inbox-message`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({msgIds}),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to delete message.');
+    } else {
+      return true;
+    }
+  });
+}
+
 async function getInboxMessages() {
   return fetch(`/api/protected/get-inbox-messages`, {
     method: 'GET',
@@ -204,6 +223,7 @@ export {
   getTribes,
   getMessages,
   getInboxMessages,
+  deleteInboxMessage,
   getLastTribeLogins,
   getRandomTribeSuggestions,
   createTribe,
