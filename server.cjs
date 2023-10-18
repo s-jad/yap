@@ -4,6 +4,15 @@ const webpackDevMiddleware = require('webpack-dev-middleware');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const liveReload = require('livereload');
+const connectLiveReload = require('connect-livereload');
+
+const liveReloadServer = liveReload.createServer();
+liveReloadServer.once('connection', () => {
+  setTimeout(() => {
+    liveReloadServer.refresh('/');
+  }, 100);
+});
 
 const port = process.env.SERVER_PORT;
 const jwtSecret = process.env.JWT_SECRET;
@@ -13,9 +22,11 @@ const compiler = webpack(config);
 const { authorization } = require('./src/backend/auth.cjs');
 const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
-const { strict } = require('assert');
+const { logger } = require('./src/backend/logging.cjs');
 
 const app = express();
+
+app.use(connectLiveReload());
 
 app.use(
   webpackDevMiddleware(compiler, {
@@ -37,11 +48,12 @@ app.post('/api/authenticate-user', async (req, res) => {
 
   try {
     const userData = await tribesMac('get-password', username);
-    const { userId, passwordHash } = userData;
+    const { userId, passwordHash, userColor } = userData;
 
     try {
       const authenticated = await comparePwHash(password, passwordHash);
-
+      logger.info("/api/authenticate-user");
+      logger.info(authenticated);
       if (!authenticated) {
         res.status(401).json({ message: 'Incorrect Password.' })    
       } else {
@@ -61,30 +73,34 @@ app.post('/api/authenticate-user', async (req, res) => {
         res.status(200).json({ 
           message: 'Login Succesful.',
           userId,
+          userColor,
         });
       } 
     } catch (error) {
       if (error.message === 'Password does not match.') {
+        logger.info('User entered a password that failed comparePwHash');
         res.status(401).json({ message: 'Incorrect Password.' });
       } else {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ message: 'An error occured.' });
       }
     }
 
   } catch (error) {
     if (error.message === 'Username or password are incorrect.') {
+      logger.info('User entered an incorrect username or password');
       res.status(401).json({ message: 'Incorrect username or password.' });
     } else {
-      console.error(error);
+      logger.error(error);
       res.status(500).json({ message: 'Database Error.' });
     }
   }
 });
 
 app.post('/api/create-user', async (req, res) => {
+  logger.info(req.body);
   try {
-    const { username, userId } = await tribesMac('create-user', req.body);
+    const { username, userId, userColor } = await tribesMac('create-user', req.body);
 
     const token = jwt.sign({ userName: username, id: userId }, jwtSecret, { expiresIn: '3h' });
     const parts = token.split('.');
@@ -100,11 +116,12 @@ app.post('/api/create-user', async (req, res) => {
     });
     res.status(200).json({ 
       message: 'User succesfully created.',
-      userId
+      userId,
+      userColor
     });
 
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'An error occured while creating the user.' });
   }
 });
@@ -117,17 +134,69 @@ app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
     let payload;
     try {
       payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-      console.log("get-last-tribe-logins::payload => ", payload);
     } catch (error) {
-      console.error('Error parsing JWT payload: ', error);
+      logger.error('Error parsing JWT payload: ', error);
       throw new Error('JWT payload is not valid JSON');
     }
     const userId = payload.id;
     const lastLogins = await tribesMac('get-last-tribe-logins', userId);
+    logger.info("lastLogins");
+    logger.info(lastLogins);
     res.send(lastLogins);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'An error occured while getting last tribe logins.' });
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting last tribe logins.' });
+  }
+});
+
+app.get('/api/protected/get-inbox-messages', async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    const messages = await tribesMac('get-inbox-messages', userId);
+    res.send(messages);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting inbox messages.' });
+  }
+});
+
+app.post('/api/protected/delete-inbox-message', async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    const data = { msgIds: req.body.msgIds, userId };
+    const messages = await tribesMac('delete-inbox-message', data);
+    logger.info("delete-user-message::messages");
+    logger.info(messages);
+    res.send(messages);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting inbox messages.' });
+  }
+});
+
+app.get('/api/protected/get-random-tribe-suggestions', async (req, res) => {
+  try {
+    const randomSuggestions = await tribesMac('get-random-tribe-suggestions');
+    res.send(randomSuggestions);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting random tribe suggestions.' })
   }
 });
 
@@ -136,7 +205,7 @@ app.get('/api/protected/join-a-tribe', async (req, res) => {
     const tribes = await tribesMac('get-tribes');
     res.send(tribes);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'An error occured while getting tribes.' })
   }
 });
@@ -148,7 +217,7 @@ app.get('/api/protected/get-chatroom-messages', async (req, res) => {
     const messages = await tribesMac('get-messages', tribeUrl);
     res.send(messages);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'An error occured while getting chatroom messages.'});
   }
 });
@@ -158,7 +227,7 @@ app.post('/api/protected/post-message', async (req, res) => {
     await tribesMac('post-message', req.body);
     res.status(201).json({ message: 'Message succesfully posted.' });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'An error occured while posting message.' });
   }
 })
@@ -170,30 +239,31 @@ app.post('/api/protected/create-a-tribe', async (req, res) => {
 
     res.status(200).json({ tribe });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'An error occurred while creating the tribe.' });
   }
 });
 
 
 app.post('/api/protected/report-user-issue', (req, res) => {
-  console.log(req.body);
+  logger.info(req.body);
   res.send(`form data received ${req.body}`);
 });
 
 app.get('*', (req, res) => {
   if (req.url.startsWith('/api')) {
-    console.error('User tried to access unknow API route');
+    logger.error('User tried to access unknown API route');
     res.status(404).send('API route not found');
   } else {
     res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
   }
 });
 
-app.use(function(err, req, res, next) {
-  console.warn("Request failed => ", req);
-  console.error(err.stack);
+app.use('/', function(err, req, res, next) {
+  logger.warn("Request failed => ", req);
+  logger.error(err.stack);
   res.status(500).send('Something broke!');
+  next();
 });
 
-app.listen(process.env.SERVER_PORT || port, () => console.log(`Server is running on port ${port}`));
+app.listen(process.env.SERVER_PORT || port, () => logger.info(`Server is running on port ${port}`));
