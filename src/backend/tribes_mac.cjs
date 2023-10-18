@@ -217,7 +217,7 @@ function getInboxMessages(userId) {
         sender.user_color as sender_color,
         receiver.user_name as receiver_name,
         receiver.user_color as receiver_color,
-        msg.replied,
+        msg.message_read,
         msg.parent_message_id
       FROM
         user_messages msg
