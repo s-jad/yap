@@ -3,14 +3,14 @@ import { getAppState } from "./app-state";
 import { getInboxMessages } from "./tribes-db-access";
 
 const messagesDashboardComponents = [];
-const userMessages = [];
+const userMessagesArr = [];
 
 async function fetchUserMessages() {
   const messages = await getInboxMessages();
   messages.forEach((msg) => {
-      userMessages.push(msg);
+      userMessagesArr.push(msg);
   });
-  console.log("userMsgs => ", userMessages);
+  console.log("userMsgs => ", userMessagesArr);
   return messages;
 }
 
@@ -20,57 +20,55 @@ function getReplies(parentMsgId) {
   let currentMsgId = parentMsgId;
   let currentMsg;
   while(currentMsgId !== null) {
-    console.log("currentMsgId => ", currentMsgId);
-    currentMsg = userMessages.find((msg) => msg.message_id === currentMsgId);
-    console.log("currentMsg => ", currentMsg);
+    currentMsg = userMessagesArr.find((msg) => msg.message_id === currentMsgId);
     currentMsgId = currentMsg.parent_message_id;
-    
     replyChain.push(currentMsg);
   }
 
-  return replyChain.reverse();
+  return replyChain;
 }
 
-
-
+function getExpandedMsgBtnContainer(msg) {
+  const btnContainer = document.createElement('div');
+  btnContainer.className = 'expanded-msg-btn-container';
+  btnContainer.innerHTML = `
+    <button class="expanded-msg-btn reply-btn">Reply</button>
+    <button class="expanded-msg-btn report-btn">Report</button>
+    <button class="expanded-msg-btn delete-btn">Delete</button>
+  `;
+  const btns = btnContainer.querySelectorAll('button');
+  
+  return btnContainer;
+}
 
 async function populateInboxOutbox(inbox, outbox) {
-  const messages = await fetchUserMessages();
+  let messages;
+
+  if (userMessagesArr.length === 0) {
+    messages = await fetchUserMessages();
+  } else {
+    messages = userMessagesArr;
+  } 
   const currentUser = getAppState('username');
 
-  const populateReplyChains = (msg, msgEl, ev) => {
-    if (ev.currentTarget.classList.contains('expanded')) {
-      msgEl.classList.remove('expanded');
-      const displayedReplyChain = msgEl.querySelector('.reply-chain-container');
-      msgEl.removeChild(displayedReplyChain);
-    } else {
-      msgEl.classList.add('expanded');
+  const populateReplyChains = (msg, replyChainContainer) => {
+    if (msg.parent_message_id !== null) {
+      const parentMsgs = getReplies(msg.parent_message_id);
+      const fullMsgDate = new Date(msg.message_timestamp).toString();
+      const dateParts = fullMsgDate.split(' ');
+      const displayMsgDate = `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
       
-      const replyChainContainer = document.createElement('div');
-      replyChainContainer.className = 'reply-chain-container';
-
-      if (msg.parent_message_id !== null) {
-        console.log("msg => ", msg);
-        const replyTo = document.createElement('p');
-        replyTo.className = 'replying-to';
-        replyTo.textConten = 'Replying to:';
-        msgEl.appendChild(replyTo);
-        const parentMsgs = getReplies(msg.parent_message_id);
-        
-        parentMsgs.forEach((parentMsg) => {
-          const parentMsgEl = document.createElement('div');
-          parentMsgEl.className = 'reply-message-wrapper';
-          parentMsgEl.innerHTML = `
-              <p class="reply-message-sender" 
-            style="color: hsl(${parentMsg.sender_color}, 100%, 70%)">${parentMsg.sender_name}</p>
-              <p class="reply-message-content">${parentMsg.message_content}</p>
-              <p class="reply-message-timestamp">${parentMsg.message_timestamp}</p>
-          `;
-
-          replyChainContainer.appendChild(parentMsgEl);
-        });
-      }
-      msgEl.appendChild(replyChainContainer);
+      parentMsgs.forEach((parentMsg) => {
+        const parentMsgEl = document.createElement('div');
+        parentMsgEl.className = 'reply-message-wrapper';
+        parentMsgEl.innerHTML = `
+            <p class="reply-message-sender" 
+          style="color: hsl(${parentMsg.sender_color}, 100%, 70%)">${parentMsg.sender_name}</p>
+            <p class="reply-message-content">${parentMsg.message_content}</p>
+            <p class="reply-message-timestamp">${displayMsgDate}</p>
+        `;
+        replyChainContainer.appendChild(parentMsgEl);
+      });
     }
   }
 
@@ -82,9 +80,29 @@ async function populateInboxOutbox(inbox, outbox) {
 
     const msgEl = document.createElement('div');
     msgEl.className = 'user-message-wrapper';
-    
-    msgEl.addEventListener('click', (ev) => {
-      populateReplyChains(msg, msgEl, ev);
+    const replyChainContainer = document.createElement('div');
+    replyChainContainer.className = 'reply-chain-container';
+    const btnContainer = getExpandedMsgBtnContainer();
+    btnContainer.className = 'expanded-msg-btn-container';
+
+    msgEl.addEventListener('click', () => {
+      if (msgEl.classList.contains('expanded')) {
+        msgEl.classList.remove('expanded');
+        replyChainContainer.style.display = 'none';
+        btnContainer.style.display = 'none';
+        setTimeout(() => {
+          replyChainContainer.style.display = 'flex';
+          btnContainer.style.display = 'flex';
+        }, 300);
+      } else {
+        msgEl.classList.add('expanded');
+        if (
+          replyChainContainer.children.length === 0 &&
+          msg.parent_message_id !== null
+        ) {
+          populateReplyChains(msg, replyChainContainer);
+        }
+      }
     });
 
     if (msg.sender_name === currentUser) {
@@ -93,6 +111,9 @@ async function populateInboxOutbox(inbox, outbox) {
         <p class="user-message-content">${msg.message_content}</p>
         <p class="user-message-timestamp">${displayMsgDate}</p>
       `;
+
+      msgEl.appendChild(btnContainer);
+      msgEl.appendChild(replyChainContainer);
       outbox.appendChild(msgEl);
     } else if (msg.receiver_name === currentUser) {
       msgEl.innerHTML = `
@@ -100,12 +121,14 @@ async function populateInboxOutbox(inbox, outbox) {
         <p class="user-message-content">${msg.message_content}</p>
         <p class="user-message-timestamp">${displayMsgDate}</p>
       `;
+
+      msgEl.appendChild(btnContainer);
+      msgEl.appendChild(replyChainContainer);
       inbox.appendChild(msgEl);
     } else {
       console.error("populateInbox receiving messages it shouldnt");
     }
   });
-
 }
 
 function getInbox() {
