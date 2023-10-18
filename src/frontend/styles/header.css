@@ -64,12 +64,17 @@
       padding-inline: 2rem;
       padding-block: 1rem;
       margin: 0;
+      height: 100%;
       list-style: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: space-evenly;
       gap: var(--gap);
+
+      & .group-list-item {
+        text-align: center;
+      }
     }
   }
 }
