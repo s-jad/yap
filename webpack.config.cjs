@@ -1,18 +1,19 @@
-const fs = require('fs');
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+//
+// const fs = require('fs');
+// const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // Before the module.exports statement
-const createDistDirectory = () => {
-  const distAssetsPath = path.resolve(__dirname, 'dist/assets');
-  if (!fs.existsSync(distAssetsPath)) {
-    fs.mkdirSync(distAssetsPath, { recursive: true });
-  }
-};
+// const createDistDirectory = () => {
+//   const distAssetsPath = path.resolve(__dirname, 'dist/assets');
+//   if (!fs.existsSync(distAssetsPath)) {
+//     fs.mkdirSync(distAssetsPath, { recursive: true });
+//   }
+// };
 
-createDistDirectory();
+// createDistDirectory();
 
 module.exports = {
   mode: 'development',
@@ -25,12 +26,6 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       title: 'Yapp',
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: 'src/frontend/assets/imgs', to: 'imgs' },
-        { from: 'src/frontend/assets/fonts', to: 'fonts' },
-      ],
     }),
   ],
   devtool: 'inline-source-map',
@@ -62,7 +57,20 @@ module.exports = {
           priority: 10,
           enforce: true,
         },
-
+        inbox: {
+          test: /[\\/]inbox[\\/]/,
+          name: 'inbox',
+          chunks: 'all',
+          priority: 10,
+          enforce: true,
+        },
+        tribeChat: {
+          test: /[\\/]get-tribe-chatroom[\\/]/,
+          name: 'get-tribe-chatroom',
+          chunks: 'all',
+          priority: 10,
+          enforce: true,
+        },
       },
     },
   runtimeChunk: 'single',
@@ -71,7 +79,7 @@ module.exports = {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
-    publicPath: '/',
+    publicPath: 'auto',
   },
   module: {
     rules: [
@@ -91,6 +99,11 @@ module.exports = {
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
+        generator: {
+          filename: '[name][ext]',
+          publicPath: 'assets/fonts/',
+          outputPath: 'assets/fonts/',
+        },
       },
     ],
   },
