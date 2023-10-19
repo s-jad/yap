@@ -87,9 +87,26 @@ function getReplyView(parentMsg) {
   const replyText = replyViewContainer.querySelector('#reply-text');
 
   const sendBtn = replyViewContainer.querySelector('.send-reply-btn');
-  sendBtn.addEventListener('click', () => {
-    // const result = replyToInboxMessage(parentMsg.message_id, replyText.value);
+  sendBtn.addEventListener('click', async() => {
+    const result = await replyToInboxMessage(parentMsg.message_id, replyText.value);
     messagesDashboardRouting('inbox', replyViewContainer);
+    const userMessagesContainer = document.body.querySelector('.user-messages-container');
+    console.log(result);
+    if (result === true) {
+      showDialog(
+        userMessagesContainer,
+        'Reply sent!',
+        'reply-msg-success',
+        'success'
+      );
+    } else {
+      showDialog(
+        userMessagesContainer,
+        'Something went wrong, please try again later.',
+        'inbox-error',
+        'error'
+      );
+    }
   });
 
   const cancelBtn = replyViewContainer.querySelector('.cancel-reply-btn');
