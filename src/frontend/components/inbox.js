@@ -1,6 +1,10 @@
 import '../styles/inbox.css';
 import { showDialog, getAppState } from "./app-state";
-import { deleteInboxMessage, getInboxMessages } from "./tribes-db-access";
+import { 
+  deleteInboxMessage,
+  replyToInboxMessage,
+  getInboxMessages
+} from "./tribes-db-access";
 
 const messagesDashboardComponents = [];
 const userMessagesArr = [];
@@ -16,16 +20,19 @@ async function fetchUserMessages() {
 
 function getReplies(parentMsgId) {
   const replyChain = [];
-
   let currentMsgId = parentMsgId;
   let currentMsg;
+
   while(currentMsgId !== null) {
     currentMsg = userMessagesArr.find((msg) => msg.message_id === currentMsgId);
-    console.log("getReplies::currentMsg => ", currentMsg);
+    if (currentMsg === undefined) {
+      return;
+    }
     currentMsgId = currentMsg.parent_message_id;
     replyChain.push(currentMsg);
   }
 
+  console.log("replyChain => ", replyChain);
   return replyChain;
 }
 
@@ -56,27 +63,83 @@ async function deleteMsg(msgId, msgEl) {
   return result;
 }
 
-function getExpandedMsgBtnContainer(msgId, msgEl) {
+function getReplyView(parentMsg) {
+  const replyViewContainer = document.createElement('div');
+  replyViewContainer.className = 'reply-view-outer messages-component-outer';
+  replyViewContainer.innerHTML = `
+    <div class="receiver-info-wrapper">
+      <h3 class="replying-to">
+        Replying to:&nbsp;
+        <span class="msg-receiver" style="color: hsl(${parentMsg.sender_color}, 90%, 50%)">
+          ${parentMsg.sender_name}
+        </span>
+      </h3>
+    </div>
+    <div class="reply-wrapper">
+      <textarea id="reply-text" name="reply-text"></textarea>
+      <div class="reply-btn-wrapper">
+        <button class="send-reply-btn">Send</button>
+        <button class="cancel-reply-btn">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  const replyText = replyViewContainer.querySelector('#reply-text');
+
+  const sendBtn = replyViewContainer.querySelector('.send-reply-btn');
+  sendBtn.addEventListener('click', () => {
+    // const result = replyToInboxMessage(parentMsg.message_id, replyText.value);
+    messagesDashboardRouting('inbox', replyViewContainer);
+  });
+
+  const cancelBtn = replyViewContainer.querySelector('.cancel-reply-btn');
+  cancelBtn.addEventListener('click', () => {
+    messagesDashboardRouting('inbox', replyViewContainer);
+  });
+
+  return replyViewContainer;
+}
+
+async function switchToReplyView(parentMsg) {
+  const userMessagesContainer = document.querySelector('.user-messages-container');
+  const toRemove = userMessagesContainer.querySelector('.messages-component-outer');
+  const replyView = getReplyView(parentMsg);
+  userMessagesContainer.removeChild(toRemove);
+  userMessagesContainer.appendChild(replyView);
+}
+
+function getExpandedMsgBtnContainer(msg, msgEl) {
   const btnContainer = document.createElement('div');
   btnContainer.className = 'expanded-msg-btn-container';
   btnContainer.innerHTML = `
     <button class="expanded-msg-btn reply-btn">Reply</button>
-    <button class="expanded-msg-btn report-btn">Report</button>
     <button class="expanded-msg-btn delete-btn">Delete</button>
+    <button class="expanded-msg-btn report-btn">Report</button>
   `;
   const btns = btnContainer.querySelectorAll('button');
   
-  btns[2].addEventListener('click', async () => {
+  btns[0].addEventListener('click', async () => {
+    switchToReplyView(msg);
+  });
+
+  btns[1].addEventListener('click', async () => {
     const userMessagesContainer = document.body.querySelector('.user-messages-container');
-    const replyChain = getReplyIds(msgId);
+    const replyChain = getReplyIds(msg.message_id);
     const result = await deleteMsg(replyChain, msgEl);
 
-    if (result) {
+    if (result === true) {
       showDialog(
         userMessagesContainer,
-        'Message succesfully deleted',
-        'delete-msg-info',
+        'Message succesfully deleted!',
+        'delete-msg-info-success',
         'success'
+      );
+    } else {
+      showDialog(
+        userMessagesContainer,
+        'Something went wrong, please try again later.',
+        'inbox-error',
+        'error'
       );
     }
   });
@@ -96,7 +159,15 @@ async function populateInboxOutbox(inbox, outbox) {
 
   const populateReplyChains = (msg, replyChainContainer) => {
     if (msg.parent_message_id !== null) {
+      console.log("original msg => ", msg);
       const parentMsgs = getReplies(msg.parent_message_id);
+     
+      // TODO - think of better way to ensure db doesnt have
+      // two msgs with same parent
+      if (parentMsgs === undefined) {
+        return;
+      }
+
       const fullMsgDate = new Date(msg.message_timestamp).toString();
       const dateParts = fullMsgDate.split(' ');
       const displayMsgDate = `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
@@ -106,7 +177,9 @@ async function populateInboxOutbox(inbox, outbox) {
         parentMsgEl.className = 'reply-message-wrapper';
         parentMsgEl.innerHTML = `
             <p class="reply-message-sender" 
-          style="color: hsl(${parentMsg.sender_color}, 100%, 70%)">${parentMsg.sender_name}</p>
+              style="color: hsl(${parentMsg.sender_color}, 100%, 70%)">
+              ${parentMsg.sender_name}
+            </p>
             <p class="reply-message-content">${parentMsg.message_content}</p>
             <p class="reply-message-timestamp">${displayMsgDate}</p>
         `;
@@ -117,9 +190,9 @@ async function populateInboxOutbox(inbox, outbox) {
 
   messages.forEach((msg) => {
     if (msg.message_read) {
-      console.log("No need to show in inbox => ", msg);
       return;
     }
+
     const fullMsgDate = new Date(msg.message_timestamp).toString();
     const dateParts = fullMsgDate.split(' ');
     const displayMsgDate = `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
@@ -129,7 +202,7 @@ async function populateInboxOutbox(inbox, outbox) {
     msgEl.className = 'user-message-wrapper';
     const replyChainContainer = document.createElement('div');
     replyChainContainer.className = 'reply-chain-container';
-    const btnContainer = getExpandedMsgBtnContainer(msg.message_id, msgEl);
+    const btnContainer = getExpandedMsgBtnContainer(msg, msgEl);
     btnContainer.className = 'expanded-msg-btn-container';
 
     msgEl.addEventListener('click', () => {
