@@ -73,6 +73,10 @@
         flex-direction: column;
         gap: var(--gap);
 
+        & .user-message-wrapper:hover {
+          outline: 1px solid var(--lemon-chiffon-03);
+        }
+
         & .user-message-wrapper {
           display: grid;
           grid-template-columns: 100px 1fr 1fr 1fr 100px;
@@ -81,8 +85,10 @@
           padding-inline: var(--p-inline);
           padding-block: var(--p-block);
           background: var(--card-clr);
+          outline: 1px solid transparent;
           border-radius: 1rem; 
-          transition: grid-template-rows 300ms ease-in-out;
+          transition: grid-template-rows 300ms ease-in-out,
+                      outline 150ms ease-in-out;
           overflow: hidden;
 
           & .user-message-sender,
@@ -117,6 +123,15 @@
             transition: opacity 150ms ease-in-out,
                         height 150ms ease-in-out;
             transition-delay: 300ms;
+
+            & button {
+              background: var(--bg-clr);
+              color: var(--font-clr);
+              border: 1px solid var(--thistle-07);
+              box-shadow: var(--shadow), var(--shadow-inset);
+              border-radius: 1rem;
+              padding: calc(var(--p-block) / 2) calc(var(--p-inline) / 2);
+            }
           }
 
           & .reply-chain-container {
