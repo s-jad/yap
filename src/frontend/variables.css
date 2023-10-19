@@ -28,6 +28,7 @@
   --lemon-chiffon: hsla(58, 74%, 85%, 1);
 
   --thistle-07: hsla(290, 35%, 83%, 0.7);
+  --lemon-chiffon-07: hsla(58, 74%, 85%, 0.7);
   --thistle-03: hsla(290, 35%, 83%, 0.3);
   --lemon-chiffon-03: hsla(58, 74%, 85%, 0.3);
   --thistle-01: hsla(290, 35%, 83%, 0.1);
@@ -38,10 +39,11 @@
 
   --gap: 1vw;
 
-
   --shadow: 0 0 5px var(--card-clr);
   --shadow-inset: inset 0 0 3px var(--thistle), inset 0 0 8px var(--thistle-03);
   --shadow-inset-hl: inset 0 0 3px var(--lemon-chiffon), inset 0 0 8px var(--lemon-chiffon-03);
+  --shadow-inset-success: inset 0 0 3px var(--success-clr), inset 0 0 8px var(--success-clr);
+  --shadow-inset-error: inset 0 0 3px var(--error-clr), inset 0 0 8px var(--error-clr);
 
   --shadow-hover: 0 0 8px var(--card-clr);
   --shadow-inset-hover: inset 0 0 6px var(--thistle), inset 0 0 14px var(--thistle-03);
@@ -75,4 +77,27 @@ a {
 body {
   font-size: var(--fsz-14);
   background: var(--bg-clr);
+}
+
+dialog {
+  background: var(--card-clr);
+  color: var(--font-clr);
+  border-radius: 1rem;
+  padding: var(--p-block) var(--p-inline);
+  border: 2px solid var(--lemon-chiffon-07);
+  top: 50%;
+  left: 50%;
+  transform: translateX(-60%);
+}
+
+dialog.success {
+  box-shadow: var(--shadow), var(--shadow-inset-success);
+}
+
+dialog.fail {
+  box-shadow: var(--shadow), var(--shadow-inset-error);
+}
+
+dialog.info {
+  box-shadow: var(--shadow), var(--shadow-inset);
 }
