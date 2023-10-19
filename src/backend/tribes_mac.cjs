@@ -272,6 +272,34 @@ async function deleteInboxMessage(deleteMsgData) {
         logger.error(err);
         reject(new Error('Can not delete user messages'));
       } else {
+        resolve(res);
+      }
+    });
+  });
+}
+
+async function replyToInboxMessage(replyMsgData) {
+  const { parentMsgId, newMsg, userId } = replyMsgData;
+  console.log("replyToInboxMessage::replyMsgData", parentMsgId, newMsg, userId);
+  const query = {
+    text: `
+      INSERT INTO user_messages (sender_id, receiver_id, message_content, parent_message_id)
+      VALUES (
+        \$1, 
+        (SELECT sender_id FROM user_messages WHERE message_id = \$3), 
+        \$2, 
+        \$3
+      );
+    `,
+    values: [userId, newMsg, parentMsgId],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(new Error('Can not insert reply message.'))
+      } else {
         logger.info(res);
         resolve(res);
       }
@@ -387,6 +415,10 @@ async function tribesMac(req, data) {
     case 'delete-inbox-message':
       const deleted = await deleteInboxMessage(data);
       return deleted;
+
+    case 'reply-to-inbox-message':
+      const reply = await replyToInboxMessage(data);
+      return reply;
 
     case 'get-inbox-messages':
       const inboxMessages = await getInboxMessages(data);
