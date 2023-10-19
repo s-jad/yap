@@ -1,9 +1,6 @@
 import '../styles/inbox.css';
-import { getAppState } from "./app-state";
-import { 
-  deleteInboxMessage,
-  getInboxMessages 
-} from "./tribes-db-access";
+import { showDialog, getAppState } from "./app-state";
+import { deleteInboxMessage, getInboxMessages } from "./tribes-db-access";
 
 const messagesDashboardComponents = [];
 const userMessagesArr = [];
@@ -70,13 +67,17 @@ function getExpandedMsgBtnContainer(msgId, msgEl) {
   const btns = btnContainer.querySelectorAll('button');
   
   btns[2].addEventListener('click', async () => {
+    const userMessagesContainer = document.body.querySelector('.user-messages-container');
     const replyChain = getReplyIds(msgId);
-    console.log("replyChain => ", replyChain);
     const result = await deleteMsg(replyChain, msgEl);
-    
+
     if (result) {
-      // TODO ADD SHORT_LIVED MODAL
-      console.log("Succesfully deleted message!");
+      showDialog(
+        userMessagesContainer,
+        'Message succesfully deleted',
+        'delete-msg-info',
+        'success'
+      );
     }
   });
 
