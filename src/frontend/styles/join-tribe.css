@@ -3,6 +3,8 @@
   align-items: center;
   justify-content: center;
   padding: var(--p-block) var(--p-inline);
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 
   & .tribe-grid {
     display: grid;
