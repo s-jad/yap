@@ -113,6 +113,26 @@ async function deleteInboxMessage(msgIds) {
   });
 }
 
+async function replyToInboxMessage(parentMsgId, newMsg) {
+  console.log("replyToInboxMessage::parentMsgId => ", parentMsgId);
+  console.log("replyToInboxMessage::newMsg => ", newMsg);
+  return fetch(`/api/protected/reply-to-inbox-message`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({parentMsgId, newMsg}),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to reply to message.');
+    } else {
+      return true;
+    }
+  });
+}
+
 async function getInboxMessages() {
   return fetch(`/api/protected/get-inbox-messages`, {
     method: 'GET',
@@ -224,6 +244,7 @@ export {
   getMessages,
   getInboxMessages,
   deleteInboxMessage,
+  replyToInboxMessage,
   getLastTribeLogins,
   getRandomTribeSuggestions,
   createTribe,
