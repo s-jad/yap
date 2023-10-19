@@ -79,6 +79,14 @@ body {
   background: var(--bg-clr);
 }
 
+button {
+  border-radius: 1rem;
+  background: var(--card-clr);
+  color: var(--font-clr);
+  box-shadow: var(--shadow), var(--shadow-inset);
+  padding: var(--p-block) var(--p-inline);
+}
+
 dialog {
   background: var(--card-clr);
   color: var(--font-clr);
