@@ -230,11 +230,11 @@ function getInboxMessages(userId) {
         OR msg.sender_id = \$1
       )
       AND NOT (
-        (msg.receiver_id = receiver.user_id AND msg.receiver_deleted = TRUE)
-        OR (msg.sender_id = sender.user_id AND msg.sender_deleted = TRUE)
+        (msg.receiver_id = \$1 AND msg.receiver_deleted = TRUE)
+        OR (msg.sender_id = \$1 AND msg.sender_deleted = TRUE)
       )
       ORDER BY
-        msg.message_id DESC
+        msg.message_timestamp DESC
     `,
     values: [userId],
   };
