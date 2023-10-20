@@ -49,7 +49,7 @@
 
   & .inbox-messages-outer,
   & .outbox-messages-outer {
-    --bmo-height: calc(100vh - calc(150px + calc(75px + var(--p-block))));
+    --bmo-height: calc(100vh - calc(150px + calc(75px + calc(var(--p-block) + 4px))));
     height: var(--bmo-height);
     max-height: var(--bmo-height);
 
@@ -61,7 +61,21 @@
     & .messages-scroll-wrapper {
       min-height: var(--bmo-height);
       max-height: var(--bmo-height);
+      width: 100%;
       overflow-y: scroll;
+      scrollbar-gutter: stable;
+
+      & .inbox-messages-inner {
+        & .user-message-wrapper {
+          grid-template-columns: 100px 1fr 1fr 1fr 100px;
+        }
+      }
+
+      & .outbox-messages-inner {
+        & .user-message-wrapper {
+          grid-template-columns: 150px 1fr 1fr 1fr 100px;
+        }
+      }
 
       & .inbox-messages-inner,
       & .outbox-messages-inner {
@@ -81,7 +95,6 @@
           display: grid;
           grid-template-columns: 100px 1fr 1fr 1fr 100px;
           grid-template-rows: 0px 1fr 0px;
-          align-items: center;
           padding-inline: var(--p-inline);
           padding-block: var(--p-block);
           background: var(--card-clr);
@@ -97,11 +110,22 @@
             grid-column: 1 / 2;
           }
 
+          & .user-message-receiver {
+            color: var(--font-clr-05);
+          }
+
           & .user-message-content {
             grid-row: 2 / 3;
             grid-column: 2 / 5;
-            overflow-x: hidden;
+            overflow: hidden;
             text-overflow: ellipsis;
+            max-height: 25px;
+            padding: 0px;
+            border-radius: 0px;
+            transition: background 500ms ease-in-out,
+                        padding 500ms ease-in-out,
+                        border-radius 500ms ease-in-out,
+                        max-height 200ms ease-in-out;
           }
 
           & .user-message-timestamp {
@@ -188,6 +212,13 @@
 
         & .expanded-msg-btn-container {
           height: auto;
+        }
+
+        & .user-message-content {
+          padding: 1rem;
+          border-radius: 1rem;
+          max-height: 2000px;
+          background: var(--bg-clr);
         }
       }
     }
