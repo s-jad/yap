@@ -72,6 +72,7 @@ h3 {
 
 a {
   text-decoration: none;
+  color: var(--thistle-07);
 }
 
 body {
@@ -94,8 +95,7 @@ dialog {
   padding: var(--p-block) var(--p-inline);
   border: 2px solid var(--lemon-chiffon-07);
   top: 50%;
-  left: 50%;
-  transform: translateX(-60%);
+  z-index: 10;
 }
 
 dialog.success {
