@@ -22,17 +22,13 @@ function getReplies(parentMsgId) {
   const replyChain = [];
   let currentMsgId = parentMsgId;
   let currentMsg;
-
   while(currentMsgId !== null) {
     currentMsg = userMessagesArr.find((msg) => msg.message_id === currentMsgId);
-    if (currentMsg === undefined) {
-      return;
-    }
     currentMsgId = currentMsg.parent_message_id;
+
     replyChain.push(currentMsg);
   }
 
-  console.log("replyChain => ", replyChain);
   return replyChain;
 }
 
@@ -88,10 +84,11 @@ function getReplyView(parentMsg) {
 
   const sendBtn = replyViewContainer.querySelector('.send-reply-btn');
   sendBtn.addEventListener('click', async() => {
-    const result = await replyToInboxMessage(parentMsg.message_id, replyText.value);
+    const replyTxtWithBr = replyText.value.replaceAll('\n', '<br>');
+    const result = await replyToInboxMessage(parentMsg.message_id, replyTxtWithBr);
     messagesDashboardRouting('inbox', replyViewContainer);
     const userMessagesContainer = document.body.querySelector('.user-messages-container');
-    console.log(result);
+
     if (result === true) {
       showDialog(
         userMessagesContainer,
@@ -200,6 +197,15 @@ async function populateInboxOutbox(inbox, outbox) {
             <p class="reply-message-content">${parentMsg.message_content}</p>
             <p class="reply-message-timestamp">${displayMsgDate}</p>
         `;
+
+        parentMsgEl.addEventListener('click', (ev) => {
+          if (parentMsgEl.classList.contains('expanded')) {
+            parentMsgEl.classList.remove('expanded');
+          } else {
+            parentMsgEl.classList.add('expanded');
+          }
+        });
+
         replyChainContainer.appendChild(parentMsgEl);
       });
     }
@@ -222,7 +228,11 @@ async function populateInboxOutbox(inbox, outbox) {
     const btnContainer = getExpandedMsgBtnContainer(msg, msgEl);
     btnContainer.className = 'expanded-msg-btn-container';
 
-    msgEl.addEventListener('click', () => {
+    msgEl.addEventListener('click', (ev) => {
+      if (ev.target.parentNode.parentNode === replyChainContainer) {
+        return;
+      }
+
       if (msgEl.classList.contains('expanded')) {
         msgEl.classList.remove('expanded');
         replyChainContainer.style.display = 'none';
@@ -244,7 +254,9 @@ async function populateInboxOutbox(inbox, outbox) {
 
     if (msg.sender_name === currentUser) {
       msgEl.innerHTML = `
-        <p class="user-message-receiver" style="color: hsl(${msg.receiver_color}, 100%, 70%)">${msg.receiver_name}</p>
+        <p class="user-message-receiver">
+        To: <span style="color: hsl(${msg.receiver_color}, 100%, 70%)">${msg.receiver_name}</span>
+        </p>
         <p class="user-message-content">${msg.message_content}</p>
         
         <p class="user-message-timestamp">${displayMsgDate}</p>
