@@ -32,6 +32,8 @@ function createNewMessage(message) {
   if (message === "") {
     return;
   }
+  
+
   const newMessage = document.createElement('div');
   newMessage.setAttribute('data-sender', getAppState('username'));
 
@@ -96,15 +98,33 @@ function createNewMessage(message) {
   };
 }
 
+function checkForAtInInput(message) {
+  if (message.includes('@')) {
+    const receiver = message.slice(message.indexOf('@') + 1, message.indexOf(' '));
+    messageState.global = false;
+    messageState.receiver = receiver;
+    return true;
+  }
+
+  return false;
+}
+
 function handleUserInput(message) {
   const messageView = document.querySelector('.message-view');
   const messageTimeline = document.querySelector('.message-timeline');
 
-  const { newMessage, timeStampEl, timestamp } = createNewMessage(message);
+  const atInMsg = checkForAtInInput(message);
+  let editedMsg; 
+  if (atInMsg) {
+    editedMsg = message.slice(message.indexOf(' ') + 1, message.length)
+  } else {
+    editedMsg = message
+  }
+  const { newMessage, timeStampEl, timestamp } = createNewMessage(editedMsg);
   messageView.appendChild(newMessage);
   messageTimeline.appendChild(timeStampEl);
 
-  return timestamp;
+  return { editedMsg, timestamp };
 }
 
 function createDbMessage(msg) {
@@ -195,21 +215,24 @@ async function populateWithMessages(msgView, msgTimeline) {
 function handleMessagePost(message) {
   const tribeChatContainer = document.getElementById('tribe-chat-container');
   const tribeName = chatState.tribeName;
-  const timestamp = handleUserInput(message);
+  const { editedMsg, timestamp } = handleUserInput(message);
   const replyToMsg = tribeChatContainer.querySelector('.replying-to');
   const userId = getAppState('userId');
-
-  if (replyToMsg) {
+  
+  if (messageState.global === false) {
     postChatMessage(
       tribeName,
-      message,
+      editedMsg,
       userId,
       messageState.receiver,
       timestamp,
       messageState.global
     );
 
-    replyToMsg.classList.remove('replying-to');
+    if (replyToMsg !== null) {
+      replyToMsg.classList.remove('replying-to');
+    }
+
     messageState.receiver = 'global';
     messageState.replyTo = '';
     chatState.replying = false;
@@ -217,7 +240,7 @@ function handleMessagePost(message) {
   } else {
     postChatMessage(
       tribeName,
-      message,
+      editedMsg,
       userId,
       userId,
       timestamp,
