@@ -234,7 +234,7 @@ function getInboxMessages(userId) {
         OR (msg.sender_id = sender.user_id AND msg.sender_deleted = TRUE)
       )
       ORDER BY
-        msg.message_id ASC
+        msg.message_id DESC
     `,
     values: [userId],
   };
@@ -280,7 +280,6 @@ async function deleteInboxMessage(deleteMsgData) {
 
 async function replyToInboxMessage(replyMsgData) {
   const { parentMsgId, newMsg, userId } = replyMsgData;
-  console.log("replyToInboxMessage::replyMsgData", parentMsgId, newMsg, userId);
   const query = {
     text: `
       INSERT INTO user_messages (sender_id, receiver_id, message_content, parent_message_id)
@@ -294,17 +293,49 @@ async function replyToInboxMessage(replyMsgData) {
     values: [userId, newMsg, parentMsgId],
   };
 
-  return new Promise((resolve, reject) => {
-    pg_client.query(query, (err, res) => {
-      if (err) {
-        logger.error(err);
-        reject(new Error('Can not insert reply message.'))
-      } else {
-        logger.info(res);
-        resolve(res);
-      }
-    });
-  });
+  const updateQuery = {
+    text: `
+      UPDATE user_messages
+      SET sender_deleted = FALSE
+      WHERE message_id = \$1;
+    `,
+    values: [parentMsgId],
+  };
+
+  try {
+    const { insertRes, updateRes } = await Promise.all([
+      new Promise((resolve, reject) => {
+        pg_client.query(query, (err, res) => {
+          if (err) {
+            logger.error(err);
+            reject(new Error('Can not insert reply message.'));
+          } else {
+            logger.info(res);
+            const insertRes = true; 
+            resolve(insertRes);
+          }
+        });
+      }),
+      new Promise((resolve, reject) => {
+        pg_client.query(updateQuery, (err, res) => {
+          if (err) {
+            logger.error(err);
+            reject(new Error('Can not update message.'));
+          } else {
+            logger.info(res);
+            const updateRes = true;
+            resolve(updateRes);
+          }
+        });
+      }),
+    ]);
+    console.log("insertRes =>", insertRes)
+    console.log("updateRes =>", insertRes)
+    return { insertRes, updateRes };
+  } catch (error) {
+    logger.error(error);
+    throw error;
+  }
 }
 
 async function createUser(newUserData) {
