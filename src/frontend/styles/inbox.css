@@ -123,8 +123,8 @@
             padding: 0px;
             border-radius: 0px;
             transition: background 500ms ease-in-out,
-                        padding 500ms ease-in-out,
-                        border-radius 500ms ease-in-out,
+                        padding 300ms ease-in-out,
+                        border-radius 300ms ease-in-out,
                         max-height 200ms ease-in-out;
           }
 
@@ -189,12 +189,30 @@
 
               & .reply-message-content {
                 grid-column: 2 / 3;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                background: var(--card-clr);
+                max-height: 25px;
+                padding: 0px;
+                border-radius: 0px;
+                transition: background 300ms ease-in-out,
+                            padding 300ms ease-in-out,
+                            border-radius 300ms ease-in-out,
+                            max-height 200ms ease-in-out;
               }
 
               & .reply-message-timestamp {
                 text-align: right;
                 opacity: 0.7;
                 grid-column: 3 / 4;
+              }
+            }
+            & .reply-message-wrapper.expanded {
+              & .reply-message-content {
+                background: var(--bg-clr);
+                max-height: 2000px;
+                padding: 1rem;
+                border-radius: 1rem;
               }
             }
           }
