@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const liveReload = require('livereload');
 const connectLiveReload = require('connect-livereload');
+const session = require('express-session');
+const RedisStore = require('connect-redis').default;
 
 const liveReloadServer = liveReload.createServer();
 liveReloadServer.once('connection', () => {
@@ -23,6 +25,11 @@ const { authorization } = require('./src/backend/auth.cjs');
 const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
 const { logger } = require('./src/backend/logging.cjs');
+const { redisClient } = require('./src/backend/redis-client.cjs');
+
+redisClient.on('ready', function() {
+  logger.info('Redis client is ready');
+});
 
 const app = express();
 
@@ -40,6 +47,39 @@ app.use('/assets/imgs', express.static(path.join(__dirname, '/assets/imgs')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.REDIS_KEY,
+  resave: false,
+  saveUninitialized: true,
+  // change to https to use secure true
+  cookie: { secure: false }
+}));
+
+app.get('/', function(req, res) {
+  redisClient.getAsync('numVisits', function(err, numVisits) {
+    if (err) {
+       logger.error(err);
+       res.status(500).send('An error occurred while getting the number of visits');
+       return;
+    }
+    numVisitsToDisplay = parseInt(numVisits) + 1;
+    if (isNaN(numVisitsToDisplay)) {
+      numVisitsToDisplay = 1;
+    }
+    logger.info(`Number of visits: ${numVisitsToDisplay}`);
+    res.send('Number of visits is: ' + numVisitsToDisplay);
+    numVisits++;
+    redisClient.setAsync('numVisits', numVisits, function(err) {
+      if (err) {
+        logger.error(err);
+        res.status(500).send('An error occurred while setting the number of visits');
+      }
+    });
+  });
+});
+
 app.use('/api/protected', authorization);
 
 app.post('/api/authenticate-user', async (req, res) => {
@@ -52,8 +92,7 @@ app.post('/api/authenticate-user', async (req, res) => {
 
     try {
       const authenticated = await comparePwHash(password, passwordHash);
-      logger.info("/api/authenticate-user");
-      logger.info(authenticated);
+
       if (!authenticated) {
         res.status(401).json({ message: 'Incorrect Password.' })    
       } else {
@@ -98,7 +137,6 @@ app.post('/api/authenticate-user', async (req, res) => {
 });
 
 app.post('/api/create-user', async (req, res) => {
-  logger.info(req.body);
   try {
     const { username, userId, userColor } = await tribesMac('create-user', req.body);
 
@@ -140,8 +178,6 @@ app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
     }
     const userId = payload.id;
     const lastLogins = await tribesMac('get-last-tribe-logins', userId);
-    logger.info("lastLogins");
-    logger.info(lastLogins);
     res.send(lastLogins);
   } catch (error) {
     logger.error(error);
@@ -189,6 +225,33 @@ app.post('/api/protected/delete-inbox-message', async (req, res) => {
     res.status(500).json({ message: 'An error occured whilst getting inbox messages.' });
   }
 });
+
+app.post('/api/protected/reply-to-inbox-message', async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    const data = { 
+      parentMsgId: req.body.parentMsgId,
+      newMsg: req.body.newMsg,
+      userId,
+    };
+    console.log("server::data => ", data);
+    const result = await tribesMac('reply-to-inbox-message', data);
+    logger.info(result);
+    res.send(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting inbox messages.' });
+  }
+});
+
 
 app.get('/api/protected/get-random-tribe-suggestions', async (req, res) => {
   try {
@@ -259,11 +322,10 @@ app.get('*', (req, res) => {
   }
 });
 
-app.use('/', function(err, req, res, next) {
+app.use('/', function(err, req, res) {
   logger.warn("Request failed => ", req);
   logger.error(err.stack);
   res.status(500).send('Something broke!');
-  next();
 });
 
 app.listen(process.env.SERVER_PORT || port, () => logger.info(`Server is running on port ${port}`));
