@@ -51,6 +51,7 @@ function getLastTribeLogin(userId) {
         logger.error(err);
         reject(err);
       } else {
+        console.log("getLastTribeLogin => tribe suggestion: ", res.rows);
         if (res.rows.length < 3) {
           getRandomTribeSuggestions()
             .then(tribeSuggestions => {
@@ -329,8 +330,6 @@ async function replyToInboxMessage(replyMsgData) {
         });
       }),
     ]);
-    console.log("insertRes =>", insertRes)
-    console.log("updateRes =>", insertRes)
     return { insertRes, updateRes };
   } catch (error) {
     logger.error(error);
@@ -368,6 +367,28 @@ async function createUser(newUserData) {
         });
       }
     })
+  });
+}
+
+function userExists(userData) {
+  console.log("userData => ", userData);
+  const query = `
+    SELECT user_name FROM users WHERE user_id = ${userData};
+  `;
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(new Error('Error checking user exists'));
+      } else if (res.rows.length === 0) {
+        resolve(false);
+      } else {
+        console.log("userExists res.rows[0] => ", res.rows[0]);
+        const user = res.rows[0]
+        resolve(user);
+      }
+    });
   });
 }
 
@@ -438,6 +459,10 @@ async function tribesMac(req, data) {
     case 'create-user':
       const user = await createUser(data);
       return user;
+
+    case 'user-exists':
+      const exists = await userExists(data);
+      return exists;
 
     case 'get-messages':
       const messages = await getChatroomMessages(data);
