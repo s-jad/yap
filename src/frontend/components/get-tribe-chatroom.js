@@ -115,6 +115,7 @@ function handleUserInput(message) {
 
   const atInMsg = checkForAtInInput(message);
   let editedMsg; 
+
   if (atInMsg) {
     editedMsg = message.slice(message.indexOf(' ') + 1, message.length)
   } else {
@@ -217,13 +218,11 @@ function handleMessagePost(message) {
   const tribeName = chatState.tribeName;
   const { editedMsg, timestamp } = handleUserInput(message);
   const replyToMsg = tribeChatContainer.querySelector('.replying-to');
-  const userId = getAppState('userId');
   
   if (messageState.global === false) {
     postChatMessage(
       tribeName,
       editedMsg,
-      userId,
       messageState.receiver,
       timestamp,
       messageState.global
@@ -241,8 +240,7 @@ function handleMessagePost(message) {
     postChatMessage(
       tribeName,
       editedMsg,
-      userId,
-      userId,
+      null,
       timestamp,
       messageState.global
     );
