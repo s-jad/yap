@@ -116,7 +116,6 @@ export default function Welcome() {
         document.body.removeChild(welcomeContainer);
 
         updateAppState('username', username);
-        updateAppState('userId', authenticated.userId);
         console.log("authenticated.userColor => ", authenticated.userColor);
         updateAppState('userColor', authenticated.userColor);
 
@@ -151,7 +150,6 @@ export default function Welcome() {
       const randomTribeSuggestions = await getRandomTribeSuggestions();
       updateAppState('header-tribe-suggestions', randomTribeSuggestions);
       updateAppState('username', username);
-      updateAppState('userId', userId);
       updateAppState('userColor', userColor);
 
       document.body.removeChild(welcomeContainer);
