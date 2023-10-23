@@ -114,8 +114,6 @@ async function deleteInboxMessage(msgIds) {
 }
 
 async function replyToInboxMessage(parentMsgId, newMsg) {
-  console.log("replyToInboxMessage::parentMsgId => ", parentMsgId);
-  console.log("replyToInboxMessage::newMsg => ", newMsg);
   return fetch(`/api/protected/reply-to-inbox-message`, {
     method: 'POST',
     headers: {
