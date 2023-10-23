@@ -18,14 +18,24 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    index: './src/frontend/index.js',
+    login: './src/frontend/login.js',
+    main: './src/frontend/main.js'
   },
   plugins: [
     new webpack.DefinePlugin({
         'process.env.SERVER_URL': JSON.stringify(process.env.SERVER_URL),
     }),
     new HtmlWebpackPlugin({
+      title: 'Welcome to Yapp',
+      template: './src/frontend/login.html',
+      filename: 'login.html',
+      chunks: ['login'],
+    }),
+    new HtmlWebpackPlugin({
       title: 'Yapp',
+      template: './src/frontend/main.html',
+      filename: 'main.html',
+      chunks: ['main'],
     }),
   ],
   devtool: 'inline-source-map',
