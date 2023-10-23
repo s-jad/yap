@@ -1,5 +1,6 @@
 import { getAppState } from "./app-state";
 import { handleChatroomLinks } from "./fetch_apis";
+import { getLastTribeLogins } from "./tribes-db-access";
 
 function getNotifications() {
   const notificationsFlex = document.createElement('div');
@@ -20,11 +21,16 @@ function getNotifications() {
   return notificationsFlex;
 }
 
-function getGroupsLinks() {
+async function getGroupsLinks() {
   const groupLinksContainer = document.createElement('div');
   groupLinksContainer.className = 'group-links-container';
+  
+  let tribeSuggestions = getAppState('header-tribe-suggestions');
+  console.log("header::tribeSuggestions => ", tribeSuggestions);
+  if (tribeSuggestions === undefined) {
+    tribeSuggestions = await getLastTribeLogins();
+  }
 
-  const tribeSuggestions = getAppState('header-tribe-suggestions');
   groupLinksContainer.innerHTML = `
     <ul class='group-list'>
       <a class="recently-viewed-tribe-link"><li class='group-list-item'></li></a>
@@ -54,16 +60,14 @@ function getGroupsLinks() {
   return groupLinksContainer;
 }
 
-export default function Header() {
+export default async function Header() {
   const headerContainer = document.createElement('div');
   headerContainer.className = 'header-container';
 
   const userName = document.createElement('h1');
   userName.className = 'username-title';
   userName.textContent = getAppState('username');
-
-  const groupLinksContainer = getGroupsLinks();
-
+  const groupLinksContainer = await getGroupsLinks();
   headerContainer.appendChild(userName);
   headerContainer.appendChild(groupLinksContainer);
   headerContainer.appendChild(getNotifications());
