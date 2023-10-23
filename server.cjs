@@ -100,7 +100,6 @@ app.post('/api/authenticate-user', async (req, res) => {
 
         res.status(200).json({ 
           message: 'Login Succesful.',
-          userId,
           userColor,
         });
       } 
@@ -193,7 +192,7 @@ app.get('/api/protected/get-inbox-messages', async (req, res) => {
   }
 });
 
-app.post('/api/protected/delete-inbox-message', async (req, res) => {
+app.delete('/api/protected/delete-inbox-message', async (req, res) => {
   try {
     const tokenParts = req.cookies.jwt_signature.split('.');
     let payload;
@@ -276,7 +275,17 @@ app.get('/api/protected/get-chatroom-messages', async (req, res) => {
 
 app.post('/api/protected/post-message', async (req, res) => {
   try {
-    await tribesMac('post-message', req.body);
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const sender = payload.id;
+    const postData = { ...req.body, sender };
+    await tribesMac('post-message', postData);
     res.status(201).json({ message: 'Message succesfully posted.' });
   } catch (error) {
     logger.error(error);
@@ -333,14 +342,14 @@ app.get('*', verifyJWT, async (req, res) => {
       if (req.userId !== undefined && req.userName !== undefined) {
         const dbResult = await tribesMac('user-exists', req.userId);
         if (dbResult.user_name === req.userName) {
-          console.log("username matches db username");
+          logger.info("Username matches db username");
           res.sendFile(path.resolve(__dirname, 'dist', 'main.html'));
         } else {
-          console.log("username doesnt match db username");
+          logger.info("username doesnt match db username");
           res.sendFile(path.resolve(__dirname, 'dist', 'login.html'));
         }
       } else {
-        console.log("user name and userId missng");
+        logger.info("user name and userId missng");
         res.sendFile(path.resolve(__dirname, 'dist', 'login.html'));
       }
     } catch (error) {
