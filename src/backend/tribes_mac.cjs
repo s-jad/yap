@@ -132,7 +132,7 @@ function getChatroomMessages(tribeUrl) {
 }
 
 function postGlobalMessage(messageData) {
-  const { tribe, message, sender, _, timestamp, global } = messageData;
+  const { tribe, message, _, timestamp, global, sender } = messageData;
   const query = {
     text: `
       INSERT into chatroom_messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
@@ -158,14 +158,14 @@ function postGlobalMessage(messageData) {
 }
 
 function postPersonalMessage(messageData) {
-  const { tribe, message, sender, receiver, timestamp, global } = messageData;
+  const { tribe, message, receiver, timestamp, global, sender } = messageData;
   const receiverIdQuery = {
     text: `
       SELECT user_id FROM users WHERE user_name = \$1;
     `,
     values: [receiver],
   };
-
+  console.log("postPersonalMessage::sender => ", sender);
   return new Promise((resolve, reject) => {
     pg_client.query(receiverIdQuery)
       .then(res => {
@@ -311,7 +311,6 @@ async function replyToInboxMessage(replyMsgData) {
             logger.error(err);
             reject(new Error('Can not insert reply message.'));
           } else {
-            logger.info(res);
             const insertRes = true; 
             resolve(insertRes);
           }
@@ -323,7 +322,6 @@ async function replyToInboxMessage(replyMsgData) {
             logger.error(err);
             reject(new Error('Can not update message.'));
           } else {
-            logger.info(res);
             const updateRes = true;
             resolve(updateRes);
           }
