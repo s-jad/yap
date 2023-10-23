@@ -33,6 +33,11 @@ redisClient.on('ready', function() {
 
 const app = express();
 
+app.use((req, res, next) => {
+  console.log('Request URL:', req.originalUrl);
+  next();
+});
+
 app.use(connectLiveReload());
 
 app.use(
@@ -41,7 +46,14 @@ app.use(
   })
 );
 
-app.use('/', express.static(path.join(__dirname, '/')));
+app.use('/', express.static(path.join(__dirname, '/'), {
+    setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
+
 app.use('/assets/imgs', express.static(path.join(__dirname, '/assets/imgs')));
 
 app.use(express.urlencoded({ extended: true }));
@@ -56,29 +68,6 @@ app.use(session({
   // change to https to use secure true
   cookie: { secure: false }
 }));
-
-app.get('/', function(req, res) {
-  redisClient.getAsync('numVisits', function(err, numVisits) {
-    if (err) {
-       logger.error(err);
-       res.status(500).send('An error occurred while getting the number of visits');
-       return;
-    }
-    numVisitsToDisplay = parseInt(numVisits) + 1;
-    if (isNaN(numVisitsToDisplay)) {
-      numVisitsToDisplay = 1;
-    }
-    logger.info(`Number of visits: ${numVisitsToDisplay}`);
-    res.send('Number of visits is: ' + numVisitsToDisplay);
-    numVisits++;
-    redisClient.setAsync('numVisits', numVisits, function(err) {
-      if (err) {
-        logger.error(err);
-        res.status(500).send('An error occurred while setting the number of visits');
-      }
-    });
-  });
-});
 
 app.use('/api/protected', authorization);
 
@@ -313,12 +302,51 @@ app.post('/api/protected/report-user-issue', (req, res) => {
   res.send(`form data received ${req.body}`);
 });
 
-app.get('*', (req, res) => {
+function verifyJWT(req, res, next) {
+  const header = req.cookies['jwt_signature'];
+  const payload = req.cookies['jwt_payload'];
+
+  if (!header || !payload) {
+    console.log("No token");
+    return next();
+  }
+
+  const token = `${header}.${payload}`;
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    req.userId = decoded.id;
+    req.userName = decoded.userName;
+    next();
+  } catch (error) {
+    logger.info(error);
+    next();
+  }
+}
+
+app.get('*', verifyJWT, async (req, res) => {
   if (req.url.startsWith('/api')) {
-    logger.error('User tried to access unknown API route');
-    res.status(404).send('API route not found');
+    logger.warn('User tried to access unknown API route');
+    res.status(404).send('Route not found');
   } else {
-    res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+    try {
+      if (req.userId !== undefined && req.userName !== undefined) {
+        const dbResult = await tribesMac('user-exists', req.userId);
+        if (dbResult.user_name === req.userName) {
+          console.log("username matches db username");
+          res.sendFile(path.resolve(__dirname, 'dist', 'main.html'));
+        } else {
+          console.log("username doesnt match db username");
+          res.sendFile(path.resolve(__dirname, 'dist', 'login.html'));
+        }
+      } else {
+        console.log("user name and userId missng");
+        res.sendFile(path.resolve(__dirname, 'dist', 'login.html'));
+      }
+    } catch (error) {
+      logger.error(error);
+      res.status(500).send('An error occurred');
+    }
   }
 });
 
