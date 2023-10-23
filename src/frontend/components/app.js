@@ -11,9 +11,12 @@ import {
   getChatroom, 
 } from './fetch_apis';
 
+
+
 async function clientRouting() {
   const currentRoute = window.location.pathname;
-  
+  sessionStorage.setItem('lastPage', currentRoute);
+
   let component;
 
   if (currentRoute.includes('tribe-chat')) {
@@ -78,7 +81,8 @@ export default async function App() {
   appContainer.id = 'app';
 
   const currentComponent = await clientRouting();
-  appContainer.appendChild(Header());
+  const header = await Header();
+  appContainer.appendChild(header);
   appContainer.appendChild(currentComponent);
   appContainer.appendChild(Sidebar());
   appContainer.appendChild(HamburgerBtn());
@@ -89,6 +93,7 @@ export default async function App() {
     const toAdd = await clientRouting();
     appContainer.appendChild(toAdd);
   });
+
 
   return appContainer;
 }
