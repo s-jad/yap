@@ -1,11 +1,27 @@
-const appState = new Map();
-
 function updateAppState(key, value) {
-  appState.set(key, value);
+  if (typeof value === Object) {
+    try {
+      const obj = JSON.stringify(value);
+      sessionStorage.setItem(key, obj);
+    } catch (error) {
+      console.error("Error converting object to JSON => ", error);
+    }
+  } else {
+    sessionStorage.setItem(key, value);
+  }
 }
 
 function getAppState(key) {
-  return appState.get(key);
+  if (key === 'header-tribe-suggestions') {
+    try {
+      const obj = JSON.parse(sessionStorage.getItem(key));
+      return obj;
+    } catch (error) {
+      console.error("Error parsing JSON object => ", error);
+    }
+  } else {
+    return sessionStorage.getItem(key);
+  }
 }
 
 function showDialog(container, info, category, dialogType) {
