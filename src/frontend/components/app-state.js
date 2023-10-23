@@ -1,7 +1,8 @@
 function updateAppState(key, value) {
-  if (typeof value === Object) {
+  if (typeof value === 'object') {
     try {
       const obj = JSON.stringify(value);
+      console.log("Stringified object =>", obj);
       sessionStorage.setItem(key, obj);
     } catch (error) {
       console.error("Error converting object to JSON => ", error);
@@ -14,7 +15,8 @@ function updateAppState(key, value) {
 function getAppState(key) {
   if (key === 'header-tribe-suggestions') {
     try {
-      const obj = JSON.parse(sessionStorage.getItem(key));
+      const value = sessionStorage.getItem(key);
+      const obj = JSON.parse(value);
       return obj;
     } catch (error) {
       console.error("Error parsing JSON object => ", error);
