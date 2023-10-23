@@ -10,4 +10,5 @@ import './styles/hamburger-btn.css';
 import Welcome from './components/welcome';
 
 const welcomeScreen = Welcome();
+history.pushState(null, null, '/');
 document.body.appendChild(welcomeScreen);
