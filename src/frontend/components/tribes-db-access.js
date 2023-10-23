@@ -97,7 +97,7 @@ async function getMessages(tribeUrl) {
 async function deleteInboxMessage(msgIds) {
   console.log("deleteInboxMessage::msgIds => ", msgIds);
   return fetch(`/api/protected/delete-inbox-message`, {
-    method: 'POST',
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -152,7 +152,7 @@ async function getInboxMessages() {
   });
 }
 
-async function postChatMessage(tribe, message, sender, receiver, timestamp, global) {
+async function postChatMessage(tribe, message, receiver, timestamp, global) {
   return fetch('/api/protected/post-message', {
     method: 'POST',
     headers: {
@@ -161,7 +161,6 @@ async function postChatMessage(tribe, message, sender, receiver, timestamp, glob
     body: JSON.stringify({
       tribe,
       message,
-      sender,
       receiver,
       timestamp,
       global,
