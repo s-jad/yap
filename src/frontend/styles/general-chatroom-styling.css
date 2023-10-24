@@ -85,8 +85,8 @@
             }
           }
 
-          & .message-wrapper.replying-to {
-            box-shadow: var(--shadow-inset-hl);
+          & .message-wrapper:hover {
+            box-shadow: var(--shadow), var(--shadow-inset-hl);
           }
         }
       } 
