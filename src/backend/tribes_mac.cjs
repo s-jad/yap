@@ -127,7 +127,6 @@ function getChatroomMessages(tribeUrl) {
         logger.error(err);
         reject(err);
       } else {
-        logger.info(res.rows);
         resolve(res.rows);
       }
     });

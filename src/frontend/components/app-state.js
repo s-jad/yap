@@ -2,7 +2,6 @@ function updateAppState(key, value) {
   if (typeof value === 'object') {
     try {
       const obj = JSON.stringify(value);
-      console.log("Stringified object =>", obj);
       sessionStorage.setItem(key, obj);
     } catch (error) {
       console.error("Error converting object to JSON => ", error);

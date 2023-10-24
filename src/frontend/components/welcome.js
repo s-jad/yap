@@ -116,10 +116,10 @@ export default function Welcome() {
         document.body.removeChild(welcomeContainer);
 
         updateAppState('username', username);
-        console.log("authenticated.userColor => ", authenticated.userColor);
         updateAppState('userColor', authenticated.userColor);
 
         const lastTribeLogins = await getLastTribeLogins();
+        console.log("lastTribeLogins => ", lastTribeLogins);
         updateAppState('header-tribe-suggestions', lastTribeLogins);
 
         const app = await App();

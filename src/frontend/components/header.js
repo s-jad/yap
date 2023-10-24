@@ -26,7 +26,7 @@ async function getGroupsLinks() {
   groupLinksContainer.className = 'group-links-container';
   
   let tribeSuggestions = getAppState('header-tribe-suggestions');
-  console.log("header::tribeSuggestions => ", tribeSuggestions);
+
   if (tribeSuggestions === undefined) {
     tribeSuggestions = await getLastTribeLogins();
   }
