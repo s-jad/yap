@@ -32,33 +32,57 @@ redisClient.on('ready', function() {
 });
 
 const app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieParser());
+
 const httpServer = require('http').createServer(app);
 const { Server } = require('socket.io');
 
 const io = new Server(httpServer, { /* options */ });
 
-io.engine.on("connection_error", (err) => {
+io.on("connection_error", (err) => {
   console.log(err.req);
   console.log(err.code);
   console.log(err.message);
   console.log(err.context);
 });
 
-io.engine.on('connection', (socket) => {
+io.use(function(socket, next) {
+  if (socket.request.headers.cookie){
+    const cookies = socket.request.headers.cookie;
+    const parts = cookies.split(';');
+    const signature = parts[1].split('=')[1];
+    const payload = parts[2].split('=')[1];
+    const token = `${signature}.${payload}`;
+    console.log("token => ", token);
+    jwt.verify(token, jwtSecret, function(err, decoded) {
+      if (err) return next(new Error('Authentication error'));
+      socket.decoded = decoded;
+      next();
+    });
+  }
+  else {
+    next(new Error('Authentication error'));
+  }    
+});
+
+io.on('connection', (socket) => {
   logger.info('New client connected');
-  socket.emit('connect', { message: 'A new client has connected! '});
+  socket.emit('connection', { message: 'A new client has connected! '});
 
   socket.on('message', (data) => {
-    logger.info(`data => ${data}`);
-    if (data.includes('message')) {
+    logger.info(typeof data);
+    console.log("data => ", data);
+    if ('message' in data) {
       try {
-        const msgData = (data.slice(data.indexOf(',') + 1, data.length - 1));
-        const jsonData = JSON.parse(msgData)
+        const msgStr = JSON.stringify(data);
+        const jsonData = JSON.parse(msgStr);
         logger.info(`jsonData => ${jsonData}`);
         const { tribe, timestamp } = jsonData;
         const msgKey = `${tribe}.${timestamp}`;
         logger.info(`msgKey, ${msgKey}`);
-        redisClient.set(msgKey, msgData);
+        redisClient.set(msgKey, msgStr);
       } catch (error) {
         logger.error(`Error parsing JSON => ${error}`);
       }
@@ -89,9 +113,7 @@ app.use('/', express.static(path.join(__dirname, '/'), {
 
 app.use('/assets/imgs', express.static(path.join(__dirname, '/assets/imgs')));
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cookieParser());
+
 
 app.use(session({
   store: new RedisStore({ client: redisClient }),
