@@ -211,10 +211,10 @@ async function handleSocketMessagePost(message) {
 
   if (global === false) {
     socket.emit('message', {
-      tribeName,
-      message: editedMsg,
-      receiver: messageState.receiver,
-      timestamp,
+      tribe_name: tribeName,
+      receiver_name: messageState.receiver,
+      message_content: editedMsg,
+      message_timestamp: timestamp,
       global,
     });
 
@@ -224,10 +224,10 @@ async function handleSocketMessagePost(message) {
     messageState.global = true;
   } else {
     socket.emit('message', {
-      tribe: tribeName,
-      message: editedMsg,
-      receiver: null,
-      timestamp,
+      tribe_name: tribeName,
+      receiver_name: null,
+      message_content: editedMsg,
+      message_timestamp: timestamp,
       global,
     });
   }
@@ -320,8 +320,12 @@ export default async function TribeChat(tribe) {
     messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
   });
 
-  socket.on('connect', () => {
+  socket.on('connection', () => {
     console.log(socket.id);
+  });
+
+  socket.on('message', (data) => {
+    console.log(data);
   });
 
   return tribeChatContainer;
