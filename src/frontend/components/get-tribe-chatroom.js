@@ -1,8 +1,10 @@
 import '../styles/general-chatroom-styling.css';
 import { getAppState } from './app-state';
 import { getMessages, postChatMessage } from './tribes-db-access';
+import { io } from "socket.io-client";
 
 const activeMembers = [];
+const socket = io(process.env.SERVER_URL);
 
 const chatState = {
   replying: false,
@@ -201,11 +203,39 @@ async function populateWithMessages(msgView, msgTimeline) {
   handleDbReturn(messages, msgView, msgTimeline);
 }
 
-function handleMessagePost(message) {
-  const tribeChatContainer = document.getElementById('tribe-chat-container');
+async function handleSocketMessagePost(message) {
   const tribeName = chatState.tribeName;
   const { editedMsg, timestamp } = handleUserInput(message);
-  const replyToMsg = tribeChatContainer.querySelector('.replying-to');
+  const global = messageState.global; 
+  console.log("Emitting socket message");
+
+  if (global === false) {
+    socket.emit('message', {
+      tribeName,
+      message: editedMsg,
+      receiver: messageState.receiver,
+      timestamp,
+      global,
+    });
+
+    messageState.receiver = 'global';
+    messageState.replyTo = '';
+    chatState.replying = false;
+    messageState.global = true;
+  } else {
+    socket.emit('message', {
+      tribe: tribeName,
+      message: editedMsg,
+      receiver: null,
+      timestamp,
+      global,
+    });
+  }
+}
+
+function handleMessagePost(message) {
+  const tribeName = chatState.tribeName;
+  const { editedMsg, timestamp } = handleUserInput(message);
   
   if (messageState.global === false) {
     postChatMessage(
@@ -215,10 +245,6 @@ function handleMessagePost(message) {
       timestamp,
       messageState.global
     );
-
-    if (replyToMsg !== null) {
-      replyToMsg.classList.remove('replying-to');
-    }
 
     messageState.receiver = 'global';
     messageState.replyTo = '';
@@ -278,7 +304,7 @@ export default async function TribeChat(tribe) {
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
-      handleMessagePost(messageInput.value);
+      handleSocketMessagePost(messageInput.value);
 
       messageInput.value = '';
       messageInput.focus();
@@ -287,11 +313,15 @@ export default async function TribeChat(tribe) {
   });
 
   messageBtn.addEventListener('click', () => {
-    handleMessagePost(messageInput.value);
+    handleSocketMessagePost(messageInput.value);
 
     messageInput.value = '';
     messageInput.focus();
     messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+  });
+
+  socket.on('connect', () => {
+    console.log(socket.id);
   });
 
   return tribeChatContainer;
