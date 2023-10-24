@@ -93,7 +93,7 @@
 
         & .user-message-wrapper {
           display: grid;
-          grid-template-columns: 100px 1fr 1fr 1fr 100px;
+          grid-template-columns: max-content 1fr 1fr 1fr 100px;
           grid-template-rows: 0px 1fr 0px;
           padding-inline: var(--p-inline);
           padding-block: var(--p-block);
@@ -106,6 +106,7 @@
 
           & .user-message-sender,
           & .user-message-receiver {
+            padding-right: 1rem;
             grid-row: 2 / 3;
             grid-column: 1 / 2;
           }
