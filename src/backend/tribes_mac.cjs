@@ -115,7 +115,9 @@ function getChatroomMessages(tribeUrl) {
         WHERE 
           msg.tribe_name = \$1
           AND msg.message_timestamp >= CURRENT_DATE::timestamp
-          AND msg.message_timestamp < (CURRENT_DATE + INTERVAL '1 day')::timestamp;
+          AND msg.message_timestamp < (CURRENT_DATE + INTERVAL '1 day')::timestamp
+        ORDER BY
+          msg.message_timestamp ASC;
       `,
       values: [tribe],
     };
@@ -125,6 +127,7 @@ function getChatroomMessages(tribeUrl) {
         logger.error(err);
         reject(err);
       } else {
+        logger.info(res.rows);
         resolve(res.rows);
       }
     });
