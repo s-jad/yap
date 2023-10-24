@@ -3,8 +3,9 @@ import { getAppState } from './app-state';
 import { getMessages, postChatMessage } from './tribes-db-access';
 import { io } from "socket.io-client";
 
-const activeMembers = [];
 const socket = io(process.env.SERVER_URL);
+
+const activeMembers = [];
 
 const chatState = {
   replying: false,
@@ -110,23 +111,32 @@ function checkForAtInInput(message) {
   return false;
 }
 
-function handleUserInput(message) {
+function handleUserInput(msg) {
   const messageView = document.querySelector('.message-view');
   const messageTimeline = document.querySelector('.message-timeline');
 
-  const atInMsg = checkForAtInInput(message);
+  const atInMsg = checkForAtInInput(msg);
   let editedMsg; 
 
   if (atInMsg) {
-    editedMsg = message.slice(message.indexOf(' ') + 1, message.length)
+    editedMsg = msg.slice(msg.indexOf(' ') + 1, msg.length)
   } else {
-    editedMsg = message
+    editedMsg = msg
   }
   const { newMessage, timeStampEl, timestamp } = createNewMessage(editedMsg);
   messageView.appendChild(newMessage);
   messageTimeline.appendChild(timeStampEl);
 
   return { editedMsg, timestamp };
+}
+
+function handleSocketMsg(msg) {
+  const messageView = document.querySelector('.message-view');
+  const messageTimeline = document.querySelector('.message-timeline');
+
+  const { newMessage, timeStampEl, _ } = createNewMessage(msg);
+  messageView.appendChild(newMessage);
+  messageTimeline.appendChild(timeStampEl);
 }
 
 function createDbMessage(msg) {
@@ -203,7 +213,7 @@ async function populateWithMessages(msgView, msgTimeline) {
   handleDbReturn(messages, msgView, msgTimeline);
 }
 
-async function handleSocketMessagePost(message) {
+async function handleMessagePost(message) {
   const tribeName = chatState.tribeName;
   const { editedMsg, timestamp } = handleUserInput(message);
   const global = messageState.global; 
@@ -233,35 +243,22 @@ async function handleSocketMessagePost(message) {
   }
 }
 
-function handleMessagePost(message) {
-  const tribeName = chatState.tribeName;
-  const { editedMsg, timestamp } = handleUserInput(message);
-  
-  if (messageState.global === false) {
-    postChatMessage(
-      tribeName,
-      editedMsg,
-      messageState.receiver,
-      timestamp,
-      messageState.global
-    );
-
-    messageState.receiver = 'global';
-    messageState.replyTo = '';
-    chatState.replying = false;
-    messageState.global = true;
-  } else {
-    postChatMessage(
-      tribeName,
-      editedMsg,
-      null,
-      timestamp,
-      messageState.global
-    );
-  }
-}
-
 export default async function TribeChat(tribe) {
+  socket.on('connection', () => {
+    console.log("Socket connected to server");
+    console.log(socket.id);
+  });
+
+  socket.on('message', (data) => {
+    try {
+      const parsedData = JSON.parse(JSON.stringify(data));
+      console.log('Received data:', parsedData);
+      handleSocketMsg(parsedData);
+    } catch (error) {
+      console.error('Error parsing data:', error);
+    }
+  });
+
   chatState.tribeName = tribe
     .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
     .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
@@ -304,7 +301,7 @@ export default async function TribeChat(tribe) {
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
-      handleSocketMessagePost(messageInput.value);
+      handleMessagePost(messageInput.value);
 
       messageInput.value = '';
       messageInput.focus();
@@ -313,20 +310,13 @@ export default async function TribeChat(tribe) {
   });
 
   messageBtn.addEventListener('click', () => {
-    handleSocketMessagePost(messageInput.value);
+    handleMessagePost(messageInput.value);
 
     messageInput.value = '';
     messageInput.focus();
     messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
   });
 
-  socket.on('connection', () => {
-    console.log(socket.id);
-  });
-
-  socket.on('message', (data) => {
-    console.log(data);
-  });
 
   return tribeChatContainer;
 }
