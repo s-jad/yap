@@ -32,7 +32,6 @@ function createNewMessage(message) {
   if (message === "") {
     return;
   }
-  
 
   const newMessage = document.createElement('div');
   newMessage.setAttribute('data-sender', getAppState('username'));
@@ -164,27 +163,16 @@ function createDbMessage(msg) {
   timeStampEl.innerHTML = `<p class="timestamp time-${timestamp}">${timeText}</p>`;
 
   newMessage.addEventListener('click', (ev) => {
-    // If the user has already clicked a message to reply to 
-    // and the message being clicked is NOT the one that was already clicked
-    if (chatState.replying 
-      && messageState.replyTo !== newMessage.classList.item(1)
-    ) {
-      return;
-    }
-
-    if (newMessage.classList.contains('replying-to')) {
-      newMessage.classList.remove('replying-to');
-      messageState.global = true;
-      messageState.receiver = '';
-      messageState.replyTo = '';
-      chatState.replying = false;
-    } else {
-      newMessage.classList.add('replying-to');
-      messageState.global = false;
-      messageState.receiver = ev.currentTarget.getAttribute('data-sender');
-      messageState.replyTo = newMessage.classList.item(1);
-      chatState.replying = true;
-    }
+    const sendMessageInput = document.body.querySelector('.send-message-input');
+    sendMessageInput.value = '';
+    messageState.global = false;
+    messageState.receiver = ev.currentTarget.getAttribute('data-sender');
+    messageState.replyTo = newMessage.classList.item(1);
+    chatState.replying = true;
+    const msgSenderTxt = newMessage.querySelector('.msg-sender').textContent;
+    const msgSender = msgSenderTxt.slice(0, msgSenderTxt.lastIndexOf(':'));
+    sendMessageInput.value = `@${msgSender} `;
+    sendMessageInput.focus();
   });
 
   return {
