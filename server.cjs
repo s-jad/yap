@@ -32,6 +32,39 @@ redisClient.on('ready', function() {
 });
 
 const app = express();
+const httpServer = require('http').createServer(app);
+const { Server } = require('socket.io');
+
+const io = new Server(httpServer, { /* options */ });
+
+io.engine.on("connection_error", (err) => {
+  console.log(err.req);
+  console.log(err.code);
+  console.log(err.message);
+  console.log(err.context);
+});
+
+io.engine.on('connection', (socket) => {
+  logger.info('New client connected');
+  socket.emit('connect', { message: 'A new client has connected! '});
+
+  socket.on('message', (data) => {
+    logger.info(`data => ${data}`);
+    if (data.includes('message')) {
+      try {
+        const msgData = (data.slice(data.indexOf(',') + 1, data.length - 1));
+        const jsonData = JSON.parse(msgData)
+        logger.info(`jsonData => ${jsonData}`);
+        const { tribe, timestamp } = jsonData;
+        const msgKey = `${tribe}.${timestamp}`;
+        logger.info(`msgKey, ${msgKey}`);
+        redisClient.set(msgKey, msgData);
+      } catch (error) {
+        logger.error(`Error parsing JSON => ${error}`);
+      }
+    }
+  });
+});
 
 app.use((req, res, next) => {
   console.log('Request URL:', req.originalUrl);
@@ -66,7 +99,10 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   // change to https to use secure true
-  cookie: { secure: false }
+  cookie: { 
+    secure: false,
+    sameSite: 'strict',
+  }
 }));
 
 app.use('/api/protected', authorization);
@@ -338,23 +374,22 @@ app.get('*', verifyJWT, async (req, res) => {
     logger.warn('User tried to access unknown API route');
     res.status(404).send('Route not found');
   } else {
-    try {
-      if (req.userId !== undefined && req.userName !== undefined) {
-        const dbResult = await tribesMac('user-exists', req.userId);
-        if (dbResult.user_name === req.userName) {
-          logger.info("Username matches db username");
+    if (req.url.startsWith('/socket.io')) {
+      logger.info("socket connection");
+      res.sendStatus(200);
+    } else {
+      logger.info("non-socket connection");
+      try {
+        if (req.userId !== undefined && req.userName !== undefined) {
           res.sendFile(path.resolve(__dirname, 'dist', 'main.html'));
         } else {
-          logger.info("username doesnt match db username");
+          logger.info("user name and userId missing");
           res.sendFile(path.resolve(__dirname, 'dist', 'login.html'));
         }
-      } else {
-        logger.info("user name and userId missng");
-        res.sendFile(path.resolve(__dirname, 'dist', 'login.html'));
+      } catch (error) {
+        logger.error(error);
+        res.status(500).send('An error occurred');
       }
-    } catch (error) {
-      logger.error(error);
-      res.status(500).send('An error occurred');
     }
   }
 });
@@ -365,4 +400,4 @@ app.use('/', function(err, req, res) {
   res.status(500).send('Something broke!');
 });
 
-app.listen(process.env.SERVER_PORT || port, () => logger.info(`Server is running on port ${port}`));
+httpServer.listen(process.env.SERVER_PORT || port, () => logger.info(`Server is running on port ${port}`));
