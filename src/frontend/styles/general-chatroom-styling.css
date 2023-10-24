@@ -3,7 +3,7 @@
   height: var(--container-height);
   
   & .messages-container-outer {
-    --mco-height: calc(100vh - calc(150px + var(--p-block)));
+    --mco-height: calc(var(--container-height) - var(--p-block));
     height: var(--mco-height);
     display: flex;
     flex-direction: column;
