@@ -74,8 +74,6 @@ function createNewMessage(msg) {
   timeStampEl.innerHTML = `<p class="timestamp time-${timestamp}">${timeText}</p>`;
 
   newMessage.addEventListener('click', (ev) => {
-    // If the user has already clicked a message to reply to 
-    // and the message being clicked is NOT the one that was already clicked
     if (chatState.replying 
       && messageState.replyTo !== newMessage.classList.item(1)
     ) {
@@ -159,10 +157,10 @@ function createDbMessage(msg) {
 
 function handleDbReturn(messages, msgView, msgTimeline) {
   messages.forEach((msg) => {
-    if (!activeMembers.includes(msg.sender_name)) {
+    if (!activeMembers.some((member) => member.username === msg.sender_name)) {
       activeMembers.push(getMemberState(msg.sender_name, msg.sender_color));
     }
-    if (!activeMembers.includes(msg.receiver_name)) {
+    if (!activeMembers.some((member) => member.username === msg.receiver_name)) {
       activeMembers.push(getMemberState(msg.receiver_name, msg.receiver_color));
     }
     const { newMessage, timeStampEl } = createDbMessage(msg);
