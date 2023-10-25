@@ -1,6 +1,6 @@
 import '../styles/general-chatroom-styling.css';
-import { getAppState } from './app-state';
-import { getMessages, postChatMessage } from './tribes-db-access';
+import { getAppState, updateAppState } from './app-state';
+import { getMessages } from './tribes-db-access';
 import { io } from "socket.io-client";
 
 const socket = io(process.env.SERVER_URL);
@@ -32,6 +32,7 @@ function getMemberState(username, memberHue) {
 }
 
 function createNewMessage(msg) {
+  console.log("inside createNewMessage!!");
   if (msg === undefined) {
     return;
   }
@@ -172,6 +173,8 @@ async function populateWithMessages(msgView, msgTimeline) {
   const tribeName = chatState.tribeName;
   const messages = await getMessages(tribeName);
   handleDbReturn(messages, msgView, msgTimeline);
+
+  
 }
 
 function checkForAtInInput(message) {
@@ -200,6 +203,7 @@ function handleUserInput(msg) {
 }
 
 function handleMsgReceive(msg) {
+  console.log("inside handleMsgReceive!!");
   const messageView = document.querySelector('.message-view');
   const messageTimeline = document.querySelector('.message-timeline');
   
@@ -305,5 +309,14 @@ export default async function TribeChat(tribe) {
     }
   });
 
+  window.addEventListener('beforeunload', () => {
+    socket.emit('window close')
+  });
+
+  messageInput.value = '';
+  messageInput.focus();
+  messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+
   return tribeChatContainer;
 }
+
