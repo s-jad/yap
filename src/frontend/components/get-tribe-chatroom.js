@@ -289,10 +289,8 @@ export default async function TribeChat(tribe) {
   const msgView = tribeChatContainer.querySelector('.message-view');
   const msgTimeline = tribeChatContainer.querySelector('.message-timeline');
 
-  const memberPresent = activeMembers.includes(member => member.username === getAppState('username'));
-
-  if (!memberPresent) {
-    activeMembers.push(getMemberState(getAppState('username'), getAppState('userColor')));
+  if (!activeMembers.some((member) => member.username === getAppState('username'))) {
+    activeMembers.push(getMemberState(getAppState('username'), parseInt(getAppState('userColor'), 10)));
   }
 
   await populateWithMessages(msgView, msgTimeline);
