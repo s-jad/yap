@@ -55,7 +55,6 @@ io.use(function(socket, next) {
     const signature = parts[1].split('=')[1];
     const payload = parts[2].split('=')[1];
     const token = `${signature}.${payload}`;
-    console.log("token => ", token);
     jwt.verify(token, jwtSecret, function(err, decoded) {
       if (err) return next(new Error('Authentication error'));
       socket.decoded = decoded;
@@ -73,16 +72,27 @@ io.on('connection', (socket) => {
 
   socket.on('message', (data) => {
     logger.info(typeof data);
-    console.log("data => ", data);
-    if ('message' in data) {
+    let toStore;
+    if (data.receiver_name === null) {
+      toStore = { 
+        ...data, 
+        receiver_name: socket.decoded.userName, 
+        sender_name: socket.decoded.userName
+      };
+    } else {
+      toStore = { ...data, sender_name: socket.decoded.userName };
+    }
+    if ('message_content' in toStore) {
       try {
-        const msgStr = JSON.stringify(data);
+        const msgStr = JSON.stringify(toStore);
         const jsonData = JSON.parse(msgStr);
-        logger.info(`jsonData => ${jsonData}`);
-        const { tribe, timestamp } = jsonData;
-        const msgKey = `${tribe}.${timestamp}`;
-        logger.info(`msgKey, ${msgKey}`);
+        const { tribe_name, message_timestamp } = jsonData;
+        const msgKey = `${tribe_name}.${message_timestamp}`;
+        console.log("msgKey =>", msgKey);
+        console.log('msgStr =>', msgStr);
         redisClient.set(msgKey, msgStr);
+        io.emit('message', msgStr);
+
       } catch (error) {
         logger.error(`Error parsing JSON => ${error}`);
       }
