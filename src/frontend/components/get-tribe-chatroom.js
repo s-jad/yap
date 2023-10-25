@@ -32,11 +32,10 @@ function getMemberState(username, memberHue) {
 }
 
 function createNewMessage(msg) {
-  if (msg === "") {
+  if (msg === undefined) {
     return;
   }
-  console.log("createNewMessage::message => ", msg);
-  console.log("activeMembers => ", activeMembers);
+
   const { sender_name, receiver_name, message_content } = msg;
 
   const newMessage = document.createElement('div');
@@ -240,23 +239,6 @@ async function handleMsgPost(msg) {
 }
 
 export default async function TribeChat(tribe) {
-  socket.on('connection', () => {
-    console.log("Socket connected to server");
-  });
-
-  socket.on('message', (data) => {
-    try {
-      const parsedData = JSON.parse(data);
-      handleMsgReceive(parsedData);
-
-      messageInput.value = '';
-      messageInput.focus();
-      messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
-    } catch (error) {
-      console.error('Error parsing data:', error);
-    }
-  });
-
   chatState.tribeName = tribe
     .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
     .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
@@ -303,6 +285,24 @@ export default async function TribeChat(tribe) {
 
   messageBtn.addEventListener('click', () => {
     handleMsgPost(messageInput.value);
+  });
+
+  socket.on('connection', (data) => {
+    console.log(data.message);
+    socket.emit('join chatroom', (chatState.tribeName));
+  });
+
+  socket.on('message', (data) => {
+    try {
+      const parsedData = JSON.parse(data);
+      handleMsgReceive(parsedData);
+
+      messageInput.value = '';
+      messageInput.focus();
+      messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+    } catch (error) {
+      console.error('Error parsing data:', error);
+    }
   });
 
   return tribeChatContainer;
