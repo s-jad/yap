@@ -31,39 +31,43 @@ function getMemberState(username, memberHue) {
   }
 }
 
-function createNewMessage(message) {
-  if (message === "") {
+function createNewMessage(msg) {
+  if (msg === "") {
     return;
   }
+  console.log("createNewMessage::message => ", msg);
+  console.log("activeMembers => ", activeMembers);
+  const { sender_name, receiver_name, message_content } = msg;
 
   const newMessage = document.createElement('div');
-  newMessage.setAttribute('data-sender', getAppState('username'));
+  newMessage.setAttribute('data-sender', sender_name);
 
   const timestamp = new Date().toISOString();
   const timeText = timestamp.slice(timestamp.indexOf('T') + 1, timestamp.indexOf('.'))
   newMessage.className = `message-wrapper message-${timestamp}`;
 
-  if (messageState.receiver === 'global') {
+  if (receiver_name === sender_name) {
     newMessage.setAttribute('data-receiver', 'global');
     newMessage.innerHTML = `
-      <p class="msg-sender">${getAppState('username')}:</p>
-      <p class="user-message">${message}</p>
+      <p class="msg-sender">${sender_name}:</p>
+      <p class="user-message">${message_content}</p>
     `;
   } else {
-    newMessage.setAttribute('data-receiver', messageState.receiver);
+    newMessage.setAttribute('data-receiver', receiver_name);
     newMessage.innerHTML = `
-      <p class="msg-sender">${getAppState('username')}:</p>
-      <p class="user-replying-to">@${messageState.receiver}</p>
-      <p class="user-message">${message}</p>
+      <p class="msg-sender">${sender_name}:</p>
+      <p class="user-replying-to">@${receiver_name}</p>
+      <p class="user-message">${message_content}</p>
 
     `;
     const msgReceiverEl = newMessage.querySelector('.user-replying-to');
-    const receiver = activeMembers.find(member => member.username === messageState.receiver);
+    const receiver = activeMembers.find(member => member.username === receiver_name);
     msgReceiverEl.style.color = `hsl(${receiver.color}, 100%, 70%)`;
   }
   
+  const sender = activeMembers.find(member => member.username === sender_name);
   const msgSenderEl = newMessage.querySelector('.msg-sender');
-  msgSenderEl.style.color = `hsl(${getAppState('userColor')}, 100%, 70%)`;
+  msgSenderEl.style.color = `hsl(${sender.color}, 100%, 70%)`;
 
   const timeStampEl = document.createElement('div');
   timeStampEl.className = 'timestamp-wrapper';
@@ -96,47 +100,7 @@ function createNewMessage(message) {
   return {
     newMessage,
     timeStampEl,
-    timestamp
   };
-}
-
-function checkForAtInInput(message) {
-  if (message.includes('@')) {
-    const receiver = message.slice(message.indexOf('@') + 1, message.indexOf(' '));
-    messageState.global = false;
-    messageState.receiver = receiver;
-    return true;
-  }
-
-  return false;
-}
-
-function handleUserInput(msg) {
-  const messageView = document.querySelector('.message-view');
-  const messageTimeline = document.querySelector('.message-timeline');
-
-  const atInMsg = checkForAtInInput(msg);
-  let editedMsg; 
-
-  if (atInMsg) {
-    editedMsg = msg.slice(msg.indexOf(' ') + 1, msg.length)
-  } else {
-    editedMsg = msg
-  }
-  const { newMessage, timeStampEl, timestamp } = createNewMessage(editedMsg);
-  messageView.appendChild(newMessage);
-  messageTimeline.appendChild(timeStampEl);
-
-  return { editedMsg, timestamp };
-}
-
-function handleSocketMsg(msg) {
-  const messageView = document.querySelector('.message-view');
-  const messageTimeline = document.querySelector('.message-timeline');
-
-  const { newMessage, timeStampEl, _ } = createNewMessage(msg);
-  messageView.appendChild(newMessage);
-  messageTimeline.appendChild(timeStampEl);
 }
 
 function createDbMessage(msg) {
@@ -213,9 +177,43 @@ async function populateWithMessages(msgView, msgTimeline) {
   handleDbReturn(messages, msgView, msgTimeline);
 }
 
-async function handleMessagePost(message) {
+function checkForAtInInput(message) {
+  if (message.includes('@')) {
+    const receiver = message.slice(message.indexOf('@') + 1, message.indexOf(' '));
+    messageState.global = false;
+    messageState.receiver = receiver;
+    return true;
+  }
+
+  return false;
+}
+
+function handleUserInput(msg) {
+  const timestamp = new Date().toISOString();
+  const atInMsg = checkForAtInInput(msg);
+  let editedMsg; 
+
+  if (atInMsg) {
+    editedMsg = msg.slice(msg.indexOf(' ') + 1, msg.length);
+  } else {
+    editedMsg = msg
+  }
+
+  return { editedMsg, timestamp };
+}
+
+function handleMsgReceive(msg) {
+  const messageView = document.querySelector('.message-view');
+  const messageTimeline = document.querySelector('.message-timeline');
+  
+  const { newMessage, timeStampEl } = createNewMessage(msg);
+  messageView.appendChild(newMessage);
+  messageTimeline.appendChild(timeStampEl);
+}
+
+async function handleMsgPost(msg) {
   const tribeName = chatState.tribeName;
-  const { editedMsg, timestamp } = handleUserInput(message);
+  const { editedMsg, timestamp } = handleUserInput(msg);
   const global = messageState.global; 
   console.log("Emitting socket message");
 
@@ -246,14 +244,16 @@ async function handleMessagePost(message) {
 export default async function TribeChat(tribe) {
   socket.on('connection', () => {
     console.log("Socket connected to server");
-    console.log(socket.id);
   });
 
   socket.on('message', (data) => {
     try {
-      const parsedData = JSON.parse(JSON.stringify(data));
-      console.log('Received data:', parsedData);
-      handleSocketMsg(parsedData);
+      const parsedData = JSON.parse(data);
+      handleMsgReceive(parsedData);
+
+      messageInput.value = '';
+      messageInput.focus();
+      messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
     } catch (error) {
       console.error('Error parsing data:', error);
     }
@@ -301,22 +301,13 @@ export default async function TribeChat(tribe) {
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
-      handleMessagePost(messageInput.value);
-
-      messageInput.value = '';
-      messageInput.focus();
-      messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+      handleMsgPost(messageInput.value);
     }
   });
 
   messageBtn.addEventListener('click', () => {
-    handleMessagePost(messageInput.value);
-
-    messageInput.value = '';
-    messageInput.focus();
-    messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+    handleMsgPost(messageInput.value);
   });
-
 
   return tribeChatContainer;
 }
