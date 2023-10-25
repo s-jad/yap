@@ -104,6 +104,12 @@ io.on('connection', (socket) => {
       }
     }
   });
+
+  socket.on('window close', () => {
+    console.log(`Disconnecting socket id: ${socket.id}`);
+    socket.disconnect()
+  });
+
 });
 
 // app.use((req, res, next) => {
