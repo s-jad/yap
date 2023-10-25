@@ -42,10 +42,10 @@ const { Server } = require('socket.io');
 const io = new Server(httpServer, { /* options */ });
 
 io.on("connection_error", (err) => {
-  console.log(err.req);
-  console.log(err.code);
-  console.log(err.message);
-  console.log(err.context);
+  logger.error(err.req);
+  logger.error(err.code);
+  logger.error(err.message);
+  logger.error(err.context);
 });
 
 io.use(function(socket, next) {
@@ -67,8 +67,13 @@ io.use(function(socket, next) {
 });
 
 io.on('connection', (socket) => {
-  logger.info('New client connected');
-  socket.emit('connection', { message: 'A new client has connected! '});
+  console.log(`A new client connected: ${socket.id}`);
+  socket.emit('connection', { message: `A new client has connected! with socket id of ${socket.id}`});
+
+  socket.on('join chatroom', (chatroom) => {
+    socket.join(chatroom);
+    console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
+  })
 
   socket.on('message', (data) => {
     logger.info(typeof data);
@@ -91,7 +96,8 @@ io.on('connection', (socket) => {
         console.log("msgKey =>", msgKey);
         console.log('msgStr =>', msgStr);
         redisClient.set(msgKey, msgStr);
-        io.emit('message', msgStr);
+
+        io.to(tribe_name).emit('message', msgStr);
 
       } catch (error) {
         logger.error(`Error parsing JSON => ${error}`);
@@ -100,10 +106,10 @@ io.on('connection', (socket) => {
   });
 });
 
-app.use((req, res, next) => {
-  console.log('Request URL:', req.originalUrl);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('Request URL:', req.originalUrl);
+//   next();
+// });
 
 app.use(connectLiveReload());
 
@@ -122,8 +128,6 @@ app.use('/', express.static(path.join(__dirname, '/'), {
 }));
 
 app.use('/assets/imgs', express.static(path.join(__dirname, '/assets/imgs')));
-
-
 
 app.use(session({
   store: new RedisStore({ client: redisClient }),
