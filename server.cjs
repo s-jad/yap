@@ -25,11 +25,15 @@ const { authorization } = require('./src/backend/auth.cjs');
 const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
 const { logger } = require('./src/backend/logging.cjs');
+const { backupChatMessages } = require('./src/backend/job-sceduler.cjs');
 const { redisClient } = require('./src/backend/redis-client.cjs');
 
 redisClient.on('ready', function() {
   logger.info('Redis client is ready');
 });
+
+backupChatMessages(redisClient);
+logger.info('Chat message backup is ready');
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -39,7 +43,25 @@ app.use(cookieParser());
 const httpServer = require('http').createServer(app);
 const { Server } = require('socket.io');
 
-const io = new Server(httpServer, { /* options */ });
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.SERVER_URL,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['*'],
+    credentials: true,
+  },
+
+  handlePreflightRequest: (req, res) => {
+    const headers = {
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Origin': req.headers.origin,
+      'Access-Control-Allow-Credentials': true,
+    };
+    console.log('Preflight-request headers => ', headers);
+    res.writeHead(200, headers);
+    res.end();
+  }
+});
 
 io.on("connection_error", (err) => {
   logger.error(err.req);
@@ -84,8 +106,8 @@ io.on('connection', (socket) => {
       .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
       .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
 
-    console.log("referer chatroom link => ", chatroom);
     try {
+      console.log("joining chatroom via page refresh");
       socket.join(chatroom);
       console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
     } catch (error) {
@@ -95,6 +117,7 @@ io.on('connection', (socket) => {
 
   socket.on('join chatroom', (chatroom) => {
     try {
+      console.log('joining chatroom via socket.emit("join chatroom")');
       socket.join(chatroom);
       console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
     } catch (error) {
@@ -112,16 +135,20 @@ io.on('connection', (socket) => {
   })
 
   socket.on('message', (data) => {
-    logger.info(typeof data);
     let toStore;
     if (data.receiver_name === null) {
       toStore = { 
         ...data, 
         receiver_name: socket.decoded.userName, 
-        sender_name: socket.decoded.userName
+        sender_name: socket.decoded.userName,
+        sender_id: socket.decoded.id,
       };
     } else {
-      toStore = { ...data, sender_name: socket.decoded.userName };
+      toStore = {
+        ...data,
+        sender_name: socket.decoded.userName,
+        sender_id: socket.decoded.id,
+      };
     }
     if ('message_content' in toStore) {
       try {
@@ -148,10 +175,11 @@ io.on('connection', (socket) => {
 
 });
 
-// app.use((req, res, next) => {
-//   console.log('Request URL:', req.originalUrl);
-//   next();
-// });
+// FOR DEBUGGING!
+app.use((req, res, next) => {
+  console.log('Request URL:', req.originalUrl);
+  next();
+});
 
 app.use(connectLiveReload());
 
