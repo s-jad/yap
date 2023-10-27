@@ -1,5 +1,5 @@
 import { getAppState } from './app-state';
-import { disconnectSocket, getSocketInitState, socket } from './sockets';
+import { disconnectSocket, getSocketInitState, initialiseSocket, socket } from './sockets';
 
 let prevChatroom;
 
@@ -27,7 +27,12 @@ function getComponent(fn) {
 
 async function getChatroom(fn, tribe) {
   prevChatroom = getAppState('current-room');
-  console.log(`prevChatroom => ${prevChatroom}`);
+
+  if (getSocketInitState()) {
+    disconnectSocket();
+  }
+        
+  initialiseSocket();
   const chatroom = await fn(tribe);
   return chatroom;
 }
@@ -215,7 +220,7 @@ function handleChatroomLinks(tribe) {
           .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
           .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
 
-        if (prevChatroom !== undefined) {
+        if (prevChatroom !== tribeName) {
           console.log(`Leaving ${prevChatroom}`);
           socket.emit('leave chatroom', prevChatroom);
         }
