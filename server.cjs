@@ -78,7 +78,12 @@ io.on('connection', (socket) => {
   // For page refreshes
   const referer = socket.request.headers.referer
   if (referer.includes('/tribe-chat')) {
-    const chatroom = referer.slice(referer.lastIndexOf('/') + 1, referer.length);
+    const tribe = referer.slice(referer.lastIndexOf('/'), referer.length);
+
+    const chatroom = tribe
+      .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
+      .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+
     console.log("referer chatroom link => ", chatroom);
     try {
       socket.join(chatroom);
