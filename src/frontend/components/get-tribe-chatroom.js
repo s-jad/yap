@@ -1,9 +1,7 @@
 import '../styles/general-chatroom-styling.css';
 import { getAppState, updateAppState } from './app-state';
 import { getMessages } from './tribes-db-access';
-import { io } from "socket.io-client";
-
-const socket = io(process.env.SERVER_URL);
+import { initialiseSocket, getSocketInitState, socket } from './sockets';
 
 const activeMembers = [];
 
@@ -247,6 +245,7 @@ export default async function TribeChat(tribe) {
     .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
     .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
 
+  updateAppState('current-room', chatState.tribeName);
   const tribeChatContainer = document.createElement('div');
   tribeChatContainer.id = 'tribe-chat-container';
   tribeChatContainer.className = 'chat-container removable';
@@ -291,9 +290,12 @@ export default async function TribeChat(tribe) {
     handleMsgPost(messageInput.value);
   });
 
+  if (!getSocketInitState()) {
+    initialiseSocket();
+  }
+
   socket.on('connection', (data) => {
     console.log(data.message);
-    socket.emit('join chatroom', (chatState.tribeName));
   });
 
   socket.on('message', (data) => {
@@ -309,9 +311,6 @@ export default async function TribeChat(tribe) {
     }
   });
 
-  window.addEventListener('beforeunload', () => {
-    socket.emit('window close')
-  });
 
   messageInput.value = '';
   messageInput.focus();
