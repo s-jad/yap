@@ -158,6 +158,7 @@ async function postChatMessage(tribe, message, receiver, timestamp, global) {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify({
       tribe,
       message,
