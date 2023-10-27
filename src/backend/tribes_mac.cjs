@@ -51,7 +51,6 @@ function getLastTribeLogin(userId) {
         logger.error(err);
         reject(err);
       } else {
-        console.log("getLastTribeLogin => tribe suggestion: ", res.rows);
         if (res.rows.length < 3) {
           getRandomTribeSuggestions()
             .then(tribeSuggestions => {
@@ -134,14 +133,27 @@ function getChatroomMessages(tribeUrl) {
 }
 
 function postGlobalMessage(messageData) {
-  const { tribe, message, _, timestamp, global, sender } = messageData;
+  const { 
+    tribe_name,
+    message_content, 
+    message_timestamp,
+    global,
+    sender_id } = messageData;
+
   const query = {
     text: `
       INSERT into chatroom_messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
       VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
       RETURNING *;
     `,
-    values: [tribe, message, sender, sender, timestamp, global],
+    values: [
+      tribe_name,
+      message_content,
+      sender_id,
+      sender_id,
+      message_timestamp,
+      global
+    ],
   };
 
   return new Promise((resolve, reject) => {
@@ -153,21 +165,28 @@ function postGlobalMessage(messageData) {
         logger.error(err);
         reject(new Error('Error posting message.'));
       } else {
-        resolve(res.rows[0]);
+        resolve(true);
       }
     })
   })
 }
 
 function postPersonalMessage(messageData) {
-  const { tribe, message, receiver, timestamp, global, sender } = messageData;
+  const { 
+    tribe_name, 
+    message_content, 
+    receiver_name,
+    message_timestamp,
+    sender_id,
+    global } = messageData;
+
   const receiverIdQuery = {
     text: `
       SELECT user_id FROM users WHERE user_name = \$1;
     `,
-    values: [receiver],
+    values: [receiver_name],
   };
-  console.log("postPersonalMessage::sender => ", sender);
+  console.log("postPersonalMessage::sender => ", sender_id);
   return new Promise((resolve, reject) => {
     pg_client.query(receiverIdQuery)
       .then(res => {
@@ -182,14 +201,21 @@ function postPersonalMessage(messageData) {
               VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
               RETURNING *;
             `,
-            values: [tribe, message, sender, receiverId, timestamp, global],
+            values: [
+              tribe_name,
+              message_content,
+              sender_id,
+              receiverId,
+              message_timestamp,
+              global
+            ],
           };
 
           return pg_client.query(postMessageQuery);
         }
       })
       .then(res => {
-        resolve(res.rows[0]);
+        resolve(true);
       })
       .catch((err) => {
         logger.error(err);
@@ -198,14 +224,18 @@ function postPersonalMessage(messageData) {
   });
 }
 
-function postChatroomMessage(messageData) {
+function backupChatroomMessages(messageData) {
+  console.log("Inside backupChatroomMessages!")
   const { global } = messageData;
+  console.log("messageData => ", messageData);
   if (global) {
     logger.info("Posting global message");
-    postGlobalMessage(messageData);
+    const res = postGlobalMessage(messageData);
+    return res;
   } else {
     logger.info("Posting personal message");
-    postPersonalMessage(messageData);
+    const res = postPersonalMessage(messageData);
+    return res;
   }
 }
 
@@ -480,8 +510,9 @@ async function tribesMac(req, data) {
       const inboxMessages = await getInboxMessages(data);
       return inboxMessages;
 
-    case 'post-message':
-      const msg = await postChatroomMessage(data);
+    case 'backup-chatroom-messages':
+      const msg = await backupChatroomMessages(data);
+      console.log("tribesMac::msg => ", msg);
       return msg;
 
     case 'get-password':
