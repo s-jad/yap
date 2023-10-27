@@ -1,4 +1,7 @@
 import { getAppState } from './app-state';
+import { disconnectSocket, getSocketInitState, socket } from './sockets';
+
+let prevChatroom;
 
 const importedList = {
   reportUserForm: false,
@@ -23,6 +26,8 @@ function getComponent(fn) {
 }
 
 async function getChatroom(fn, tribe) {
+  prevChatroom = getAppState('current-room');
+  console.log(`prevChatroom => ${prevChatroom}`);
   const chatroom = await fn(tribe);
   return chatroom;
 }
@@ -205,6 +210,17 @@ function handleChatroomLinks(tribe) {
       if (toAdd) {
         app.removeChild(toRemove);
         app.appendChild(toAdd);
+        
+        const tribeName = tribe
+          .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
+          .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+
+        if (prevChatroom !== undefined) {
+          console.log(`Leaving ${prevChatroom}`);
+          socket.emit('leave chatroom', prevChatroom);
+        }
+
+        socket.emit('join chatroom', tribeName);
       }
     })
     .catch((error) => {
@@ -215,6 +231,10 @@ function handleChatroomLinks(tribe) {
 function handleClientSideLinks(page) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
+
+  if (getSocketInitState()) {
+    disconnectSocket();
+  }
 
   importModules(page)
     .then((toAdd) => {
