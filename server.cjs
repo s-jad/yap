@@ -50,6 +50,7 @@ io.on("connection_error", (err) => {
 
 io.use(function(socket, next) {
   if (socket.request.headers.cookie){
+    console.log(socket.request.headers);
     const cookies = socket.request.headers.cookie;
     const parts = cookies.split(';');
     const signature = parts[1].split('=')[1];
@@ -67,12 +68,42 @@ io.use(function(socket, next) {
 });
 
 io.on('connection', (socket) => {
-  console.log(`A new client connected: ${socket.id}`);
-  socket.emit('connection', { message: `A new client has connected! with socket id of ${socket.id}`});
+  try {
+    console.log(`A new client connected: ${socket.id}`);
+    socket.emit('connection', { message: `A new client has connected! with socket id of ${socket.id}`});
+  } catch (error) {
+    console.log(`Error connecting client: ${error}`);
+  }
+  
+  // For page refreshes
+  const referer = socket.request.headers.referer
+  if (referer.includes('/tribe-chat')) {
+    const chatroom = referer.slice(referer.lastIndexOf('/') + 1, referer.length);
+    console.log("referer chatroom link => ", chatroom);
+    try {
+      socket.join(chatroom);
+      console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
+    } catch (error) {
+      console.log(`Error joining ${chatroom}: ${error}`);
+    }
+  }
 
   socket.on('join chatroom', (chatroom) => {
-    socket.join(chatroom);
-    console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
+    try {
+      socket.join(chatroom);
+      console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
+    } catch (error) {
+      console.log(`Error joining ${chatroom}: ${error}`);
+    }
+  });
+
+  socket.on('leave chatroom', (chatroom) => {
+    try {
+      socket.leave(chatroom);
+      console.log(`Socket ${socket.id} left chatroom ${chatroom}`);
+    } catch (error) {
+      console.log(`Error leaving ${chatroom}: ${error}`);
+    }
   })
 
   socket.on('message', (data) => {
@@ -105,7 +136,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('window close', () => {
+  socket.on('user disconnect', () => {
     console.log(`Disconnecting socket id: ${socket.id}`);
     socket.disconnect()
   });
