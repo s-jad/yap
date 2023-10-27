@@ -25,7 +25,7 @@ const { authorization } = require('./src/backend/auth.cjs');
 const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
 const { logger } = require('./src/backend/logging.cjs');
-const { backupChatMessages } = require('./src/backend/job-sceduler.cjs');
+const { backupChatMessages } = require('./src/backend/job-scheduler.cjs');
 const { redisClient } = require('./src/backend/redis-client.cjs');
 
 redisClient.on('ready', function() {
