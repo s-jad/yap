@@ -1,7 +1,7 @@
 import '../styles/general-chatroom-styling.css';
 import { getAppState, updateAppState } from './app-state';
 import { getMessages } from './tribes-db-access';
-import { initialiseSocket, getSocketInitState, socket } from './sockets';
+import { socket } from './sockets';
 
 const activeMembers = [];
 
@@ -290,10 +290,6 @@ export default async function TribeChat(tribe) {
     handleMsgPost(messageInput.value);
   });
 
-  if (!getSocketInitState()) {
-    initialiseSocket();
-  }
-
   socket.on('connection', (data) => {
     console.log(data.message);
   });
@@ -310,7 +306,6 @@ export default async function TribeChat(tribe) {
       console.error('Error parsing data:', error);
     }
   });
-
 
   messageInput.value = '';
   messageInput.focus();
