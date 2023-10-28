@@ -13,8 +13,7 @@ import {
 
 
 
-async function clientRouting() {
-  const currentRoute = window.location.pathname;
+async function clientRouting(currentRoute) {
   sessionStorage.setItem('lastPage', currentRoute);
 
   let component;
@@ -80,11 +79,19 @@ export default async function App() {
   appContainer.classList.add('app-container');
   appContainer.id = 'app';
 
-  const currentComponent = await clientRouting();
+  const currentRoute = window.location.pathname;
+  const currentComponent = await clientRouting(currentRoute);
+  
+  let sidebarUrl;
+  if (currentRoute.includes('tribe-chat')) {
+    const urlSplit = currentRoute.split('/');
+    sidebarUrl = urlSplit[1];
+  }
+
   const header = await Header();
   appContainer.appendChild(header);
   appContainer.appendChild(currentComponent);
-  appContainer.appendChild(Sidebar());
+  appContainer.appendChild(Sidebar(sidebarUrl));
   appContainer.appendChild(HamburgerBtn());
 
   window.addEventListener('popstate', async() => {
