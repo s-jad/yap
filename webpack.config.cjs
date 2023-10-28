@@ -22,6 +22,12 @@ module.exports = {
     main: './src/frontend/main.js'
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
     new webpack.DefinePlugin({
         'process.env.SERVER_URL': JSON.stringify(process.env.SERVER_URL),
     }),
@@ -116,5 +122,14 @@ module.exports = {
         },
       },
     ],
+  },
+  resolve: {
+    fallback: {
+      "crypto": require.resolve("crypto-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "buffer": require.resolve("buffer"),
+      "url": require.resolve("url"),
+      "util": require.resolve("util")
+    }
   },
 };
