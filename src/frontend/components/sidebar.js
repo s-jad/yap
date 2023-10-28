@@ -1,7 +1,52 @@
 import { handleClientSideLinks } from './fetch_apis';
-import { getSidebarIcons, getLogo } from './icons';
+import {
+  getSidebarIcons,
+  getOptionalSidebarIcons,
+  getLogo,
+} from './icons';
 
-export default function Sidebar() {
+function getOptionalSidebarItems(sidebarUrl) {
+  const optionalItemContainer = document.createElement('ul');
+  optionalItemContainer.className = 'optional-items-container';
+
+  switch (sidebarUrl) {
+    case 'tribe-chat':
+      const res = setSidebarTribeChat(optionalItemContainer);
+      return res;
+
+    default:
+      break;
+  }
+}
+
+function setSidebarTribeChat(optionalItemContainer) {
+  optionalItemContainer.innerHTML = `
+    <li class="sidebar-list-item">
+      <a class="sidebar-list-anchor" data-link="/tribe-chat/members" href="/tribe-chat/members"></a>
+    </li>
+  `;
+
+  const links = Array.from(optionalItemContainer.querySelectorAll('li'));
+
+  const icon = getOptionalSidebarIcons('tribe-chat');
+  
+  links.forEach((link, index) => {
+    link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const url = link.getAttribute('data-link');
+      history.pushState(null, null, url);
+      handleClientSideLinks(url);
+    });
+    icon.className = 'sidebar-list-icon';
+    link.appendChild(icon);
+  });
+
+  console.log("optionalItemContainer => ", optionalItemContainer);
+
+  return optionalItemContainer;
+}
+
+export default function Sidebar(sidebarUrl) {
   const sidebarContainer = document.createElement('div');
   sidebarContainer.className = 'sidebar-container hideable';
 
@@ -12,8 +57,9 @@ export default function Sidebar() {
   sidebarListFlex.innerHTML = `
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/dashboard" href="/dashboard"></a></li>
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/inbox" href="/inbox"></a></li>
-  `;
 
+  `;
+  
   const icons = getSidebarIcons();
   const links = Array.from(sidebarListFlex.querySelectorAll('[data-link]'));
 
@@ -28,9 +74,12 @@ export default function Sidebar() {
     icons[index].className = 'sidebar-list-icon';
     link.appendChild(icons[index]);
   });
-
+  
+  const optionalListFlex = getOptionalSidebarItems(sidebarUrl);
+  console.log("optionalListFlex => ", optionalListFlex);
   sidebarContainer.appendChild(logo);
   sidebarContainer.appendChild(sidebarListFlex);
+  sidebarContainer.appendChild(optionalListFlex);
 
   return sidebarContainer;
 }
