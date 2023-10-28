@@ -82,16 +82,18 @@ export default async function App() {
   const currentRoute = window.location.pathname;
   const currentComponent = await clientRouting(currentRoute);
   
-  let sidebarUrl;
+  const urls = [];
   if (currentRoute.includes('tribe-chat')) {
     const urlSplit = currentRoute.split('/');
-    sidebarUrl = urlSplit[1];
+    const sidebarUrl = urlSplit[1];
+    const chatroomUrl = urlSplit[2];
+    urls.push(sidebarUrl, chatroomUrl);
   }
 
   const header = await Header();
   appContainer.appendChild(header);
   appContainer.appendChild(currentComponent);
-  appContainer.appendChild(Sidebar(sidebarUrl));
+  appContainer.appendChild(Sidebar(urls));
   appContainer.appendChild(HamburgerBtn());
 
   window.addEventListener('popstate', async() => {
