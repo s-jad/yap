@@ -144,7 +144,7 @@ export default function Welcome() {
     const userColor = Math.floor(Math.random() * 360);
 
     try {
-      const { userId } = await createUser(username, password, joined, userColor);
+      await createUser(username, password, joined, userColor);
       displayCreateAccountError.textContent = '';      
       history.pushState(null, null, '/dashboard');
       const randomTribeSuggestions = await getRandomTribeSuggestions();
