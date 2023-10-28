@@ -24,6 +24,8 @@
 
   --bg-clr: hsla(0, 0%, 18%, 1);
   --card-clr: hsla(0, 0%, 12%, 1);
+  --bg-clr-03: hsla(0, 0%, 18%, 0.3);
+  --card-clr-03: hsla(0, 0%, 12%, 0.3);
   --thistle: hsla(290, 35%, 83%, 1);
   --lemon-chiffon: hsla(58, 74%, 85%, 1);
 
