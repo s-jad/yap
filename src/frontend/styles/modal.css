@@ -1,0 +1,23 @@
+.modal-outer {
+  position: absolute;
+  content: "";
+  inset: 0;
+  background: hsla(0, 60%, 10%, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+
+  & .modal-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    height: 50vh;
+    width: 50vw;
+    background: var(--bg-clr);
+    color: var(--font-clr);
+    padding: var(--p-block) var(--p-inline);
+    border-radius: 1rem;
+    box-shadow: var(--shadow), var(--shadow-inset);
+  }
+}
