@@ -27,7 +27,7 @@ async function getGroupsLinks() {
   
   let tribeSuggestions = getAppState('header-tribe-suggestions');
 
-  if (tribeSuggestions === undefined) {
+  if (tribeSuggestions === undefined || tribeSuggestions === null) {
     tribeSuggestions = await getLastTribeLogins();
   }
 
@@ -67,6 +67,7 @@ export default async function Header() {
   const userName = document.createElement('h1');
   userName.className = 'username-title';
   userName.textContent = getAppState('username');
+  console.log("username => ", getAppState('username'));
   const groupLinksContainer = await getGroupsLinks();
   headerContainer.appendChild(userName);
   headerContainer.appendChild(groupLinksContainer);
