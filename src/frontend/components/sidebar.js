@@ -16,6 +16,8 @@ function getOptionalSidebarItems(urls) {
     const tribe = urls[1];
     const res = setSidebarTribeChat(optionalItemContainer, tribe);
     return res;
+  } else {
+    return optionalItemContainer;
   }
 }
 
@@ -39,8 +41,6 @@ function setSidebarTribeChat(optionalItemContainer, tribe) {
     icon.className = 'sidebar-list-icon';
     link.appendChild(icon);
   });
-
-  console.log("optionalItemContainer => ", optionalItemContainer);
 
   return optionalItemContainer;
 }
@@ -75,7 +75,6 @@ export default function Sidebar(urls) {
   });
   
   const optionalListFlex = getOptionalSidebarItems(urls);
-  console.log("optionalListFlex => ", optionalListFlex);
   sidebarContainer.appendChild(logo);
   sidebarContainer.appendChild(sidebarListFlex);
   sidebarContainer.appendChild(optionalListFlex);
