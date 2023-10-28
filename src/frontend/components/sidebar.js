@@ -56,7 +56,6 @@ export default function Sidebar(urls) {
   sidebarListFlex.innerHTML = `
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/dashboard" href="/dashboard"></a></li>
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/inbox" href="/inbox"></a></li>
-
   `;
   
   const icons = getSidebarIcons();
@@ -78,6 +77,16 @@ export default function Sidebar(urls) {
   sidebarContainer.appendChild(logo);
   sidebarContainer.appendChild(sidebarListFlex);
   sidebarContainer.appendChild(optionalListFlex);
+  
+  sidebarContainer.addEventListener('sidebar-link-change', (ev) => {
+    const newUrls = []
+    const currentUrlSplit = ev.detail.currentUrl.split('/');
+    newUrls.push(currentUrlSplit[1], currentUrlSplit[2]);
+    const toRemove = sidebarContainer.querySelector('.optional-items-container');
+    const newOptionalListFlex = getOptionalSidebarItems(newUrls);
+    sidebarContainer.removeChild(toRemove);
+    sidebarContainer.appendChild(newOptionalListFlex);
+  });
 
   return sidebarContainer;
 }
