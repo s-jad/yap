@@ -468,6 +468,35 @@ function getPwHash(user) {
   });
 }
 
+function getTribeMembers(tribe) {
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: `
+        SELECT users.user_name
+        FROM users
+        JOIN tribe_members ON users.user_id = tribe_members.member_id
+        JOIN tribes ON tribe_members.tribe_id = tribes.tribe_id
+        WHERE tribes.tribe_name = \$1;
+      `,
+      values: [tribe],
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else if (res.rows.length === 0) {
+        logger.error('Tribe has no members');
+        reject(new Error('Tribe has no members'));
+      } else {
+        const members = res.rows;
+        console.log("tribesMac::getTribeMembers::members => ", members);
+        resolve(members);
+      }
+    });
+  });
+}
+
 async function tribesMac(req, data) {
   switch (req) {
     case 'get-tribes':
@@ -481,6 +510,10 @@ async function tribesMac(req, data) {
     case 'get-random-tribe-suggestions':
       const suggestions = await getRandomTribeSuggestions();
       return suggestions;
+
+    case 'get-tribe-members':
+      const members = await getTribeMembers(data);
+      return members;
 
     case 'create-tribe':
       const tribe = await createTribe(data);
