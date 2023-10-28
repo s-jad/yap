@@ -414,6 +414,19 @@ app.get('/api/protected/get-chatroom-messages', async (req, res) => {
   }
 });
 
+app.get('/api/protected/get-tribe-members', async (req, res) => {
+  const tribe = req.query.tribe;
+  logger.info(`request members from ${tribe}`);
+
+  try {
+    const members = await tribesMac('get-tribe-members', tribe);
+    res.send(members);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured while fetching tribe member list.' });
+  }
+});
+
 app.post('/api/protected/post-message', async (req, res) => {
   try {
     const tokenParts = req.cookies.jwt_signature.split('.');
@@ -432,7 +445,7 @@ app.post('/api/protected/post-message', async (req, res) => {
     logger.error(error);
     res.status(500).json({ message: 'An error occured while posting message.' });
   }
-})
+});
 
 
 app.post('/api/protected/create-a-tribe', async (req, res) => {
