@@ -107,8 +107,8 @@ function importModules(page) {
             resolve(component);
           }
           catch (error) {
-              console.error(error);
-              reject(error);
+            console.error(error);
+            reject(error);
           }
         } else {
           component = getAsyncComponent(importedComponents.joinTribe);
@@ -206,32 +206,6 @@ function handleCreateTribe(form) {
   });
 }
 
-function handleChatroomLinks(tribe) {
-  const app = document.body.querySelector('#app');
-  const toRemove = app.querySelector('.removable');
-
-  importChatroom(tribe)
-    .then((toAdd) => {
-      if (toAdd) {
-        app.removeChild(toRemove);
-        app.appendChild(toAdd);
-        
-        const tribeName = tribe
-          .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
-          .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
-
-        if (prevChatroom !== tribeName) {
-          console.log(`Leaving ${prevChatroom}`);
-          socket.emit('leave chatroom', prevChatroom);
-        }
-        socket.emit('join chatroom', tribeName);
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-}
-
 function getModal() {
   const modalOuter = document.createElement('div');
   modalOuter.className = 'modal-outer';
@@ -292,6 +266,49 @@ async function handleSidebarOptionalLinks(url) {
   }
 }
 
+function emitSidebarLinkEvent() {
+  const sidebar = document.body.querySelector('.sidebar-container');
+  const currentUrl = window.location.pathname;
+  console.log("emitSidebarLinkEvent::currentUrl => ", currentUrl);
+  const sidebarLinkEvent = new CustomEvent('sidebar-link-change', {
+    bubbles: true,
+    cancelable: true,
+    detail: {
+      currentUrl,
+    },
+  });
+
+  sidebar.dispatchEvent(sidebarLinkEvent);
+}
+
+function handleChatroomLinks(tribe) {
+  const app = document.body.querySelector('#app');
+  const toRemove = app.querySelector('.removable');
+
+  importChatroom(tribe)
+    .then((toAdd) => {
+      if (toAdd) {
+        app.removeChild(toRemove);
+        app.appendChild(toAdd);
+        
+        const tribeName = tribe
+          .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
+          .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+
+        if (prevChatroom !== tribeName) {
+          console.log(`Leaving ${prevChatroom}`);
+          socket.emit('leave chatroom', prevChatroom);
+        }
+        socket.emit('join chatroom', tribeName);
+
+        emitSidebarLinkEvent();
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
 function handleClientSideLinks(page) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
@@ -305,6 +322,7 @@ function handleClientSideLinks(page) {
       if (toAdd) {
         app.removeChild(toRemove);
         app.appendChild(toAdd);
+        emitSidebarLinkEvent();
       }
     })
     .catch((error) => {
