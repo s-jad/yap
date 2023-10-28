@@ -6,6 +6,8 @@ function updateAppState(key, value) {
     } catch (error) {
       console.error("Error converting object to JSON => ", error);
     }
+  } else if (key === 'username') {
+    localStorage.setItem(key, value);
   } else {
     sessionStorage.setItem(key, value);
   }
@@ -20,6 +22,8 @@ function getAppState(key) {
     } catch (error) {
       console.error("Error parsing JSON object => ", error);
     }
+  } else if (key === 'username') {
+    return localStorage.getItem(key);
   } else {
     return sessionStorage.getItem(key);
   }
