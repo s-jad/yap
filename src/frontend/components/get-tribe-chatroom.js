@@ -30,7 +30,6 @@ function getMemberState(username, memberHue) {
 }
 
 function createNewMessage(msg) {
-  console.log("inside createNewMessage!!");
   if (msg === undefined) {
     return;
   }
@@ -201,7 +200,6 @@ function handleUserInput(msg) {
 }
 
 function handleMsgReceive(msg) {
-  console.log("inside handleMsgReceive!!");
   const messageView = document.querySelector('.message-view');
   const messageTimeline = document.querySelector('.message-timeline');
   
@@ -214,7 +212,6 @@ async function handleMsgPost(msg) {
   const tribeName = chatState.tribeName;
   const { editedMsg, timestamp } = handleUserInput(msg);
   const global = messageState.global; 
-  console.log("Emitting socket message");
 
   if (global === false) {
     socket.emit('message', {
@@ -246,6 +243,7 @@ export default async function TribeChat(tribe) {
     .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
 
   updateAppState('current-room', chatState.tribeName);
+
   const tribeChatContainer = document.createElement('div');
   tribeChatContainer.id = 'tribe-chat-container';
   tribeChatContainer.className = 'chat-container removable';
