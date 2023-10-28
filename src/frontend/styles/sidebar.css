@@ -12,7 +12,9 @@
   gap: calc(var(--gap) * 2);
   opacity: 1;
 
-  & .sidebar-list-flex {
+
+  & .sidebar-list-flex,
+  & .optional-items-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -36,4 +38,5 @@
       }
     }
   }
+
 }
