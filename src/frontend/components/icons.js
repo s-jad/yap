@@ -7,6 +7,7 @@ import reportIssue from '../assets/imgs/report_issue.svg';
 import logoSVG from '../assets/imgs/logo.svg';
 import homeSVG from '../assets/imgs/home.svg';
 import messagesSVG from '../assets/imgs/envelope.svg';
+import membersSVG from '../assets/imgs/members.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -29,6 +30,20 @@ function getSidebarIcons() {
     home,
     messages,
   ];
+}
+
+function getOptionalSidebarIcons(url) {
+  switch (url) {
+    case 'tribe-chat':
+      console.log("inside case tribe-chat");
+      const members = new Image();
+      members.src = membersSVG;
+      members.alt = '3 people';
+      return members;
+
+    default:
+      break;
+  }
 }
 
 function getDashboardIcons(dashboardGrid) {
@@ -73,6 +88,7 @@ function getDashboardIcons(dashboardGrid) {
 export {
   getDashboardIcons,
   getSidebarIcons,
+  getOptionalSidebarIcons,
   getLogo,
 };
 
