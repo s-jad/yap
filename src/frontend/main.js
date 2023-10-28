@@ -7,6 +7,7 @@ import './styles/header.css';
 import './styles/dashboard.css';
 import './styles/sidebar.css';
 import './styles/hamburger-btn.css';
+import './styles/modal.css';
 import App from './components/app';
 
 const app = await App();
