@@ -224,13 +224,72 @@ function handleChatroomLinks(tribe) {
           console.log(`Leaving ${prevChatroom}`);
           socket.emit('leave chatroom', prevChatroom);
         }
-
         socket.emit('join chatroom', tribeName);
       }
     })
     .catch((error) => {
       console.error(error);
     });
+}
+
+function getModal() {
+  const modalOuter = document.createElement('div');
+  modalOuter.className = 'modal-outer';
+  const modalInner = document.createElement('div');
+  modalInner.className = 'modal-inner';
+  modalOuter.appendChild(modalInner);
+
+  return modalOuter;
+}
+
+async function fetchTribeMembers(tribe) {
+  return fetch(`/api/protected/get-tribe-members?tribe=${encodeURIComponent(tribe)}`, {
+    method: 'GET',
+  })
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    const members = data;
+    console.log("fetchTribeMembers::members => ", members);
+    return members;
+  })
+  .catch((error) => {
+    console.error('fetchTribeMembers::Error:', error);
+  });
+}
+
+async function getTribeMembersListModal(tribe) {
+  const modal = getModal();
+  const members = await fetchTribeMembers(tribe);
+  const modalInner = modal.querySelector('.modal-inner');
+  
+  members.forEach((member) => {
+    const memberEl = document.createElement('div');
+    memberEl.className = 'member-list-item';
+    memberEl.innerHTML = `
+      <p class="member-name">${member.user_name}</p>
+    `;
+
+    modalInner.appendChild(memberEl);
+  });
+
+  return modal;
+}
+
+async function handleSidebarOptionalLinks(url) {
+  const body = document.body;
+  const urlSplit = url.split('/');
+  
+  if (urlSplit[1] === 'tribe-chat') {
+    const tribe = `/${urlSplit[2]}`
+      .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
+      .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+
+    const membersModal = await getTribeMembersListModal(tribe);
+    console.log(membersModal);
+    body.appendChild(membersModal);
+  }
 }
 
 function handleClientSideLinks(page) {
@@ -257,6 +316,7 @@ export {
   handleClientSideLinks,
   handleChatroomLinks,
   handleCreateTribe,
+  handleSidebarOptionalLinks,
   importModules,
   importChatroom,
   importedComponents,
