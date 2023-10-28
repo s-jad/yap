@@ -1,41 +1,40 @@
-import { handleClientSideLinks } from './fetch_apis';
+import { 
+  handleClientSideLinks,
+  handleSidebarOptionalLinks,
+} from './fetch_apis';
 import {
   getSidebarIcons,
   getOptionalSidebarIcons,
   getLogo,
 } from './icons';
 
-function getOptionalSidebarItems(sidebarUrl) {
+function getOptionalSidebarItems(urls) {
   const optionalItemContainer = document.createElement('ul');
   optionalItemContainer.className = 'optional-items-container';
 
-  switch (sidebarUrl) {
-    case 'tribe-chat':
-      const res = setSidebarTribeChat(optionalItemContainer);
-      return res;
-
-    default:
-      break;
+  if (urls[0] === 'tribe-chat') {
+    const tribe = urls[1];
+    const res = setSidebarTribeChat(optionalItemContainer, tribe);
+    return res;
   }
 }
 
-function setSidebarTribeChat(optionalItemContainer) {
+function setSidebarTribeChat(optionalItemContainer, tribe) {
   optionalItemContainer.innerHTML = `
     <li class="sidebar-list-item">
-      <a class="sidebar-list-anchor" data-link="/tribe-chat/members" href="/tribe-chat/members"></a>
+      <a class="sidebar-list-anchor" data-link="/tribe-chat/${tribe}/members" href="/api/tribe-chat/${tribe}/members"></a>
     </li>
   `;
 
-  const links = Array.from(optionalItemContainer.querySelectorAll('li'));
-
+  const links = Array.from(optionalItemContainer.querySelectorAll('a'));
   const icon = getOptionalSidebarIcons('tribe-chat');
-  
+   
   links.forEach((link, index) => {
     link.addEventListener('click', (ev) => {
       ev.preventDefault();
       const url = link.getAttribute('data-link');
       history.pushState(null, null, url);
-      handleClientSideLinks(url);
+      handleSidebarOptionalLinks(url);
     });
     icon.className = 'sidebar-list-icon';
     link.appendChild(icon);
@@ -46,7 +45,7 @@ function setSidebarTribeChat(optionalItemContainer) {
   return optionalItemContainer;
 }
 
-export default function Sidebar(sidebarUrl) {
+export default function Sidebar(urls) {
   const sidebarContainer = document.createElement('div');
   sidebarContainer.className = 'sidebar-container hideable';
 
@@ -75,7 +74,7 @@ export default function Sidebar(sidebarUrl) {
     link.appendChild(icons[index]);
   });
   
-  const optionalListFlex = getOptionalSidebarItems(sidebarUrl);
+  const optionalListFlex = getOptionalSidebarItems(urls);
   console.log("optionalListFlex => ", optionalListFlex);
   sidebarContainer.appendChild(logo);
   sidebarContainer.appendChild(sidebarListFlex);
