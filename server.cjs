@@ -50,17 +50,6 @@ const io = new Server(httpServer, {
     allowedHeaders: ['*'],
     credentials: true,
   },
-
-  handlePreflightRequest: (req, res) => {
-    const headers = {
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Origin': req.headers.origin,
-      'Access-Control-Allow-Credentials': true,
-    };
-    console.log('Preflight-request headers => ', headers);
-    res.writeHead(200, headers);
-    res.end();
-  }
 });
 
 io.on("connection_error", (err) => {
@@ -96,6 +85,11 @@ io.on('connection', (socket) => {
   } catch (error) {
     console.log(`Error connecting client: ${error}`);
   }
+
+  socket.use((packet, next) => {
+    console.log('Received packet: ', packet);
+    next();
+  });
   
   // For page refreshes
   const referer = socket.request.headers.referer
@@ -105,23 +99,28 @@ io.on('connection', (socket) => {
     const chatroom = tribe
       .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
       .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+  
 
-    try {
-      console.log("joining chatroom via page refresh");
-      socket.join(chatroom);
-      console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
-    } catch (error) {
-      console.log(`Error joining ${chatroom}: ${error}`);
+    if (!socket.rooms.has(chatroom)) {
+      try {
+        console.log("joining chatroom via page refresh");
+        socket.join(chatroom);
+        console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
+      } catch (error) {
+        console.log(`Error joining ${chatroom}: ${error}`);
+      }
     }
   }
 
   socket.on('join chatroom', (chatroom) => {
-    try {
-      console.log('joining chatroom via socket.emit("join chatroom")');
-      socket.join(chatroom);
-      console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
-    } catch (error) {
-      console.log(`Error joining ${chatroom}: ${error}`);
+    if (!socket.rooms.has(chatroom)) {
+      try {
+        console.log("joining chatroom via page refresh");
+        socket.join(chatroom);
+        console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
+      } catch (error) {
+        console.log(`Error joining ${chatroom}: ${error}`);
+      }
     }
   });
 
