@@ -237,10 +237,11 @@ async function handleMsgPost(msg) {
   }
 }
 
-async function handleUpdateLogin() {
-  const newLogin = new Date().toISOString();
-  await updateTribeMemberLogin(newLogin, chatState.tribeName);
-}
+// async function handleUpdateLogin() {
+//   console.log("WE SHOULDNT BE HERE!!!!!!");
+//   const newLogin = new Date().toISOString();
+//   await updateTribeMemberLogin(newLogin, chatState.tribeName);
+// }
 
 export default async function TribeChat(tribe) {
   chatState.tribeName = tribe
@@ -283,7 +284,7 @@ export default async function TribeChat(tribe) {
 
   await populateWithMessages(msgView, msgTimeline);
 
-  handleUpdateLogin();
+  //handleUpdateLogin();
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
