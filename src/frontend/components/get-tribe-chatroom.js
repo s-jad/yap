@@ -1,6 +1,6 @@
 import '../styles/general-chatroom-styling.css';
 import { getAppState, updateAppState } from './app-state';
-import { getMessages } from './tribes-db-access';
+import { getMessages, updateTribeMemberLogin } from './tribes-db-access';
 import { socket } from './sockets';
 
 const activeMembers = [];
@@ -237,6 +237,11 @@ async function handleMsgPost(msg) {
   }
 }
 
+async function handleUpdateLogin() {
+  const newLogin = new Date().toISOString();
+  await updateTribeMemberLogin(newLogin, chatState.tribeName);
+}
+
 export default async function TribeChat(tribe) {
   chatState.tribeName = tribe
     .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
@@ -277,6 +282,8 @@ export default async function TribeChat(tribe) {
   }
 
   await populateWithMessages(msgView, msgTimeline);
+
+  handleUpdateLogin();
 
   messageInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
