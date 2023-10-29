@@ -186,7 +186,6 @@ function postPersonalMessage(messageData) {
     `,
     values: [receiver_name],
   };
-  console.log("postPersonalMessage::sender => ", sender_id);
   return new Promise((resolve, reject) => {
     pg_client.query(receiverIdQuery)
       .then(res => {
@@ -225,9 +224,7 @@ function postPersonalMessage(messageData) {
 }
 
 function backupChatroomMessages(messageData) {
-  console.log("Inside backupChatroomMessages!")
   const { global } = messageData;
-  console.log("messageData => ", messageData);
   if (global) {
     logger.info("Posting global message");
     const res = postGlobalMessage(messageData);
@@ -401,7 +398,6 @@ async function createUser(newUserData) {
 }
 
 function userExists(userData) {
-  console.log("userData => ", userData);
   const query = `
     SELECT user_name FROM users WHERE user_id = ${userData};
   `;
@@ -501,7 +497,6 @@ function getTribeMembers(tribe) {
 }
 
 function updateTribeMemberLogin(loginData) {
-  console.log("INSIDE updateTribeMemberLogin");
   const { timestamp, tribe, member } = loginData;
   return new Promise((resolve, reject) => {
     const query = {
@@ -524,7 +519,6 @@ function updateTribeMemberLogin(loginData) {
         logger.error(err);
         reject(err);
       } else {
-        console.log(res);
         resolve(res);
       }
     })
@@ -554,7 +548,6 @@ function updateTribeMemberLogout(logoutData) {
         logger.error(err);
         reject(err);
       } else {
-        console.log(res);
         resolve(res);
       }
     })
