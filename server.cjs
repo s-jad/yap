@@ -52,6 +52,34 @@ const io = new Server(httpServer, {
   },
 });
 
+async function handleTribeLoginDbUpdate(socket, chatroom) {
+  console.log("inside handleTribeLoginDbUpdate");
+  try {
+    const member = socket.decoded.id;
+    const tribe = chatroom;
+    const timestamp = new Date().toISOString();
+    const patchData = { timestamp, tribe, member };
+    const res = await tribesMac('update-tribe-member-login', patchData);
+    console.log("result of login => ", res);
+  } catch (error) {
+    console.error(`Error updating ${member} login of ${tribe}`);
+  }
+}
+
+async function handleTribeLogoutDbUpdate(socket, chatroom) {
+  console.log("inside handleTribeLogoutDbUpdate");
+  try {
+    const member = socket.decoded.id;
+    const tribe = chatroom;
+    const timestamp = new Date().toISOString();
+    const patchData = { timestamp, tribe, member };
+    const res = await tribesMac('update-tribe-member-logout', patchData);
+    console.log("result of logout => ", res);
+  } catch (error) {
+    console.error(`Error updating ${member} logout of ${tribe}`);
+  }
+}
+
 io.on("connection_error", (err) => {
   logger.error(err.req);
   logger.error(err.code);
@@ -106,6 +134,7 @@ io.on('connection', (socket) => {
         console.log("joining chatroom via page refresh");
         socket.join(chatroom);
         console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
+        handleTribeLoginDbUpdate(socket, chatroom);
       } catch (error) {
         console.log(`Error joining ${chatroom}: ${error}`);
       }
@@ -115,9 +144,10 @@ io.on('connection', (socket) => {
   socket.on('join chatroom', (chatroom) => {
     if (!socket.rooms.has(chatroom)) {
       try {
-        console.log("joining chatroom via page refresh");
+        console.log("joining chatroom via page socket.on('join chatroom')");
         socket.join(chatroom);
         console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
+        handleTribeLoginDbUpdate(socket, chatroom);
       } catch (error) {
         console.log(`Error joining ${chatroom}: ${error}`);
       }
@@ -128,6 +158,7 @@ io.on('connection', (socket) => {
     try {
       socket.leave(chatroom);
       console.log(`Socket ${socket.id} left chatroom ${chatroom}`);
+      handleTribeLogoutDbUpdate(socket, chatroom);
     } catch (error) {
       console.log(`Error leaving ${chatroom}: ${error}`);
     }
@@ -471,7 +502,6 @@ app.delete('/api/protected/delete-inbox-message', async (req, res) => {
 // PATCH ROUTES 
 
 app.patch('/api/protected/update-tribe-member-login', async (req, res) => {
-  console.log(req.body);
   try {
     const tokenParts = req.cookies.jwt_signature.split('.');
     let payload;
@@ -563,7 +593,6 @@ app.get('*', verifyJWT, async (req, res) => {
 });
 
 app.use('/', function(err, req, res) {
-  logger.warn("Request failed => ", req);
   logger.error(err.stack);
   res.status(500).send('Something broke!');
 });
