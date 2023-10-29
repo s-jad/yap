@@ -2,22 +2,64 @@
   position: absolute;
   content: "";
   inset: 0;
-  background: hsla(0, 60%, 10%, 0.3);
+  background: var(--card-clr-03);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
 
   & .modal-inner {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap);
+    overflow-y: scroll;
     height: 50vh;
-    width: 50vw;
+    width: 70vw;
     background: var(--bg-clr);
     color: var(--font-clr);
-    padding: var(--p-block) var(--p-inline);
+    padding: var(--p-inline) var(--p-inline);
     border-radius: 1rem;
     box-shadow: var(--shadow), var(--shadow-inset);
+
+    & .modal-btn-container {
+      position: sticky;
+      top: 1rem;
+      right: 0.5rem;
+      margin-left: auto;
+      height: 30px;
+      width: 30px;
+      border-radius: 15px;
+      box-shadow: var(--shadow), var(--shadow-inset);
+
+      & .invisible-btn {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        z-index: 10;
+      }
+
+      & .close-modal-btn {
+        margin: auto;
+      }
+    }
+
+    & .modal-scroll-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      justify-content: center;
+      gap: var(--gap);
+
+      & .member-list-item {
+        display: flex;
+        gap: calc(var(--gap) * 2);
+        padding: 1rem;
+
+        & .active-indicator.member-active {
+          opacity: 1;
+        }
+
+        & .active-indicator.member-inactive {
+          opacity: 0.7;
+        }
+      }
+    }
   }
 }
