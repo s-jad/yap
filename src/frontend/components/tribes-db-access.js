@@ -227,6 +227,44 @@ async function createUser(username, password, joined, userColor) {
   });
 }
 
+async function updateTribeMemberLogin(timestamp, tribe) {
+  console.log("updateTribeMemberLogin:: timestamp, tribe => ", timestamp, tribe);
+  return fetch('/api/protected/update-tribe-member-login', {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ timestamp, tribe }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to update login details.');
+    } else {
+      return true;
+    }  
+  });
+}
+
+async function updateTribeMemberLogout(timestamp, tribe) {
+  console.log("updateTribeMemberLogout:: timestamp, tribe => ", timestamp, tribe);
+  return fetch('/api/protected/update-tribe-member-logout', {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ timestamp, tribe }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to update logout details.');
+    } else {
+      return true;
+    }  
+  });
+}
+
 async function authenticateUser(username, password) {
   return fetch('/api/authenticate-user', {
     method: 'POST',
@@ -257,6 +295,8 @@ async function authenticateUser(username, password) {
 export {
   getTribes,
   getTribeMembers,
+  updateTribeMemberLogin,
+  updateTribeMemberLogout,
   getMessages,
   getInboxMessages,
   deleteInboxMessage,
