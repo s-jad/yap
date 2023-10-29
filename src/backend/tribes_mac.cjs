@@ -472,7 +472,10 @@ function getTribeMembers(tribe) {
   return new Promise((resolve, reject) => {
     const query = {
       text: `
-        SELECT users.user_name
+        SELECT 
+          users.user_name,
+          tribe_members.last_login,
+          tribe_members.last_logout
         FROM users
         JOIN tribe_members ON users.user_id = tribe_members.member_id
         JOIN tribes ON tribe_members.tribe_id = tribes.tribe_id
@@ -497,8 +500,85 @@ function getTribeMembers(tribe) {
   });
 }
 
+function updateTribeMemberLogin(loginData) {
+  console.log("INSIDE updateTribeMemberLogin");
+  const { timestamp, tribe, member } = loginData;
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: `
+        UPDATE tribe_members
+        SET last_login = \$1
+        WHERE (
+          tribe_id = (
+            SELECT tribe_id FROM tribes WHERE tribe_name = \$2
+          )
+          AND member_id = \$3
+        )
+        RETURNING *;
+      `,
+      values: [timestamp, tribe, member],
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        console.log(res);
+        resolve(res);
+      }
+    })
+  });
+}
+
+function updateTribeMemberLogout(logoutData) {
+  const { timestamp, tribe, member } = logoutData;
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: `
+        UPDATE tribe_members
+        SET last_logout = \$1
+        WHERE (
+          tribe_id = (
+            SELECT tribe_id FROM tribes WHERE tribe_name = \$2
+          )
+          AND member_id = \$3
+        )
+        RETURNING *;
+      `,
+      values: [timestamp, tribe, member],
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        console.log(res);
+        resolve(res);
+      }
+    })
+  });
+}
+
 async function tribesMac(req, data) {
   switch (req) {
+    case 'create-user':
+      const user = await createUser(data);
+      return user;
+
+    case 'user-exists':
+      const exists = await userExists(data);
+      return exists;
+
+    case 'update-tribe-member-login':
+      const login = await updateTribeMemberLogin(data);
+      return login;
+
+    case 'update-tribe-member-logout':
+      const logout = await updateTribeMemberLogout(data);
+      return logout;
+
     case 'get-tribes':
       const tribes = await getTribes();
       return tribes;
@@ -518,14 +598,6 @@ async function tribesMac(req, data) {
     case 'create-tribe':
       const tribe = await createTribe(data);
       return tribe;
-
-    case 'create-user':
-      const user = await createUser(data);
-      return user;
-
-    case 'user-exists':
-      const exists = await userExists(data);
-      return exists;
 
     case 'get-messages':
       const messages = await getChatroomMessages(data);
