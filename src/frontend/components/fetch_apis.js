@@ -1,4 +1,6 @@
 import { getAppState } from './app-state';
+import { emitSidebarLinkEvent } from './events';
+import { getTribeMembersListModal } from './modals';
 import { disconnectSocket, getSocketInitState, initialiseSocket, socket } from './sockets';
 
 let prevChatroom;
@@ -206,51 +208,6 @@ function handleCreateTribe(form) {
   });
 }
 
-function getModal() {
-  const modalOuter = document.createElement('div');
-  modalOuter.className = 'modal-outer';
-  const modalInner = document.createElement('div');
-  modalInner.className = 'modal-inner';
-  modalOuter.appendChild(modalInner);
-
-  return modalOuter;
-}
-
-async function fetchTribeMembers(tribe) {
-  return fetch(`/api/protected/get-tribe-members?tribe=${encodeURIComponent(tribe)}`, {
-    method: 'GET',
-  })
-  .then((response) => {
-    return response.json();
-  })
-  .then((data) => {
-    const members = data;
-    console.log("fetchTribeMembers::members => ", members);
-    return members;
-  })
-  .catch((error) => {
-    console.error('fetchTribeMembers::Error:', error);
-  });
-}
-
-async function getTribeMembersListModal(tribe) {
-  const modal = getModal();
-  const members = await fetchTribeMembers(tribe);
-  const modalInner = modal.querySelector('.modal-inner');
-  
-  members.forEach((member) => {
-    const memberEl = document.createElement('div');
-    memberEl.className = 'member-list-item';
-    memberEl.innerHTML = `
-      <p class="member-name">${member.user_name}</p>
-    `;
-
-    modalInner.appendChild(memberEl);
-  });
-
-  return modal;
-}
-
 async function handleSidebarOptionalLinks(url) {
   const body = document.body;
   const urlSplit = url.split('/');
@@ -264,21 +221,6 @@ async function handleSidebarOptionalLinks(url) {
     console.log(membersModal);
     body.appendChild(membersModal);
   }
-}
-
-function emitSidebarLinkEvent() {
-  const sidebar = document.body.querySelector('.sidebar-container');
-  const currentUrl = window.location.pathname;
-  console.log("emitSidebarLinkEvent::currentUrl => ", currentUrl);
-  const sidebarLinkEvent = new CustomEvent('sidebar-link-change', {
-    bubbles: true,
-    cancelable: true,
-    detail: {
-      currentUrl,
-    },
-  });
-
-  sidebar.dispatchEvent(sidebarLinkEvent);
 }
 
 function handleChatroomLinks(tribe) {
