@@ -16,6 +16,23 @@ async function getTribes() {
     });
 }
 
+async function getTribeMembers(tribe) {
+  return fetch(`/api/protected/get-tribe-members?tribe=${encodeURIComponent(tribe)}`, {
+    method: 'GET',
+  })
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    const members = data;
+    console.log("fetchTribeMembers::members => ", members);
+    return members;
+  })
+  .catch((error) => {
+    console.error('fetchTribeMembers::Error:', error);
+  });
+}
+
 async function createTribe() {
   return fetch('/api/protected/create-a-tribe')
     .then(response => {
@@ -239,6 +256,7 @@ async function authenticateUser(username, password) {
 
 export {
   getTribes,
+  getTribeMembers,
   getMessages,
   getInboxMessages,
   deleteInboxMessage,
