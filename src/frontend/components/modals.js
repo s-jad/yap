@@ -31,17 +31,32 @@ async function getTribeMembersListModal(tribe) {
   const modal = getModal();
   const members = await getTribeMembers(tribe);
   const modalInner = modal.querySelector('.modal-inner');
-  
+  const modalScroll = document.createElement('div');
+  modalScroll.className = 'modal-scroll-wrapper';
+  modalInner.appendChild(modalScroll);
+
   members.forEach((member) => {
-    console.log(`${member.user_name} last logged IN at ${member.last_login}`);
-    console.log(`${member.user_name} last logged OUT at ${member.last_logout}`);
+    const activeIndicator = document.createElement('p');
+    activeIndicator.className = 'active-indicator';
+    if (member.last_login > member.last_logout) {
+      activeIndicator.classList.add('member-active')
+      activeIndicator.textContent = 'Active';
+    } else {
+      const lastLogout = member.last_logout;
+      const parts = lastLogout.split('T');
+      const date = parts[0];
+      const time = parts[1].split('.')[0];
+      activeIndicator.classList.add('member-inactive')
+      activeIndicator.textContent = `Last seen: ${time} ${date}`;
+    }
     const memberEl = document.createElement('div');
     memberEl.className = 'member-list-item';
     memberEl.innerHTML = `
       <p class="member-name">${member.user_name}</p>
     `;
+    memberEl.appendChild(activeIndicator);
 
-    modalInner.appendChild(memberEl);
+    modalScroll.appendChild(memberEl);
   });
 
   return modal;
