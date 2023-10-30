@@ -7,6 +7,7 @@ import {
   getOptionalSidebarIcons,
   getLogo,
 } from './icons';
+import { getInboxMessageCount } from './tribes-db-access';
 
 function getOptionalSidebarItems(urls) {
   const optionalItemContainer = document.createElement('ul');
@@ -45,7 +46,7 @@ function setSidebarTribeChat(optionalItemContainer, tribe) {
   return optionalItemContainer;
 }
 
-export default function Sidebar(urls) {
+export default async function Sidebar(urls) {
   const sidebarContainer = document.createElement('div');
   sidebarContainer.className = 'sidebar-container hideable';
 
@@ -55,9 +56,20 @@ export default function Sidebar(urls) {
   sidebarListFlex.className = 'sidebar-list-flex';
   sidebarListFlex.innerHTML = `
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/dashboard" href="/dashboard"></a></li>
-    <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/inbox" href="/inbox"></a></li>
+    <li class="sidebar-list-item inbox-icon"><a class="sidebar-list-anchor" data-link="/inbox" href="/inbox"></a></li>
   `;
   
+  const inboxAnchor = sidebarListFlex.querySelector('a[data-link="/inbox"]');
+  console.log(inboxAnchor);
+  const msgCount = await getInboxMessageCount();
+  
+  if (msgCount !== 0) {
+    const inboxMsgCount = document.createElement('div'); 
+    inboxMsgCount.className = 'inbox-msg-count';
+    inboxMsgCount.innerText = `${msgCount}`;
+    inboxAnchor.appendChild(inboxMsgCount);
+  }
+
   const icons = getSidebarIcons();
   const links = Array.from(sidebarListFlex.querySelectorAll('[data-link]'));
 
