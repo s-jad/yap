@@ -14,7 +14,7 @@
     width: 70vw;
     background: var(--bg-clr);
     color: var(--font-clr);
-    padding: var(--p-inline) var(--p-inline);
+    padding: var(--p-block) var(--p-inline);
     border-radius: 1rem;
     box-shadow: var(--shadow), var(--shadow-inset);
 
@@ -48,12 +48,14 @@
       gap: var(--gap);
 
       & .member-list-item {
-        display: flex;
+        display: grid;
+        grid-template-columns: 120px 1fr;
         gap: calc(var(--gap) * 2);
         padding: 1rem;
 
         & .active-indicator.member-active {
           opacity: 1;
+          color: var(--success-clr);
         }
 
         & .active-indicator.member-inactive {
