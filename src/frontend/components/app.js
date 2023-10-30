@@ -91,9 +91,10 @@ export default async function App() {
   }
 
   const header = await Header();
+  const sidebar = await Sidebar(urls);
   appContainer.appendChild(header);
   appContainer.appendChild(currentComponent);
-  appContainer.appendChild(Sidebar(urls));
+  appContainer.appendChild(sidebar);
   appContainer.appendChild(HamburgerBtn());
 
   window.addEventListener('popstate', async() => {
