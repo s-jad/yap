@@ -20,7 +20,7 @@
     align-items: center;
     justify-content: center;
     list-style: none;
-    gap: var(--gap);
+    gap: calc(var(--gap) * 2);
     padding: 0;
     margin: 0;
 
@@ -37,6 +37,23 @@
         scale: 1.05;
       }
     }
-  }
 
+    & .sidebar-list-item.inbox-icon {
+      position: relative;
+
+      & .inbox-msg-count {
+        position: absolute;
+        top: -8px;
+        right: -14px;
+        height: 25px;
+        width: 25px;
+        border-radius: 12.5px;
+        z-index: 3;
+        background: var(--lemon-chiffon);
+        color: var(--card-clr);
+        font-weight: 700;
+        text-align: center;
+      }
+    }
+  }
 }
