@@ -345,6 +345,27 @@ app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
   }
 });
 
+app.get('/api/protected/get-inbox-message-count', async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    console.log("get-inbox-message-count::userId => ", userId);
+    const count = await tribesMac('get-inbox-message-count', userId);
+    console.log("get-inbox-message-count::count => ", count);
+    res.send(count);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting inbox message count.' });
+  }
+});
+
 app.get('/api/protected/get-inbox-messages', async (req, res) => {
   try {
     const tokenParts = req.cookies.jwt_signature.split('.');
