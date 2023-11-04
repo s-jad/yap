@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import { getAppState } from "./app-state";
 
 let initialized = false;
 let socket;
@@ -6,7 +7,8 @@ let socket;
 function disconnectSocket() {
   initialized = false;
   if (socket !== null) {
-    socket.emit('user disconnect');
+    const chatroom = getAppState('current-room');
+    socket.emit('user disconnect', chatroom);
     socket = null;
   }
 }
