@@ -198,8 +198,9 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('user disconnect', () => {
-    console.log(`Disconnecting socket id: ${socket.id}`);
+  socket.on('user disconnect', (chatroom) => {
+    console.log(`Disconnecting socket id: ${socket.id}, leaving ${chatroom}`);
+    handleTribeLogoutDbUpdate(socket, chatroom);
     socket.disconnect()
   });
 
