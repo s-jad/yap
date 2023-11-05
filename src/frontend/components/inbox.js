@@ -396,6 +396,28 @@ function messagesDashboardRouting(linkTo, displayed) {
   }
 }
 
+function addMessagesDashboardEventListeners(userMessagesContainer, sendMsg) {
+  userMessagesContainer.addEventListener('focus-reply-msg', (ev) => {
+    const toRemove = userMessagesContainer.querySelector('.messages-component-outer');
+    userMessagesContainer.removeChild(toRemove);
+    userMessagesContainer.appendChild(sendMsg);
+
+    const msgReceiverName = sendMsg.querySelector('.message-receiver-name');
+    const sendMsgInput = sendMsg.querySelector('.message-receiver-input');
+    const sendMsgTa = sendMsg.querySelector('.send-message-ta');
+
+    msgReceiverName.textContent = ev.detail.focus.receiver;
+    msgReceiverName.classList.remove('hidden');
+    sendMsgInput.classList.add('hidden');
+    sendMsgTa.focus();
+
+    const prevLink = userMessagesContainer.querySelector('.displayed');
+    const sendMsgLink = userMessagesContainer.querySelector('li[data-link="send-msg"]');
+    prevLink.classList.remove('displayed');
+    sendMsgLink.classList.add('displayed');
+  });
+}
+
 export default async function MessagesDashboard() {
   const userMessagesContainer = document.createElement('div');
   userMessagesContainer.className = 'user-messages-container removable';
@@ -441,6 +463,8 @@ export default async function MessagesDashboard() {
   messagesDashboardComponents.push(reportSpam);
 
   userMessagesContainer.appendChild(inbox);
+
+  addMessagesDashboardEventListeners(userMessagesContainer, sendMsg);
 
   return userMessagesContainer;
 }
