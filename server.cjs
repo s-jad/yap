@@ -455,6 +455,33 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
 
 // POST ROUTES 
 
+app.post('/api/protected/send-inbox-message', async (req, res) => {
+  console.log("msgData => ", req.body.msgData);
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    const data = { 
+      newMsg: req.body.msgData.newMsg,
+      receiverName: req.body.msgData.receiverName,
+      userId,
+    };
+    console.log("server::data => ", data);
+    const result = await tribesMac('send-inbox-message', data);
+    logger.info(result);
+    res.send(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst sending inbox message.' });
+  }
+});
+
 app.post('/api/protected/reply-to-inbox-message', async (req, res) => {
   try {
     const tokenParts = req.cookies.jwt_signature.split('.');
