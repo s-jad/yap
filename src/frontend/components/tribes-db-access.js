@@ -25,7 +25,6 @@ async function getTribeMembers(tribe) {
   })
   .then((data) => {
     const members = data;
-    console.log("fetchTribeMembers::members => ", members);
     return members;
   })
   .catch((error) => {
@@ -33,6 +32,26 @@ async function getTribeMembers(tribe) {
   });
 }
 
+async function getFriends() {
+  return fetch('/api/protected/get-friends', {
+    method: 'GET',
+    credentials: 'include',
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to fetch friends list');
+    }
+    return response.text().then(text => {
+      try {
+        const friendsJson = JSON.parse(text);
+        return friendsJson;
+      } catch (error) {
+        console.err('getFriends::Error parsing JSON', error);
+        throw new Error('Error parsing JSON');
+      }
+    });
+  });
+}
 async function createTribe() {
   return fetch('/api/protected/create-a-tribe')
     .then(response => {
@@ -111,8 +130,28 @@ async function getMessages(tribeUrl) {
     });
 }
 
+async function getInboxMessageCount() {
+  return fetch('/api/protected/get-inbox-message-count', {
+    method: 'GET',
+    credentials: 'include',
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to get user inbox message count.')
+    }
+    return response.text().then(text => {
+      try {
+        const json = JSON.parse(text);
+        return json;
+      } catch (err) {
+        console.error('getInboxMessageCount::Error parsing JSON', error);
+        throw new Error('Error parsing JSON');
+      }
+    });
+  });
+}
+
 async function deleteInboxMessage(msgIds) {
-  console.log("deleteInboxMessage::msgIds => ", msgIds);
   return fetch(`/api/protected/delete-inbox-message`, {
     method: 'DELETE',
     headers: {
@@ -186,7 +225,6 @@ async function postChatMessage(tribe, message, receiver, timestamp, global) {
   })
   .then(response => {
     if (!response.ok) {
-      console.log(response);
       throw new Error('Unable to post message.');
     }
     return response.json().then(json => {
@@ -227,43 +265,42 @@ async function createUser(username, password, joined, userColor) {
   });
 }
 
-async function updateTribeMemberLogin(timestamp, tribe) {
-  console.log("updateTribeMemberLogin:: timestamp, tribe => ", timestamp, tribe);
-  return fetch('/api/protected/update-tribe-member-login', {
-    method: 'PATCH',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ timestamp, tribe }),
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to update login details.');
-    } else {
-      return true;
-    }  
-  });
-}
-
-async function updateTribeMemberLogout(timestamp, tribe) {
-  console.log("updateTribeMemberLogout:: timestamp, tribe => ", timestamp, tribe);
-  return fetch('/api/protected/update-tribe-member-logout', {
-    method: 'PATCH',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ timestamp, tribe }),
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to update logout details.');
-    } else {
-      return true;
-    }  
-  });
-}
+// NOTE: May be necessary, lets see if the socket method works well first
+// async function updateTribeMemberLogin(timestamp, tribe) {
+//   return fetch('/api/protected/update-tribe-member-login', {
+//     method: 'PATCH',
+//     credentials: 'include',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify({ timestamp, tribe }),
+//   })
+//   .then(response => {
+//     if (!response.ok) {
+//       throw new Error('Unable to update login details.');
+//     } else {
+//       return true;
+//     }  
+//   });
+// }
+// 
+// async function updateTribeMemberLogout(timestamp, tribe) {
+//   return fetch('/api/protected/update-tribe-member-logout', {
+//     method: 'PATCH',
+//     credentials: 'include',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify({ timestamp, tribe }),
+//   })
+//   .then(response => {
+//     if (!response.ok) {
+//       throw new Error('Unable to update logout details.');
+//     } else {
+//       return true;
+//     }  
+//   });
+// }
 
 async function authenticateUser(username, password) {
   return fetch('/api/authenticate-user', {
@@ -295,10 +332,12 @@ async function authenticateUser(username, password) {
 export {
   getTribes,
   getTribeMembers,
-  updateTribeMemberLogin,
-  updateTribeMemberLogout,
+  getFriends, 
+//  updateTribeMemberLogin,
+//  updateTribeMemberLogout,
   getMessages,
   getInboxMessages,
+  getInboxMessageCount,
   deleteInboxMessage,
   replyToInboxMessage,
   getLastTribeLogins,
