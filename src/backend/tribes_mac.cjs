@@ -336,6 +336,34 @@ function deleteInboxMessage(deleteMsgData) {
   });
 }
 
+async function sendInboxMessage(msgData) {
+  const { newMsg, receiverName, userId } = msgData;
+  const query = {
+    text: `
+      INSERT INTO user_messages (sender_id, receiver_id, message_content, parent_message_id)
+      VALUES (
+        \$1,
+        (SELECT user_id FROM users WHERE user_name = \$2),
+        \$3,
+        NULL
+      )
+      RETURNING *;
+    `,
+    values: [userId, receiverName, newMsg],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    });
+  });
+}
+
 async function replyToInboxMessage(replyMsgData) {
   const { parentMsgId, newMsg, userId } = replyMsgData;
   const query = {
@@ -688,6 +716,10 @@ async function tribesMac(req, data) {
     case 'delete-inbox-message':
       const deleted = await deleteInboxMessage(data);
       return deleted;
+
+    case 'send-inbox-message':
+      const userMsg = await sendInboxMessage(data);
+      return userMsg;
 
     case 'reply-to-inbox-message':
       const reply = await replyToInboxMessage(data);
