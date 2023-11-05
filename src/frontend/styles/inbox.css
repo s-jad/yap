@@ -243,6 +243,79 @@
     }
   }   
 
+  & .send-message-outer {
+    --smo-height: calc(100vh - calc(150px + 75px));
+    height: var(--smo-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--p-block) var(--p-inline);
+    
+
+    & input[type="text"],
+    & textarea {
+      background: var(--card-clr);
+      color: var(--thistle);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-inset), var(--shadow);
+    }
+
+    & .send-message-inner {
+      display: grid;
+      height: 100%;
+      width: 100%;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: 30px 1fr 50px;
+      gap: var(--gap);
+
+      & .send-message-receiver-wrapper {
+        grid-column: 1 / 6;
+        grid-row: 1 / 2;
+        display: flex;
+        align-items: center;
+        gap: calc(var(--gap) * 2);
+
+        & input.message-receiver-input {
+          width: 100%;
+          height: 35px;
+        }
+
+        & input.hidden {
+          display: none;
+        }
+
+        & .message-receiver-name{
+          opacity: 1;
+        }
+
+        & .message-receiver-name.hidden {
+          opacity: 0;
+          transition: opacity 300ms ease-in-out;
+        }
+      }
+
+      & .send-message-ta {
+        grid-column: 1 / 6;
+        grid-row: 2 / 3;
+        height: 100%;
+        width: 100%;
+        padding: var(--p-block) var(--p-inline);
+      }
+
+      & button {
+        grid-row: 3 / 4;
+      }
+
+      & .send-message-btn {
+        grid-column: 2 / 3;
+      }
+
+      & .cancel-message-btn {
+        grid-column: 4 / 5;
+      }
+    }
+  }
+
   & .reply-view-outer {
     --rvo-height: calc(100vh - calc(150px + 75px));
     height: var(--rvo-height);
