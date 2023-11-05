@@ -446,6 +446,34 @@ function userExists(userData) {
   });
 }
 
+function getFriends(userId) {
+  const query = {
+    text: `
+      SELECT friend_id FROM friends
+      WHERE user_id = \$1
+      UNION ALL
+      SELECT user_id FROM friends
+      WHERE friend_id = \$1;
+    `,
+    values: [userId],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(new Error('Error getting friends list from db'));
+      } else if (res.rows.length === 0) {
+        resolve(false);
+      } else {
+        console.log('friends list => ', res.rows);
+        const friends = res.rows;
+        resolve(friends);
+      }
+    })
+  });
+}
+
 function createTribe(newTribeData) {
   const values = newTribeData;
   const query = `
@@ -590,6 +618,10 @@ async function tribesMac(req, data) {
     case 'user-exists':
       const exists = await userExists(data);
       return exists;
+
+    case 'get-friends':
+      const friends = await getFriends(data);
+      return friends;
 
     case 'update-tribe-member-login':
       const login = await updateTribeMemberLogin(data);
