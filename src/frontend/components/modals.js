@@ -1,4 +1,4 @@
-import { handleChatroomLinks } from "./fetch_apis";
+import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
 import { getTribeMembers } from "./tribes-db-access";
 
 function closeModal(modal) {
@@ -56,7 +56,8 @@ function getFriendsCardOptionsModal(friend) {
   fcmoBtnContainer.appendChild(viewProfileBtn);
 
   sendMsgBtn.addEventListener('click', () => {
-    console.log('linking to inbox');
+    const focus = { receiver: friend.user_name };
+    handleClientSideLinks('/inbox', focus);
     closeModal(modal);
   });
 
