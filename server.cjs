@@ -387,6 +387,26 @@ app.get('/api/protected/get-inbox-messages', async (req, res) => {
   }
 });
 
+app.get('/api/protected/get-friends', async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    const friends = await tribesMac('get-friends', userId);
+    res.send(friends);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting friends list.' });
+  }
+});
+
+
 
 app.get('/api/protected/get-random-tribe-suggestions', async (req, res) => {
   try {
