@@ -1,6 +1,6 @@
 import '../styles/general-chatroom-styling.css';
 import { getAppState, updateAppState } from './app-state';
-import { getMessages, updateTribeMemberLogin } from './tribes-db-access';
+import { getMessages } from './tribes-db-access';
 import { socket } from './sockets';
 
 const activeMembers = [];
