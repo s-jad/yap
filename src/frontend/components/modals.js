@@ -1,3 +1,4 @@
+import { handleChatroomLinks } from "./fetch_apis";
 import { getTribeMembers } from "./tribes-db-access";
 
 function closeModal(modal) {
@@ -27,10 +28,59 @@ function getModal() {
   return modalOuter;
 }
 
+function getFriendsCardOptionsModal(friend) {
+  const modal = getModal();
+
+  const modalInner = modal.querySelector('.modal-inner');
+  modalInner.classList.add('fcmo-modal-inner');
+  
+  const fcmoBtnContainer = document.createElement('div');
+  fcmoBtnContainer.className = 'fcmo-btn-container';
+
+  const sendMsgBtn = document.createElement('button');
+  sendMsgBtn.type = 'button';
+  sendMsgBtn.className = 'fcmo-send-message';
+  sendMsgBtn.textContent = 'Send Message';
+  fcmoBtnContainer.appendChild(sendMsgBtn);
+
+  const joinChatBtn = document.createElement('button');
+  joinChatBtn.type = 'button';
+  joinChatBtn.className = 'fcmo-join-chat';
+  joinChatBtn.textContent = 'Join Chat';
+  fcmoBtnContainer.appendChild(joinChatBtn);
+
+  const viewProfileBtn = document.createElement('button');
+  viewProfileBtn.type = 'button';
+  viewProfileBtn.className = 'fcmo-view-profile';
+  viewProfileBtn.textContent = 'View Profile';
+  fcmoBtnContainer.appendChild(viewProfileBtn);
+
+  sendMsgBtn.addEventListener('click', () => {
+    console.log('linking to inbox');
+    closeModal(modal);
+  });
+
+  joinChatBtn.addEventListener('click', () => {
+    const tribe = `/${friend.tribe_name.replaceAll(' ', '-').toLowerCase()}`;
+    handleChatroomLinks(tribe);
+    closeModal(modal);
+  });
+
+  viewProfileBtn.addEventListener('click', () => {
+    console.log('linking to profile from', friend.user_name);
+    closeModal(modal);
+  });
+
+  modalInner.appendChild(fcmoBtnContainer);
+
+  return modal;
+}
+
 async function getTribeMembersListModal(tribe) {
   const modal = getModal();
   const members = await getTribeMembers(tribe);
   const modalInner = modal.querySelector('.modal-inner');
+  modalInner.classList.add('gtml-modal-inner');
   const modalScroll = document.createElement('div');
   modalScroll.className = 'modal-scroll-wrapper';
   modalInner.appendChild(modalScroll);
@@ -65,4 +115,5 @@ async function getTribeMembersListModal(tribe) {
 export {
   getModal,
   getTribeMembersListModal,
+  getFriendsCardOptionsModal,
 }
