@@ -9,9 +9,6 @@
   z-index: 100;
 
   & .modal-inner {
-    overflow-y: scroll;
-    height: 50vh;
-    width: 70vw;
     background: var(--bg-clr);
     color: var(--font-clr);
     padding: var(--p-block) var(--p-inline);
@@ -39,6 +36,12 @@
         margin: auto;
       }
     }
+  }
+  
+  & .modal-inner.gtml-modal-inner {
+    overflow-y: scroll;
+    height: 50vh;
+    width: 70vw;
 
     & .modal-scroll-wrapper {
       display: flex;
@@ -62,6 +65,18 @@
           opacity: 0.7;
         }
       }
+    }
+  }
+
+  & .modal-inner.fcmo-modal-inner {
+    height: auto;
+    width: 70vw;
+
+    & .fcmo-btn-container {
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
     }
   }
 }
