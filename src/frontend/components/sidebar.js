@@ -57,10 +57,10 @@ export default async function Sidebar(urls) {
   sidebarListFlex.innerHTML = `
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/dashboard" href="/dashboard"></a></li>
     <li class="sidebar-list-item inbox-icon"><a class="sidebar-list-anchor" data-link="/inbox" href="/inbox"></a></li>
+    <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/friends" href="/friends"></a></li>
   `;
   
   const inboxAnchor = sidebarListFlex.querySelector('a[data-link="/inbox"]');
-  console.log(inboxAnchor);
   const msgCount = await getInboxMessageCount();
   
   if (msgCount !== 0) {
