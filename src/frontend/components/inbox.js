@@ -351,6 +351,13 @@ function getSendMsg() {
       sendMsgTa.focus();
     } 
   });
+  
+  msgReceiverName.addEventListener('click', () => {
+    msgReceiverName.textContent = '';
+    msgReceiverName.classList.add('hidden');
+    sendMsgInput.classList.remove('hidden');
+    sendMsgInput.focus();
+  });
 
   const btns = Array.from(sendMsg.querySelectorAll('button'));
 
