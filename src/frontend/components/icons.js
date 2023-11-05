@@ -8,6 +8,7 @@ import logoSVG from '../assets/imgs/logo.svg';
 import homeSVG from '../assets/imgs/home.svg';
 import messagesSVG from '../assets/imgs/envelope.svg';
 import membersSVG from '../assets/imgs/members.svg';
+import friendsSVG from '../assets/imgs/friends.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -26,9 +27,14 @@ function getSidebarIcons() {
   messages.src = messagesSVG;
   messages.alt = 'An envelope';
 
+  const friends = new Image();
+  friends.src = friendsSVG;
+  friends.alt = 'A person with magnifying glass';
+
   return [
     home,
     messages,
+    friends,
   ];
 }
 
