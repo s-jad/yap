@@ -449,13 +449,41 @@ function userExists(userData) {
 function getFriends(userId) {
   const query = {
     text: `
-      SELECT user_name FROM users
-      JOIN friends ON users.user_id = friends.friend_id
-      WHERE friends.user_id = \$1
+      SELECT 
+        u.user_name,
+        t.tribe_name,
+        tm.last_login,
+        tm.last_logout
+      FROM users u
+      JOIN friends f ON u.user_id = f.friend_id
+      JOIN tribe_members tm ON u.user_id = tm.member_id
+      JOIN tribes t ON tm.tribe_id = t.tribe_id
+      WHERE (
+        f.user_id = \$1
+        AND tm.last_login = (
+          SELECT MAX(last_login)
+          FROM tribe_members
+          WHERE member_id = u.user_id
+        )
+      )
       UNION ALL
-      SELECT user_name FROM users
-      JOIN friends ON users.user_id = friends.user_id
-      WHERE friends.friend_id = \$1;
+      SELECT 
+        u.user_name,
+        t.tribe_name,
+        tm.last_login,
+        tm.last_logout
+      FROM users u
+      JOIN friends f ON u.user_id = f.user_id
+      JOIN tribe_members tm ON u.user_id = tm.member_id
+      JOIN tribes t ON tm.tribe_id = t.tribe_id
+      WHERE (
+        f.friend_id = \$1
+        AND tm.last_login = (
+          SELECT MAX(last_login)
+          FROM tribe_members
+          WHERE member_id = u.user_id
+        )
+      );
     `,
     values: [userId],
   };
