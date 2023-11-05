@@ -1,4 +1,5 @@
 import '../styles/friends.css';
+import { getFriendsCardOptionsModal } from './modals';
 import { getFriends } from "./tribes-db-access";
 
 export default async function Friends() {
@@ -47,6 +48,11 @@ export default async function Friends() {
       <p class="friend-last-tribe-login">${friend.tribe_name}</p>
       <p class="friend-active-status ${classStatus}">${status}</p>
     `;
+
+    friendCard.addEventListener('click', () => {
+      const modal = getFriendsCardOptionsModal(friend);
+      document.body.appendChild(modal);
+    });
 
     friendsList.appendChild(friendCard);
   });
