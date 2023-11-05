@@ -4,20 +4,24 @@ import { getFriends } from "./tribes-db-access";
 export default async function Friends() {
   const friendsContainer = document.createElement('div');
   friendsContainer.className = 'friends-container removable';
-  
+  const friendsContainerInner = document.createElement('div');  
+  friendsContainerInner.className = 'friends-container-inner';
+  friendsContainer.appendChild(friendsContainerInner);
+
   const friendsList = document.createElement('div');
   friendsList.className = 'friends-list';
-
-  const friendsListHead = document.createElement('div');
-  friendsListHead.className = 'friends-list-header';
-
-  friendsListHead.innerHTML = `
-    <h3 class="friends-list-head-item">Friend</h3>
-    <h3 class="friends-list-head-item">Last Tribe Login</h3>
-    <h3 class="friends-list-head-item">Status</h3>
+  friendsList.innerHTML = `
+    <div class="friends-list-header">
+      <h3 class="friends-list-head-item">Friend</h3>
+      <h3 class="friends-list-head-item">Last Tribe Login</h3>
+      <h3 class="friends-list-head-item">Status</h3>
+    </div>
   `;
   
-  friendsList.appendChild(friendsListHead);
+  const scrollContainer = document.createElement('div');
+  scrollContainer.className = 'friends-list-scroll-wrapper';
+
+  scrollContainer.appendChild(friendsList);
 
   const friends = await getFriends();
   friends.reverse();
@@ -47,7 +51,7 @@ export default async function Friends() {
     friendsList.appendChild(friendCard);
   });
 
-  friendsContainer.appendChild(friendsList);
+  friendsContainerInner.appendChild(scrollContainer);
 
   return friendsContainer;
 }
