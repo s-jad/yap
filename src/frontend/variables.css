@@ -36,10 +36,10 @@
   --thistle-01: hsla(290, 35%, 83%, 0.1);
   --lemon-chiffon-0025: hsla(58, 74%, 85%, 0.025);
 
-  --p-inline: 2vw;
-  --p-block: 1vh;
+  --p-inline: clamp(10px, 2vw, 20px);
+  --p-block: clamp(5px, 1vh, 10px);
 
-  --gap: 1vw;
+  --gap: clamp(5px, 1vw, 10px);
 
   --shadow: 0 0 5px var(--card-clr);
   --shadow-inset: inset 0 0 3px var(--thistle), inset 0 0 8px var(--thistle-03);
