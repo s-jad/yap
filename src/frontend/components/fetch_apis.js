@@ -11,6 +11,7 @@ const importedList = {
   createTribe: false,
   tribeChat: false,
   messagesDashboard: false,
+  friendsDashboard: false,
 };
 
 const importedComponents = {
@@ -20,6 +21,7 @@ const importedComponents = {
   createTribe: () => {},
   tribeChat: () => {},
   messagesDashboard: () => {},
+  friendsDashboard: () => {},
 }
 
 function getComponent(fn) {
@@ -114,6 +116,27 @@ function importModules(page) {
           }
         } else {
           component = getAsyncComponent(importedComponents.joinTribe);
+          resolve(component);
+        }
+        break;
+
+      case '/friends':
+        if (importedList.inbox !== true) {
+          try {
+            const friendsModule = await import(/* webpackChunkName: "friends" */ './friends')
+            const friendsDashboard =  friendsModule.default;
+            const fn = friendsDashboard;
+            importedList.friendsDashboard = true;
+            importedComponents.friendsDashboard = fn;
+            component = getAsyncComponent(fn)
+            resolve(component);
+          }
+          catch (error) {
+              console.error(error);
+              reject(error);
+          }
+        } else {
+          component = getAsyncComponent(importedComponents.friendsDashboard);
           resolve(component);
         }
         break;
@@ -218,7 +241,6 @@ async function handleSidebarOptionalLinks(url) {
       .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
 
     const membersModal = await getTribeMembersListModal(tribe);
-    console.log(membersModal);
     body.appendChild(membersModal);
   }
 }
