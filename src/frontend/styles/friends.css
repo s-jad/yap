@@ -44,6 +44,7 @@
           padding: 1rem;
           border: 1px solid var(--thistle-07);
           border-radius: 1rem;
+          cursor: pointer;
 
           .friend-active-status {
             text-align: right;
@@ -56,6 +57,11 @@
           .friend-active-status.inactive {
             color: var(--error-clr);
           }
+        }
+
+        .friend-card:hover,
+        .friend-card:focus-visible {
+          box-shadow: var(--shadow), var(--shadow-inset);
         }
       }
     }
