@@ -449,11 +449,13 @@ function userExists(userData) {
 function getFriends(userId) {
   const query = {
     text: `
-      SELECT friend_id FROM friends
-      WHERE user_id = \$1
+      SELECT user_name FROM users
+      JOIN friends ON users.user_id = friends.friend_id
+      WHERE friends.user_id = \$1
       UNION ALL
-      SELECT user_id FROM friends
-      WHERE friend_id = \$1;
+      SELECT user_name FROM users
+      JOIN friends ON users.user_id = friends.user_id
+      WHERE friends.friend_id = \$1;
     `,
     values: [userId],
   };
