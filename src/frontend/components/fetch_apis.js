@@ -1,5 +1,5 @@
 import { getAppState } from './app-state';
-import { emitSidebarLinkEvent } from './events';
+import { emitFocusEvent, emitSidebarLinkEvent } from './events';
 import { getTribeMembersListModal } from './modals';
 import { disconnectSocket, getSocketInitState, initialiseSocket, socket } from './sockets';
 
@@ -273,7 +273,7 @@ function handleChatroomLinks(tribe) {
     });
 }
 
-function handleClientSideLinks(page) {
+function handleClientSideLinks(page, focus) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
 
@@ -286,6 +286,11 @@ function handleClientSideLinks(page) {
       if (toAdd) {
         app.removeChild(toRemove);
         app.appendChild(toAdd);
+        
+        if (focus) {
+          emitFocusEvent(page, toAdd, focus);
+        }
+
         emitSidebarLinkEvent();
       }
     })
