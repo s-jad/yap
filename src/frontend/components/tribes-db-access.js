@@ -169,6 +169,24 @@ async function deleteInboxMessage(msgIds) {
   });
 }
 
+async function sendInboxMessage(msgData) {
+  return fetch('/api/protected/send-inbox-message', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({msgData}),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to send message.');
+    } else {
+      return true;
+    }
+  });
+}
+
 async function replyToInboxMessage(parentMsgId, newMsg) {
   return fetch(`/api/protected/reply-to-inbox-message`, {
     method: 'POST',
@@ -339,6 +357,7 @@ export {
   getInboxMessages,
   getInboxMessageCount,
   deleteInboxMessage,
+  sendInboxMessage,
   replyToInboxMessage,
   getLastTribeLogins,
   getRandomTribeSuggestions,
