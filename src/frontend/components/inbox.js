@@ -323,6 +323,48 @@ function getReportSpam() {
   return reportSpam;
 }
 
+function getSendMsg() {
+  const sendMsg = document.createElement('div');
+  sendMsg.className = 'send-message-outer messages-component-outer';
+  sendMsg.innerHTML = `
+    <div class="send-message-inner">
+      <div class="send-message-receiver-wrapper">
+        <h3 class="send-message-receiver">To:</h3>
+        <input type="text" class="message-receiver-input"/>
+        <h3 class="message-receiver-name hidden"></h3>
+      </div>
+      <textarea class="send-message-ta"></textarea>
+      <button type="button" class="send-message-btn">Send</button>
+      <button type="button" class="cancel-message-btn">Cancel</button>
+    </div>
+  `;
+
+  const sendMsgInput = sendMsg.querySelector('input[type="text"]');
+  const msgReceiverName = sendMsg.querySelector('.message-receiver-name');
+  const sendMsgTa = sendMsg.querySelector('textarea');
+
+  sendMsgInput.addEventListener('keypress', (ev) => {
+    if (ev.key === 'Enter') {
+      msgReceiverName.textContent = sendMsgInput.value;
+      msgReceiverName.classList.remove('hidden');
+      sendMsgInput.classList.add('hidden');
+      sendMsgTa.focus();
+    } 
+  });
+
+  const btns = Array.from(sendMsg.querySelectorAll('button'));
+
+  btns[0].addEventListener('click', () => {
+    console.log("sending msg");
+  });
+
+  btns[1].addEventListener('click', () => {
+    console.log("cancelling msg");
+  });
+
+  return sendMsg;
+}
+
 function messagesDashboardRouting(linkTo, displayed) {
   const userMessagesContainer = document.body.querySelector('#user-messages');
   userMessagesContainer.removeChild(displayed);
@@ -336,9 +378,14 @@ function messagesDashboardRouting(linkTo, displayed) {
       userMessagesContainer.appendChild(messagesDashboardComponents[1]);
       break;
 
-    case 'report-spam':
+    case 'send-msg':
       userMessagesContainer.appendChild(messagesDashboardComponents[2]);
       break;
+
+    case 'report-spam':
+      userMessagesContainer.appendChild(messagesDashboardComponents[3]);
+      break;
+
   }
 }
 
@@ -352,6 +399,7 @@ export default async function MessagesDashboard() {
       <ul class="options-list">
         <li class="options-list-item displayed" data-link="inbox">Inbox</li>
         <li class="options-list-item" data-link="outbox">Outbox</li>
+        <li class="options-list-item" data-link="send-msg">Send Message</li>
         <li class="options-list-item" data-link="report-spam">Report Spam</li>
       </ul>
     </div>
@@ -372,6 +420,7 @@ export default async function MessagesDashboard() {
 
   const inbox = getInbox();
   const outbox = getOutbox();
+  const sendMsg = getSendMsg();
   const reportSpam = getReportSpam();
 
   const inboxMessagesInner = inbox.querySelector('.inbox-messages-inner');
@@ -381,6 +430,7 @@ export default async function MessagesDashboard() {
 
   messagesDashboardComponents.push(inbox);
   messagesDashboardComponents.push(outbox);
+  messagesDashboardComponents.push(sendMsg);
   messagesDashboardComponents.push(reportSpam);
 
   userMessagesContainer.appendChild(inbox);
