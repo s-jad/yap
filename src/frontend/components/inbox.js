@@ -3,7 +3,8 @@ import { showDialog, getAppState } from "./app-state";
 import { 
   deleteInboxMessage,
   replyToInboxMessage,
-  getInboxMessages
+  getInboxMessages,
+  sendInboxMessage
 } from "./tribes-db-access";
 
 const messagesDashboardComponents = [];
@@ -362,11 +363,24 @@ function getSendMsg() {
   const btns = Array.from(sendMsg.querySelectorAll('button'));
 
   btns[0].addEventListener('click', () => {
-    console.log("sending msg");
+    if (
+      msgReceiverName.textContent !== ''
+      && sendMsgTa.value !== undefined
+    ) {
+      const msgData = {
+        receiverName: msgReceiverName.textContent,
+        newMsg: sendMsgTa.value,
+      };
+
+      sendInboxMessage(msgData);
+      messagesDashboardRouting('inbox', sendMsg);
+    } else {
+      return;
+    }
   });
 
   btns[1].addEventListener('click', () => {
-    console.log("cancelling msg");
+    messagesDashboardRouting('inbox', sendMsg);
   });
 
   return sendMsg;
