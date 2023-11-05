@@ -1,47 +1,62 @@
 .friends-container {
+  --container-height: calc(100vh - 150px);
+  height: var(--container-height);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--p-block) var(--p-inline);
 
-  .friends-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap);
+  & .friends-container-inner {
+    --fci-height: calc(var(--container-height) - var(--p-block));
+    height: var(--fci-height);
     width: 100%;
-    height: 100%;
+  
+    & .friends-list-scroll-wrapper {
+      height: var(--fci-height);
+      width: 100%;
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
 
-    .friends-list-header {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
+      .friends-list {
+        min-height: var(--fci-height);
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+        width: 99%;
 
-      & h3:last-child {
-        text-align: right;
-      }
-    }
+        .friends-list-header {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          align-items: center;
+          justify-content: space-between;
+          padding: 1rem;
 
-    .friend-card {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-      border: 1px solid var(--thistle-07);
-      border-radius: 1rem;
+          & h3:last-child {
+            text-align: right;
+          }
+        }
 
-      .friend-active-status {
-        text-align: right;
-      }
+        .friend-card {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          align-items: center;
+          justify-content: space-between;
+          padding: 1rem;
+          border: 1px solid var(--thistle-07);
+          border-radius: 1rem;
 
-      .friend-active-status.active {
-        color: var(--success-clr);
-      }
+          .friend-active-status {
+            text-align: right;
+          }
 
-      .friend-active-status.inactive {
-        color: var(--error-clr);
+          .friend-active-status.active {
+            color: var(--success-clr);
+          }
+
+          .friend-active-status.inactive {
+            color: var(--error-clr);
+          }
+        }
       }
     }
   }
