@@ -80,6 +80,13 @@ module.exports = {
           priority: 10,
           enforce: true,
         },
+        friends: {
+          test: /[\\/]friends[\\/]/,
+          name: 'friends',
+          chunks: 'all',
+          priority: 10,
+          enforce: true,
+        },
         tribeChat: {
           test: /[\\/]get-tribe-chatroom[\\/]/,
           name: 'get-tribe-chatroom',
