@@ -7,6 +7,9 @@ const cookieParser = require('cookie-parser');
 const liveReload = require('livereload');
 const connectLiveReload = require('connect-livereload');
 const session = require('express-session');
+const multer = require('multer');
+const upload = multer();
+
 const RedisStore = require('connect-redis').default;
 
 const liveReloadServer = liveReload.createServer();
@@ -455,6 +458,41 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
 
 // POST ROUTES 
 
+app.post('/api/protected/report-user-incident', upload.none(), async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    const uneditedUserArr = req.body.involvedUsers.split(',');
+    const involvedUsers = uneditedUserArr.map((user) => user.replace(' ', ''));
+
+    if (involvedUsers[involvedUsers.length - 1] === '') {
+      involvedUsers.pop();
+    }
+    console.log("involvedUsers => ", involvedUsers);
+
+    const data = { 
+      incidentDescription: req.body.incidentDescription,
+      incidentType: req.body.incidentType,
+      involvedUsers,
+      userId,
+    };
+
+    const result = await tribesMac('report-user-incident', data);
+    logger.info(result);
+    res.send(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst reporting user incident.' });
+  }
+});
+
 app.post('/api/protected/send-inbox-message', async (req, res) => {
   console.log("msgData => ", req.body.msgData);
   try {
@@ -538,11 +576,6 @@ app.post('/api/protected/create-a-tribe', async (req, res) => {
     logger.error(error);
     res.status(500).json({ message: 'An error occurred while creating the tribe.' });
   }
-});
-
-app.post('/api/protected/report-user-issue', (req, res) => {
-  logger.info(req.body);
-  res.send(`form data received ${req.body}`);
 });
 
 // DELETE ROUTES 
