@@ -1,3 +1,5 @@
+import { showDialog } from "./app-state";
+import { emitFocusEvent } from "./events";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
 import { getTribeMembers } from "./tribes-db-access";
 
@@ -104,7 +106,28 @@ async function getTribeMembersListModal(tribe) {
     memberEl.className = 'member-list-item';
     memberEl.innerHTML = `
       <p class="member-name">${member.user_name}</p>
+
     `;
+
+    memberEl.addEventListener('click', () => {
+      const tribeChat = document.querySelector('#tribe-chat-container');
+      if (member.last_login > member.last_logout) {
+        const focus = {
+          replyTo: member.user_name,
+        };
+
+        emitFocusEvent('/members', tribeChat, focus);
+        closeModal(modal);
+      } else {
+        showDialog(
+          tribeChat,
+          'Can only post messages to currently active members',
+          'post-msg-failure',
+          'fail'
+        );
+      }
+    });
+
     memberEl.appendChild(activeIndicator);
 
     modalScroll.appendChild(memberEl);
