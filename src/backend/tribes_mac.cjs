@@ -638,6 +638,43 @@ function updateTribeMemberLogin(loginData) {
   });
 }
 
+function reportUserIncident(incidentData) {
+  console.log("reportUserIncident::incidentData => ", incidentData);
+  const {
+    userId,
+    incidentDescription,
+    incidentType,
+    involvedUsers,
+  } = incidentData;
+
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: `
+        WITH inserted_report AS (
+          INSERT INTO user_incident_reports (reporting_user_id, incident_description, incident_type)
+          VALUES (\$1, \$2, \$3)
+          RETURNING report_id
+        ), involved_user_ids AS (
+          SELECT user_id FROM users WHERE user_name = ANY (SELECT UNNEST(\$4::text[]))
+        )
+        INSERT INTO user_incident_reports_involved_users (report_id, involved_user_id)
+        SELECT report_id, user_id FROM inserted_report, involved_user_ids; 
+      `,
+       values: [userId, incidentDescription, incidentType, involvedUsers],
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        logger.info(res);
+        resolve(res);
+      }
+    });
+  });
+}
+
 function updateTribeMemberLogout(logoutData) {
   const { timestamp, tribe, member } = logoutData;
   return new Promise((resolve, reject) => {
@@ -668,6 +705,7 @@ function updateTribeMemberLogout(logoutData) {
 }
 
 async function tribesMac(req, data) {
+  console.log("tribesMac::req => ", req);
   switch (req) {
     case 'create-user':
       const user = await createUser(data);
@@ -737,6 +775,11 @@ async function tribesMac(req, data) {
       const msg = await backupChatroomMessages(data);
       console.log("tribesMac::msg => ", msg);
       return msg;
+
+    case 'report-user-incident':
+      const reportResult = await reportUserIncident(data);
+      console.log("report-user-incident => reportResult => ", reportResult);
+      return reportResult;
 
     case 'get-password':
       const result = await getPwHash(data);
