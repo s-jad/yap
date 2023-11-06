@@ -70,7 +70,7 @@ export default function ReportUserIncidentForm() {
         `Something went wrong,
         please check if you input the correct usernames`,
         'report-failure',
-        'error'
+        'fail'
       );
     }
   });
