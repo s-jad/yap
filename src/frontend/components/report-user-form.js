@@ -1,4 +1,5 @@
 import '../styles/report-user-form.css';
+import { showDialog } from './app-state';
 import { postUserReport } from './tribes-db-access';
 
 const url = process.env.SERVER_URL;
@@ -55,7 +56,23 @@ export default function ReportUserIncidentForm() {
     const formData = new FormData(reportFormContainer.querySelector('.yapp-form'));
     
     const result = await postUserReport(formData);
-    console.log("result => ", result);
+    
+    if (result.rowCount > 0) {
+      showDialog(
+        reportFormContainer,
+        'Report sent!',
+        'report-msg-success',
+        'success'
+      );
+    } else {
+      showDialog(
+        reportFormContainer,
+        `Something went wrong,
+        please check if you input the correct usernames`,
+        'report-failure',
+        'error'
+      );
+    }
   });
 
   return reportFormContainer;
