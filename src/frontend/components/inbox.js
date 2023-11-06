@@ -102,7 +102,7 @@ function getReplyView(parentMsg) {
         userMessagesContainer,
         'Something went wrong, please try again later.',
         'inbox-error',
-        'error'
+        'fail'
       );
     }
   });
@@ -154,7 +154,7 @@ function getExpandedMsgBtnContainer(msg, msgEl) {
         userMessagesContainer,
         'Something went wrong, please try again later.',
         'inbox-error',
-        'error'
+        'fail'
       );
     }
   });
