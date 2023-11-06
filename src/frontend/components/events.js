@@ -27,6 +27,18 @@ function emitFocusEvent(page, element, focus) {
       element.dispatchEvent(inboxFocusEvent);
       break;
 
+    case '/members':
+      const tribeChatMembersFocusEvent = new CustomEvent('focus-tribe-chat-members', {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          focus,
+        },
+      });
+
+      element.dispatchEvent(tribeChatMembersFocusEvent);
+      break;
+
     default:
       break;
   }
