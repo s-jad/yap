@@ -639,7 +639,6 @@ function updateTribeMemberLogin(loginData) {
 }
 
 function reportUserIncident(incidentData) {
-  console.log("reportUserIncident::incidentData => ", incidentData);
   const {
     userId,
     incidentDescription,
@@ -669,7 +668,7 @@ function reportUserIncident(incidentData) {
         reject(err);
       } else {
         logger.info(res);
-        resolve(res);
+        resolve(res.rowCount);
       }
     });
   });
@@ -705,7 +704,6 @@ function updateTribeMemberLogout(logoutData) {
 }
 
 async function tribesMac(req, data) {
-  console.log("tribesMac::req => ", req);
   switch (req) {
     case 'create-user':
       const user = await createUser(data);
@@ -773,12 +771,10 @@ async function tribesMac(req, data) {
 
     case 'backup-chatroom-messages':
       const msg = await backupChatroomMessages(data);
-      console.log("tribesMac::msg => ", msg);
       return msg;
 
     case 'report-user-incident':
       const reportResult = await reportUserIncident(data);
-      console.log("report-user-incident => reportResult => ", reportResult);
       return reportResult;
 
     case 'get-password':
