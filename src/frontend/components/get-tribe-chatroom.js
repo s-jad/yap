@@ -1,5 +1,5 @@
 import '../styles/general-chatroom-styling.css';
-import { getAppState, updateAppState } from './app-state';
+import { getAppState, showDialog, updateAppState } from './app-state';
 import { getMessages } from './tribes-db-access';
 import { socket } from './sockets';
 
@@ -170,8 +170,6 @@ async function populateWithMessages(msgView, msgTimeline) {
   const tribeName = chatState.tribeName;
   const messages = await getMessages(tribeName);
   handleDbReturn(messages, msgView, msgTimeline);
-
-  
 }
 
 function checkForAtInInput(message) {
@@ -309,13 +307,23 @@ export default async function TribeChat(tribe) {
       messageInput.focus();
       messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
     } catch (error) {
-      console.error('Error parsing data:', error);
+      showDialog(
+        tribeChatContainer,
+        `Something went wrong, please check the @username you input exists`,
+        'message-error',
+        'fail'
+      );
     }
   });
 
   messageInput.value = '';
   messageInput.focus();
   messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+
+  tribeChatContainer.addEventListener('focus-tribe-chat-members', (ev) => {
+    messageInput.value = `@${ev.detail.focus.replyTo} `;
+    messageInput.focus();
+  });
 
   return tribeChatContainer;
 }
