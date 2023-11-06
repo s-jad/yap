@@ -320,6 +320,25 @@ async function createUser(username, password, joined, userColor) {
 //   });
 // }
 
+async function postUserReport(formData) {
+  console.log("postUserReport::formData => ", formData);
+  return fetch ('/api/protected/report-user-incident', {
+    method: 'POST',
+    body: formData,
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to post report');
+    }
+    return response.json().then(json => {
+      if (json.message === 'Data was posted successfully.') {
+        console.log('Message posted successfully.');
+      }
+      return json;
+    });
+  });
+}
+
 async function authenticateUser(username, password) {
   return fetch('/api/authenticate-user', {
     method: 'POST',
@@ -365,4 +384,5 @@ export {
   createUser,
   authenticateUser,
   postChatMessage,
+  postUserReport,
 };
