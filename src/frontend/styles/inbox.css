@@ -276,6 +276,7 @@
         gap: calc(var(--gap) * 2);
 
         & input.message-receiver-input {
+          padding: 1rem;
           width: 100%;
           height: 35px;
         }

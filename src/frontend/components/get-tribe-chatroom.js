@@ -61,7 +61,7 @@ function createNewMessage(msg) {
     const receiver = activeMembers.find(member => member.username === receiver_name);
     msgReceiverEl.style.color = `hsl(${receiver.color}, 100%, 70%)`;
   }
-  
+
   const sender = activeMembers.find(member => member.username === sender_name);
   const msgSenderEl = newMessage.querySelector('.msg-sender');
   msgSenderEl.style.color = `hsl(${sender.color}, 100%, 70%)`;
@@ -71,7 +71,7 @@ function createNewMessage(msg) {
   timeStampEl.innerHTML = `<p class="timestamp time-${timestamp}">${timeText}</p>`;
 
   newMessage.addEventListener('click', (ev) => {
-    if (chatState.replying 
+    if (chatState.replying
       && messageState.replyTo !== newMessage.classList.item(1)
     ) {
       return;
@@ -122,7 +122,7 @@ function createDbMessage(msg) {
     msgReceiver.style.color = `hsl(${receiverInfo.color}, 100%, 70%)`;
   }
   newMessage.className = `message-wrapper message-${timestamp}`;
-  
+
   const senderInfo = activeMembers.find(member => member.username === msg.sender_name);
   const msgSender = newMessage.querySelector('.msg-sender');
   msgSender.style.color = `hsl(${senderInfo.color}, 100%, 70%)`;
@@ -186,7 +186,7 @@ function checkForAtInInput(message) {
 function handleUserInput(msg) {
   const timestamp = new Date().toISOString();
   const atInMsg = checkForAtInInput(msg);
-  let editedMsg; 
+  let editedMsg;
 
   if (atInMsg) {
     editedMsg = msg.slice(msg.indexOf(' ') + 1, msg.length);
@@ -200,7 +200,7 @@ function handleUserInput(msg) {
 function handleMsgReceive(msg) {
   const messageView = document.querySelector('.message-view');
   const messageTimeline = document.querySelector('.message-timeline');
-  
+
   const { newMessage, timeStampEl } = createNewMessage(msg);
   messageView.appendChild(newMessage);
   messageTimeline.appendChild(timeStampEl);
@@ -209,7 +209,7 @@ function handleMsgReceive(msg) {
 async function handleMsgPost(msg) {
   const tribeName = chatState.tribeName;
   const { editedMsg, timestamp } = handleUserInput(msg);
-  const global = messageState.global; 
+  const global = messageState.global;
 
   if (global === false) {
     socket.emit('message', {
