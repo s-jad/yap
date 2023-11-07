@@ -1,6 +1,7 @@
 const { pg_client } = require("./tribes_db.cjs");
 const { logger } = require('./logging.cjs');
 const { hashPassword } = require("./pw_encryption.cjs");
+const { resolve } = require("url");
 
 function getTribes() {
   return new Promise((resolve, reject) => {
@@ -12,6 +13,31 @@ function getTribes() {
         resolve(res.rows);
       }
     });
+  });
+}
+
+function checkRole(checkData) {
+  const { userId, tribeName } = checkData;
+  return new Promise ((resolve, reject) => {
+    const query = {
+      text: `
+        SELECT member_role 
+        FROM tribe_members 
+        WHERE member_id = \$1
+        AND tribe_id = (SELECT tribe_id FROM tribes WHERE tribe_name = \$2);
+      `,
+      values: [userId, tribeName],
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        logger.info(res.rows[0]);
+        resolve(res.rows[0]);
+      }
+    })
   });
 }
 
@@ -778,6 +804,10 @@ async function tribesMac(req, data) {
     case 'apply-for-invitation':
       const inviteRes = await postJoinTribeApplication(data);
       return inviteRes;
+
+    case 'check-role':
+      const roleCheck = await checkRole(data);
+      return roleCheck;
 
     case 'create-tribe':
       const tribe = await createTribe(data);
