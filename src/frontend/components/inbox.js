@@ -87,8 +87,8 @@ function getReplyView(parentMsg) {
   sendBtn.addEventListener('click', async () => {
     const replyTxtWithBr = replyText.value.replaceAll('\n', '<br>');
     const result = await replyToInboxMessage(parentMsg.message_id, replyTxtWithBr);
-    messagesDashboardRouting('inbox', replyViewContainer);
-    const userMessagesContainer = document.body.querySelector('.user-messages-container');
+    const userMessagesContainer = document.body.querySelector('#user-messages');
+    const inboxLink = userMessagesContainer.querySelector('.options-list-item[data-link="inbox"]');
 
     if (result === true) {
       showDialog(
@@ -97,6 +97,7 @@ function getReplyView(parentMsg) {
         'reply-msg-success',
         'success'
       );
+      messagesDashboardRouting(inboxLink);
     } else {
       showDialog(
         userMessagesContainer,
@@ -109,7 +110,7 @@ function getReplyView(parentMsg) {
 
   const cancelBtn = replyViewContainer.querySelector('.cancel-reply-btn');
   cancelBtn.addEventListener('click', () => {
-    messagesDashboardRouting('inbox', replyViewContainer);
+    messagesDashboardRouting(inboxLink);
   });
 
   return replyViewContainer;
@@ -395,7 +396,7 @@ function getSendMsg(userMessagesContainer) {
           userMessagesContainer,
           'Failed to send message, please check the receivers username',
           'msg-sent-failure',
-          'failure'
+          'fail'
         );
         msgReceiverName.textContent = '';
         msgReceiverName.classList.add('hidden');
@@ -407,7 +408,7 @@ function getSendMsg(userMessagesContainer) {
         userMessagesContainer,
         'Please enter a valid member name and/or a message (minimum 3 characters)',
         'msg-sent-failure',
-        'failure'
+        'fail'
       );
       msgReceiverName.textContent = '';
       msgReceiverName.classList.add('hidden');
