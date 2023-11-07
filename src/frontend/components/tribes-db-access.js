@@ -32,6 +32,24 @@ async function getTribeMembers(tribe) {
     });
 }
 
+async function applyForInvitation(tribeName) {
+  console.log("applyForInvitation::tribeName => ", tribeName);
+  return fetch('/api/protected/apply-for-invitation', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ tribeName }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        return new Error('Unable to apply for invitation');
+      }
+      return true;
+    });
+}
+
 async function getFriends() {
   return fetch('/api/protected/get-friends', {
     method: 'GET',
@@ -385,4 +403,5 @@ export {
   authenticateUser,
   postChatMessage,
   postUserReport,
+  applyForInvitation,
 };
