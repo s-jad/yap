@@ -56,7 +56,6 @@ const io = new Server(httpServer, {
 });
 
 async function handleTribeLoginDbUpdate(socket, chatroom) {
-  console.log("inside handleTribeLoginDbUpdate");
   try {
     const member = socket.decoded.id;
     const tribe = chatroom;
@@ -70,7 +69,6 @@ async function handleTribeLoginDbUpdate(socket, chatroom) {
 }
 
 async function handleTribeLogoutDbUpdate(socket, chatroom) {
-  console.log("inside handleTribeLogoutDbUpdate");
   try {
     const member = socket.decoded.id;
     const tribe = chatroom;
@@ -458,6 +456,33 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
 
 // POST ROUTES 
 
+app.post('/api/protected/apply-for-invitation', async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const applyingUserId = payload.id;
+
+    const data = { 
+      applyingUserId,
+      tribeName: req.body.tribeName,
+    };
+
+    const rowCount = await tribesMac('apply-for-invitation', data);
+    const result = { rowCount };
+    logger.info(result);
+    res.send(result);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst applying for an invitation.' });
+  }
+});
+
 app.post('/api/protected/report-user-incident', upload.none(), async (req, res) => {
   try {
     const tokenParts = req.cookies.jwt_signature.split('.');
@@ -475,7 +500,6 @@ app.post('/api/protected/report-user-incident', upload.none(), async (req, res) 
     if (involvedUsers[involvedUsers.length - 1] === '') {
       involvedUsers.pop();
     }
-    console.log("involvedUsers => ", involvedUsers);
 
     const data = { 
       incidentDescription: req.body.incidentDescription,
@@ -484,7 +508,8 @@ app.post('/api/protected/report-user-incident', upload.none(), async (req, res) 
       userId,
     };
 
-    const result = await tribesMac('report-user-incident', data);
+    const rowCount = await tribesMac('report-user-incident', data);
+    const result = { rowCount };
     logger.info(result);
     res.send(result);
   } catch (error) {
