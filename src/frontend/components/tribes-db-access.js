@@ -50,6 +50,26 @@ async function applyForInvitation(tribeName) {
     });
 }
 
+async function checkMembership(tribe) {
+  return fetch(`/api/protected/check-membership?tribe=${encodeURIComponent(tribe)}`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to fetch friends list');
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const role = data.member_role;
+      return role;
+    })
+    .catch((error) => {
+      console.error("checkMembership::error => ", error);
+    });
+}
+
 async function getFriends() {
   return fetch('/api/protected/get-friends', {
     method: 'GET',
@@ -70,6 +90,7 @@ async function getFriends() {
       });
     });
 }
+
 async function createTribe() {
   return fetch('/api/protected/create-a-tribe')
     .then(response => {
@@ -404,4 +425,5 @@ export {
   postChatMessage,
   postUserReport,
   applyForInvitation,
+  checkMembership,
 };
