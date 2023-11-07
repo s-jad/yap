@@ -15,6 +15,40 @@ function getTribes() {
   });
 }
 
+function postJoinTribeApplication(applicationData) {
+  const { applyingUserId, tribeName } = applicationData;
+  console.log("postJoinTribeApplication::applyingUserId => ", applyingUserId);
+  console.log("postJoinTribeApplication::tribeName => ", tribeName);
+  return new Promise ((resolve, reject) => {
+    const query = {
+      text: `
+        INSERT INTO private_tribes_invitations (
+          tribe_id,
+          inviting_user_id,
+          applying_user_id,
+          application_accepted
+        ) VALUES (
+          (SELECT tribe_id FROM tribes WHERE tribe_name = \$1),
+          null,
+          \$2,
+          FALSE
+        ) RETURNING *;
+      `,
+      values: [ tribeName, applyingUserId ],
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        logger.info(res);
+        resolve(res.rowCount);
+      }
+    });
+  });
+}
+
 function getLastTribeLogin(userId) {
   return new Promise((resolve, reject) => {
     const query = {
@@ -740,6 +774,10 @@ async function tribesMac(req, data) {
     case 'get-tribe-members':
       const members = await getTribeMembers(data);
       return members;
+
+    case 'apply-for-invitation':
+      const inviteRes = await postJoinTribeApplication(data);
+      return inviteRes;
 
     case 'create-tribe':
       const tribe = await createTribe(data);
