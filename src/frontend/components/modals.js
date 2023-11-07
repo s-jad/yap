@@ -76,7 +76,7 @@ function getFriendsCardOptionsModal(friend) {
 
   modalInner.appendChild(fcmoBtnContainer);
 
-  return modal;
+  document.body.appendChild(modal);
 }
 
 async function getTribeMembersListModal(tribe) {
@@ -133,7 +133,7 @@ async function getTribeMembersListModal(tribe) {
     modalScroll.appendChild(memberEl);
   });
 
-  return modal;
+  document.body.appendChild(modal);
 }
 
 function getApplyForInvitationModal(tribe) {
