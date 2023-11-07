@@ -20,16 +20,16 @@ async function getTribeMembers(tribe) {
   return fetch(`/api/protected/get-tribe-members?tribe=${encodeURIComponent(tribe)}`, {
     method: 'GET',
   })
-  .then((response) => {
-    return response.json();
-  })
-  .then((data) => {
-    const members = data;
-    return members;
-  })
-  .catch((error) => {
-    console.error('fetchTribeMembers::Error:', error);
-  });
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      const members = data;
+      return members;
+    })
+    .catch((error) => {
+      console.error('fetchTribeMembers::Error:', error);
+    });
 }
 
 async function getFriends() {
@@ -37,20 +37,20 @@ async function getFriends() {
     method: 'GET',
     credentials: 'include',
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to fetch friends list');
-    }
-    return response.text().then(text => {
-      try {
-        const friendsJson = JSON.parse(text);
-        return friendsJson;
-      } catch (error) {
-        console.err('getFriends::Error parsing JSON', error);
-        throw new Error('Error parsing JSON');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to fetch friends list');
       }
+      return response.text().then(text => {
+        try {
+          const friendsJson = JSON.parse(text);
+          return friendsJson;
+        } catch (error) {
+          console.err('getFriends::Error parsing JSON', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
     });
-  });
 }
 async function createTribe() {
   return fetch('/api/protected/create-a-tribe')
@@ -75,20 +75,20 @@ async function getRandomTribeSuggestions() {
     method: 'GET',
     credentials: 'include',
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to get random tribe suggestions');
-    }
-    return response.text().then(text => {
-      try {
-        const json = JSON.parse(text);
-        return json;
-      } catch (error) {
-        console.error('getRandomTribeSuggestions::Error parsing JSON => ', error);
-        throw new Error('Error parsing JSON');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to get random tribe suggestions');
       }
+      return response.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (error) {
+          console.error('getRandomTribeSuggestions::Error parsing JSON => ', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
     });
-  });
 }
 
 async function getLastTribeLogins() {
@@ -96,20 +96,20 @@ async function getLastTribeLogins() {
     method: 'GET',
     credentials: 'include',
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to get last tribe logins');
-    }
-    return response.text().then(text => {
-      try {
-        const json = JSON.parse(text);
-        return json;
-      } catch (error) {
-        console.error('getLastTribeLogins::Error parsing JSON => ', error);
-        throw new Error('Error parsing JSON');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to get last tribe logins');
       }
+      return response.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (error) {
+          console.error('getLastTribeLogins::Error parsing JSON => ', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
     });
-  });
 }
 
 async function getMessages(tribeUrl) {
@@ -135,20 +135,20 @@ async function getInboxMessageCount() {
     method: 'GET',
     credentials: 'include',
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to get user inbox message count.')
-    }
-    return response.text().then(text => {
-      try {
-        const json = JSON.parse(text);
-        return json;
-      } catch (err) {
-        console.error('getInboxMessageCount::Error parsing JSON', error);
-        throw new Error('Error parsing JSON');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to get user inbox message count.')
       }
+      return response.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (err) {
+          console.error('getInboxMessageCount::Error parsing JSON', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
     });
-  });
 }
 
 async function deleteInboxMessage(msgIds) {
@@ -158,15 +158,15 @@ async function deleteInboxMessage(msgIds) {
       'Content-Type': 'application/json'
     },
     credentials: 'include',
-    body: JSON.stringify({msgIds}),
+    body: JSON.stringify({ msgIds }),
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to delete message.');
-    } else {
-      return true;
-    }
-  });
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to delete message.');
+      } else {
+        return true;
+      }
+    });
 }
 
 async function sendInboxMessage(msgData) {
@@ -176,15 +176,15 @@ async function sendInboxMessage(msgData) {
       'Content-Type': 'application/json'
     },
     credentials: 'include',
-    body: JSON.stringify({msgData}),
+    body: JSON.stringify({ msgData }),
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to send message.');
-    } else {
-      return true;
-    }
-  });
+    .then(response => {
+      if (!response.ok) {
+        return false;
+      } else {
+        return true;
+      }
+    });
 }
 
 async function replyToInboxMessage(parentMsgId, newMsg) {
@@ -194,15 +194,15 @@ async function replyToInboxMessage(parentMsgId, newMsg) {
       'Content-Type': 'application/json'
     },
     credentials: 'include',
-    body: JSON.stringify({parentMsgId, newMsg}),
+    body: JSON.stringify({ parentMsgId, newMsg }),
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to reply to message.');
-    } else {
-      return true;
-    }
-  });
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to reply to message.');
+      } else {
+        return true;
+      }
+    });
 }
 
 async function getInboxMessages() {
@@ -210,20 +210,20 @@ async function getInboxMessages() {
     method: 'GET',
     credentials: 'include',
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to get messages.');
-    }
-    return response.text().then(text => {
-      try {
-        const json = JSON.parse(text);
-        return json;
-      } catch (error) {
-        console.error('createTribe::Error parsing JSON', error);
-        throw new Error('Error parsing JSON');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to get messages.');
       }
+      return response.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (error) {
+          console.error('createTribe::Error parsing JSON', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
     });
-  });
 }
 
 async function postChatMessage(tribe, message, receiver, timestamp, global) {
@@ -241,17 +241,17 @@ async function postChatMessage(tribe, message, receiver, timestamp, global) {
       global,
     })
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to post message.');
-    }
-    return response.json().then(json => {
-      if (json.message === 'Data was posted successfully.') {
-        console.log('Message posted successfully.');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to post message.');
       }
-      return json;
+      return response.json().then(json => {
+        if (json.message === 'Data was posted successfully.') {
+          console.log('Message posted successfully.');
+        }
+        return json;
+      })
     })
-  })
 }
 
 async function createUser(username, password, joined, userColor) {
@@ -267,20 +267,20 @@ async function createUser(username, password, joined, userColor) {
       userColor
     }),
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`The username ${username} is not available`);
-    }
-    return response.text().then(text => {
-      try {
-        const json = JSON.parse(text);
-        return json;
-      } catch (error) {
-        console.error('createUser::Error parsing JSON', error);
-        throw new Error('Error parsing JSON');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`The username ${username} is not available`);
       }
+      return response.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (error) {
+          console.error('createUser::Error parsing JSON', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
     });
-  });
 }
 
 // NOTE: May be necessary, lets see if the socket method works well first
@@ -322,21 +322,21 @@ async function createUser(username, password, joined, userColor) {
 
 async function postUserReport(formData) {
   console.log("postUserReport::formData => ", formData);
-  return fetch ('/api/protected/report-user-incident', {
+  return fetch('/api/protected/report-user-incident', {
     method: 'POST',
     body: formData,
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Unable to post report');
-    }
-    return response.json().then(json => {
-      if (json.message === 'Data was posted successfully.') {
-        console.log('Message posted successfully.');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to post report');
       }
-      return json;
+      return response.json().then(json => {
+        if (json.message === 'Data was posted successfully.') {
+          console.log('Message posted successfully.');
+        }
+        return json;
+      });
     });
-  });
 }
 
 async function authenticateUser(username, password) {
@@ -350,28 +350,28 @@ async function authenticateUser(username, password) {
       pw: password,
     }),
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Incorrect username or password.');
-    }
-    return response.text().then(text => {
-      try {
-        const json = JSON.parse(text);
-        return json;
-      } catch (error) {
-        console.error('authenticateUser::Error parsing JSON', error);
-        throw new Error('Error parsing JSON');
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Incorrect username or password.');
       }
+      return response.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (error) {
+          console.error('authenticateUser::Error parsing JSON', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
     });
-  });
 }
 
 export {
   getTribes,
   getTribeMembers,
-  getFriends, 
-//  updateTribeMemberLogin,
-//  updateTribeMemberLogout,
+  getFriends,
+  //  updateTribeMemberLogin,
+  //  updateTribeMemberLogout,
   getMessages,
   getInboxMessages,
   getInboxMessageCount,
