@@ -1,17 +1,28 @@
 import '../styles/join-tribe.css';
 import { getTribes } from './tribes-db-access';
 import { handleChatroomLinks } from './fetch_apis';
+import { getApplyForInvitationModal } from './modals';
 
 async function populateTribesGrid(tribeGrid) {
   const tribes = await getTribes();
 
   for (let i = 0; i < tribes.length; i += 1) {
     const tribeUrl = tribes[i].tribe_name
-        .toLowerCase()
-        .replaceAll(' ', '-');
+      .toLowerCase()
+      .replaceAll(' ', '-');
+
+    let privacy;
+    let privacyClass;
+    if (tribes[i].private) {
+      privacy = 'Private';
+      privacyClass = 'private-tribe';
+    } else {
+      privacy = 'Public';
+      privacyClass = 'public-tribe';
+    }
 
     const tribeCard = document.createElement('div');
-    tribeCard.className = 'tribe-card-container';
+    tribeCard.className = `tribe-card-container ${privacyClass}`;
     tribeCard.innerHTML = `
       <a class="tribe-link" href="/api/protected/tribe-chat/${tribeUrl}" data-link="/tribe-chat/${tribeUrl}" tabindex="${i + 4}">
         <div class="tribe-card">
@@ -21,24 +32,30 @@ async function populateTribesGrid(tribeGrid) {
           </div>
           <h3 class="tribe-cta">${tribes[i].tribe_cta}</h3>
           <p class="tribe-description">${tribes[i].tribe_description}</p>
+          <p class="tribe-privacy">${privacy}</p>
         </div>
       </a>
     `;
 
+    const tribePrivacy = tribeCard.querySelector('.tribe-privacy');
+
+    const tribeCardLink = tribeCard.querySelector('.tribe-link');
+    tribeCardLink.addEventListener('click', (ev) => {
+      if (tribePrivacy.textContent === 'Public') {
+        ev.preventDefault();
+        const linkUrl = tribeCardLink.getAttribute('data-link');
+        history.pushState(null, null, linkUrl);
+        const urlSplit = linkUrl.split('/');
+        const tribeUrl = `/${urlSplit[2]}`;
+        handleChatroomLinks(tribeUrl);
+      } else if (tribePrivacy.textContent === 'Private') {
+        ev.preventDefault();
+        getApplyForInvitationModal(tribes[i]);
+      }
+    });
+
     tribeGrid.appendChild(tribeCard);
   };
-
-  const tribeCardLinks = Array.from(tribeGrid.querySelectorAll('.tribe-link'));
-  tribeCardLinks.forEach((link) => {
-    link.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      const linkUrl = link.getAttribute('data-link');
-      history.pushState(null, null, linkUrl);
-      const urlSplit = linkUrl.split('/');
-      const tribeUrl = `/${urlSplit[2]}`;
-      handleChatroomLinks(tribeUrl);
-    });
-  });
 
   return tribeGrid;
 }
