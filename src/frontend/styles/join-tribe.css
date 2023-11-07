@@ -50,6 +50,10 @@
       & .tribe-description {
         color: var(--font-clr);
       }
+
+      & .tribe-privacy {
+        margin-top: auto;
+      }
     }
 
     & .tribe-card:hover,
