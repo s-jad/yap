@@ -1,7 +1,7 @@
 import { showDialog } from "./app-state";
 import { emitFocusEvent } from "./events";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
-import { getTribeMembers } from "./tribes-db-access";
+import { applyForInvitation, getTribeMembers } from "./tribes-db-access";
 
 function closeModal(modal) {
   document.body.removeChild(modal);
@@ -149,15 +149,25 @@ function getApplyForInvitationModal(tribe) {
   `;
 
   const afiApplyBtn = modalInner.querySelector('.afi-apply-btn');
+  const joinTribe = document.querySelector('#join-tribe-container');
+  afiApplyBtn.addEventListener('click', async () => {
+    const applicationRes = await applyForInvitation(tribe.tribe_name);
 
-  afiApplyBtn.addEventListener('click', () => {
-    console.log("Sending application to tribe");
-    showDialog(
-      modal,
-      `Application sent to ${tribe.tribe_name}!`,
-      'afi-modal-success',
-      'success',
-    );
+    if (applicationRes === true) {
+      showDialog(
+        joinTribe,
+        `Application sent to ${tribe.tribe_name}!`,
+        'afi-modal-success',
+        'success',
+      );
+    } else {
+      showDialog(
+        joinTribe,
+        `${applicationRes}`,
+        'afi-modal-failure',
+        'fail',
+      );
+    }
 
     setTimeout(() => {
       closeModal(modal);
