@@ -1,6 +1,6 @@
 import '../styles/inbox.css';
 import { showDialog, getAppState } from "./app-state";
-import { 
+import {
   deleteInboxMessage,
   replyToInboxMessage,
   getInboxMessages,
@@ -13,7 +13,7 @@ const userMessagesArr = [];
 async function fetchUserMessages() {
   const messages = await getInboxMessages();
   messages.forEach((msg) => {
-      userMessagesArr.push(msg);
+    userMessagesArr.push(msg);
   });
   console.log("userMsgs => ", userMessagesArr);
   return messages;
@@ -23,7 +23,7 @@ function getReplies(parentMsgId) {
   const replyChain = [];
   let currentMsgId = parentMsgId;
   let currentMsg;
-  while(currentMsgId !== null) {
+  while (currentMsgId !== null) {
     currentMsg = userMessagesArr.find((msg) => msg.message_id === currentMsgId);
     currentMsgId = currentMsg.parent_message_id;
 
@@ -40,7 +40,7 @@ function getReplyIds(parentMsgId) {
   replyChain.push(currentMsgId);
   let currentMsg;
 
-  while(currentMsgId !== null) {
+  while (currentMsgId !== null) {
     currentMsg = userMessagesArr.find((msg) => msg.message_id === currentMsgId);
     currentMsgId = currentMsg.parent_message_id;
 
@@ -84,7 +84,7 @@ function getReplyView(parentMsg) {
   const replyText = replyViewContainer.querySelector('#reply-text');
 
   const sendBtn = replyViewContainer.querySelector('.send-reply-btn');
-  sendBtn.addEventListener('click', async() => {
+  sendBtn.addEventListener('click', async () => {
     const replyTxtWithBr = replyText.value.replaceAll('\n', '<br>');
     const result = await replyToInboxMessage(parentMsg.message_id, replyTxtWithBr);
     messagesDashboardRouting('inbox', replyViewContainer);
@@ -132,7 +132,7 @@ function getExpandedMsgBtnContainer(msg, msgEl) {
     <button class="expanded-msg-btn report-btn">Report</button>
   `;
   const btns = btnContainer.querySelectorAll('button');
-  
+
   btns[0].addEventListener('click', async () => {
     switchToReplyView(msg);
   });
@@ -169,14 +169,14 @@ async function populateInboxOutbox(inbox, outbox) {
     messages = await fetchUserMessages();
   } else {
     messages = userMessagesArr;
-  } 
+  }
   const currentUser = getAppState('username');
 
   const populateReplyChains = (msg, replyChainContainer) => {
     if (msg.parent_message_id !== null) {
       console.log("original msg => ", msg);
       const parentMsgs = getReplies(msg.parent_message_id);
-     
+
       // TODO - think of better way to ensure db doesnt have
       // two msgs with same parent
       if (parentMsgs === undefined) {
@@ -186,7 +186,7 @@ async function populateInboxOutbox(inbox, outbox) {
       const fullMsgDate = new Date(msg.message_timestamp).toString();
       const dateParts = fullMsgDate.split(' ');
       const displayMsgDate = `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
-      
+
       parentMsgs.forEach((parentMsg) => {
         const parentMsgEl = document.createElement('div');
         parentMsgEl.className = 'reply-message-wrapper';
@@ -324,7 +324,7 @@ function getReportSpam() {
   return reportSpam;
 }
 
-function getSendMsg() {
+function getSendMsg(userMessagesContainer) {
   const sendMsg = document.createElement('div');
   sendMsg.className = 'send-message-outer messages-component-outer';
   sendMsg.innerHTML = `
@@ -344,15 +344,22 @@ function getSendMsg() {
   const msgReceiverName = sendMsg.querySelector('.message-receiver-name');
   const sendMsgTa = sendMsg.querySelector('textarea');
 
+  sendMsgInput.addEventListener('blur', (ev) => {
+    msgReceiverName.textContent = sendMsgInput.value;
+    msgReceiverName.classList.remove('hidden');
+    sendMsgInput.classList.add('hidden');
+    sendMsgTa.focus();
+  });
+
   sendMsgInput.addEventListener('keypress', (ev) => {
     if (ev.key === 'Enter') {
       msgReceiverName.textContent = sendMsgInput.value;
       msgReceiverName.classList.remove('hidden');
       sendMsgInput.classList.add('hidden');
       sendMsgTa.focus();
-    } 
+    }
   });
-  
+
   msgReceiverName.addEventListener('click', () => {
     msgReceiverName.textContent = '';
     msgReceiverName.classList.add('hidden');
@@ -361,10 +368,11 @@ function getSendMsg() {
   });
 
   const btns = Array.from(sendMsg.querySelectorAll('button'));
+  const inboxLink = userMessagesContainer.querySelector('.options-list-item[data-link="inbox"]');
 
-  btns[0].addEventListener('click', () => {
+  btns[0].addEventListener('click', async () => {
     if (
-      msgReceiverName.textContent !== ''
+      msgReceiverName.textContent.length < 3
       && sendMsgTa.value !== undefined
     ) {
       const msgData = {
@@ -372,23 +380,61 @@ function getSendMsg() {
         newMsg: sendMsgTa.value,
       };
 
-      sendInboxMessage(msgData);
-      messagesDashboardRouting('inbox', sendMsg);
+      const res = await sendInboxMessage(msgData);
+
+      if (res) {
+        showDialog(
+          userMessagesContainer,
+          'Message sent!',
+          'msg-sent-success',
+          'success',
+        );
+        messagesDashboardRouting(inboxLink);
+      } else {
+        showDialog(
+          userMessagesContainer,
+          'Failed to send message, please check the receivers username',
+          'msg-sent-failure',
+          'failure'
+        );
+        msgReceiverName.textContent = '';
+        msgReceiverName.classList.add('hidden');
+        sendMsgInput.classList.remove('hidden');
+        sendMsgInput.focus();
+      }
     } else {
+      showDialog(
+        userMessagesContainer,
+        'Please enter a valid member name and/or a message (minimum 3 characters)',
+        'msg-sent-failure',
+        'failure'
+      );
+      msgReceiverName.textContent = '';
+      msgReceiverName.classList.add('hidden');
+      sendMsgInput.classList.remove('hidden');
+      sendMsgInput.value = '';
+      sendMsgInput.focus();
       return;
     }
   });
 
   btns[1].addEventListener('click', () => {
-    messagesDashboardRouting('inbox', sendMsg);
+    messagesDashboardRouting(inboxLink);
   });
 
   return sendMsg;
 }
 
-function messagesDashboardRouting(linkTo, displayed) {
+function messagesDashboardRouting(link) {
   const userMessagesContainer = document.body.querySelector('#user-messages');
-  userMessagesContainer.removeChild(displayed);
+  const linkTo = link.getAttribute('data-link');
+  const currentlyDisplayed = userMessagesContainer.querySelector('.messages-component-outer');
+  const prevLink = userMessagesContainer.querySelector('.displayed');
+
+  prevLink.classList.remove('displayed');
+  link.classList.add('displayed');
+
+  userMessagesContainer.removeChild(currentlyDisplayed);
 
   switch (linkTo) {
     case 'inbox':
@@ -452,23 +498,18 @@ export default async function MessagesDashboard() {
 
   links.forEach((link) => {
     link.addEventListener('click', () => {
-      const linkTo = link.getAttribute('data-link');
-      const currentlyDisplayed = userMessagesContainer.querySelector('.messages-component-outer');
-      const prevLink = userMessagesContainer.querySelector('.displayed');
-      prevLink.classList.remove('displayed');
-      link.classList.add('displayed');
-      messagesDashboardRouting(linkTo, currentlyDisplayed);
+      messagesDashboardRouting(link);
     });
   });
 
   const inbox = getInbox();
   const outbox = getOutbox();
-  const sendMsg = getSendMsg();
+  const sendMsg = getSendMsg(userMessagesContainer);
   const reportSpam = getReportSpam();
 
   const inboxMessagesInner = inbox.querySelector('.inbox-messages-inner');
   const outboxMessagesInner = outbox.querySelector('.outbox-messages-inner');
-  
+
   await populateInboxOutbox(inboxMessagesInner, outboxMessagesInner);
 
   messagesDashboardComponents.push(inbox);
