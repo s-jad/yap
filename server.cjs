@@ -454,6 +454,39 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
   }
 });
 
+app.get('/api/protected/check-membership', async (req, res) => {
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+
+    const data = { 
+      userId,
+      tribeName: req.query.tribe,
+    };
+
+    const result = await tribesMac('check-role', data);
+
+    let role;
+    if (result === undefined) {
+      role = { member_role: 'none' };
+    } else {
+      role = result;
+    }
+
+    res.send(role);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst applying for an invitation.' });
+  }
+});
+
 // POST ROUTES 
 
 app.post('/api/protected/apply-for-invitation', async (req, res) => {
