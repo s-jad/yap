@@ -18,11 +18,11 @@ function getModal() {
     <button type="button" class="invisible-btn"></button>
     <div class="close-modal-btn">X</div>
   `;
-  
+
   const btn = btnContainer.querySelector('button');
   btn.addEventListener('click', () => {
     closeModal(modalOuter);
-  }); 
+  });
 
   modalInner.appendChild(btnContainer);
   modalOuter.appendChild(modalInner);
@@ -35,7 +35,7 @@ function getFriendsCardOptionsModal(friend) {
 
   const modalInner = modal.querySelector('.modal-inner');
   modalInner.classList.add('fcmo-modal-inner');
-  
+
   const fcmoBtnContainer = document.createElement('div');
   fcmoBtnContainer.className = 'fcmo-btn-container';
 
@@ -136,8 +136,47 @@ async function getTribeMembersListModal(tribe) {
   return modal;
 }
 
+function getApplyForInvitationModal(tribe) {
+  const modal = getModal();
+  const modalInner = modal.querySelector('.modal-inner');
+  modalInner.classList.add('afi-modal-inner');
+  console.log("Inside the modal!!!");
+
+  modalInner.innerHTML = `
+    <h2 class="afi-modal-header">Apply for an invitation to ${tribe.tribe_name}?</h2>
+    <button class="afi-apply-btn">Apply</button>
+    <button class="afi-cancel-btn">Cancel</button>
+  `;
+
+  const afiApplyBtn = modalInner.querySelector('.afi-apply-btn');
+
+  afiApplyBtn.addEventListener('click', () => {
+    console.log("Sending application to tribe");
+    showDialog(
+      modal,
+      `Application sent to ${tribe.tribe_name}!`,
+      'afi-modal-success',
+      'success',
+    );
+
+    setTimeout(() => {
+      closeModal(modal);
+    }, 100);
+  });
+
+  const afiCancelBtn = modalInner.querySelector('.afi-cancel-btn');
+  afiCancelBtn.addEventListener('click', () => {
+    closeModal(modal);
+  });
+
+  modal.appendChild(modalInner);
+
+  document.body.appendChild(modal);
+}
+
 export {
   getModal,
   getTribeMembersListModal,
   getFriendsCardOptionsModal,
+  getApplyForInvitationModal,
 }
