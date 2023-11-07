@@ -4,7 +4,7 @@ const { hashPassword } = require("./pw_encryption.cjs");
 
 function getTribes() {
   return new Promise((resolve, reject) => {
-    pg_client.query('SELECT tribe_name, tribe_cta, tribe_description FROM tribes', (err, res) => {
+    pg_client.query('SELECT tribe_name, tribe_cta, tribe_description, private FROM tribes', (err, res) => {
       if (err) {
         logger.error(err);
         reject(err);
