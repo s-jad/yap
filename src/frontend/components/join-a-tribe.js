@@ -1,5 +1,5 @@
 import '../styles/join-tribe.css';
-import { getTribes } from './tribes-db-access';
+import { checkMembership, getTribes } from './tribes-db-access';
 import { handleChatroomLinks } from './fetch_apis';
 import { getApplyForInvitationModal } from './modals';
 
@@ -40,7 +40,7 @@ async function populateTribesGrid(tribeGrid) {
     const tribePrivacy = tribeCard.querySelector('.tribe-privacy');
 
     const tribeCardLink = tribeCard.querySelector('.tribe-link');
-    tribeCardLink.addEventListener('click', (ev) => {
+    tribeCardLink.addEventListener('click', async (ev) => {
       if (tribePrivacy.textContent === 'Public') {
         ev.preventDefault();
         const linkUrl = tribeCardLink.getAttribute('data-link');
@@ -50,7 +50,17 @@ async function populateTribesGrid(tribeGrid) {
         handleChatroomLinks(tribeUrl);
       } else if (tribePrivacy.textContent === 'Private') {
         ev.preventDefault();
-        getApplyForInvitationModal(tribes[i]);
+        const memberStatus = await checkMembership(tribes[i].tribe_name);
+
+        if (memberStatus === 'mod' || memberStatus === 'member') {
+          const linkUrl = tribeCardLink.getAttribute('data-link');
+          history.pushState(null, null, linkUrl);
+          const urlSplit = linkUrl.split('/');
+          const tribeUrl = `/${urlSplit[2]}`;
+          handleChatroomLinks(tribeUrl);
+        } else {
+          getApplyForInvitationModal(tribes[i]);
+        }
       }
     });
 
