@@ -5,7 +5,7 @@ import { getFriends } from "./tribes-db-access";
 export default async function Friends() {
   const friendsContainer = document.createElement('div');
   friendsContainer.className = 'friends-container removable';
-  const friendsContainerInner = document.createElement('div');  
+  const friendsContainerInner = document.createElement('div');
   friendsContainerInner.className = 'friends-container-inner';
   friendsContainer.appendChild(friendsContainerInner);
 
@@ -18,7 +18,7 @@ export default async function Friends() {
       <h3 class="friends-list-head-item">Status</h3>
     </div>
   `;
-  
+
   const scrollContainer = document.createElement('div');
   scrollContainer.className = 'friends-list-scroll-wrapper';
 
@@ -30,7 +30,7 @@ export default async function Friends() {
   friends.forEach((friend) => {
     const friendCard = document.createElement('div');
     friendCard.className = 'friend-card';
-  
+
     const loggedIn = friend.last_login > friend.last_logout;
 
     let status;
@@ -50,8 +50,7 @@ export default async function Friends() {
     `;
 
     friendCard.addEventListener('click', () => {
-      const modal = getFriendsCardOptionsModal(friend);
-      document.body.appendChild(modal);
+      getFriendsCardOptionsModal(friend);
     });
 
     friendsList.appendChild(friendCard);
