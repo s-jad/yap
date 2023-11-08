@@ -9,6 +9,7 @@ import homeSVG from '../assets/imgs/home.svg';
 import messagesSVG from '../assets/imgs/envelope.svg';
 import membersSVG from '../assets/imgs/members.svg';
 import friendsSVG from '../assets/imgs/friends.svg';
+import applicationsSVG from '../assets/imgs/applications.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -41,11 +42,15 @@ function getSidebarIcons() {
 function getOptionalSidebarIcons(url) {
   switch (url) {
     case 'tribe-chat':
-      console.log("inside case tribe-chat");
       const members = new Image();
       members.src = membersSVG;
       members.alt = '3 people';
-      return members;
+
+      const applications = new Image();
+      applications.src = applicationsSVG;
+      applications.alt = 'An application letter';
+
+      return [members, applications];
 
     default:
       break;
