@@ -62,7 +62,7 @@ async function getApplicants(tribeName) {
       return response.json();
     })
     .then((data) => {
-      const applicants = data.applicants;
+      const applicants = data.rows;
       return applicants;
     })
     .catch((error) => {
