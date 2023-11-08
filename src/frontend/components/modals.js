@@ -1,7 +1,7 @@
 import { showDialog } from "./app-state";
 import { emitFocusEvent } from "./events";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
-import { applyForInvitation, getTribeMembers } from "./tribes-db-access";
+import { applyForInvitation, getApplicants, getTribeMembers } from "./tribes-db-access";
 
 function closeModal(modal) {
   document.body.removeChild(modal);
@@ -79,6 +79,31 @@ function getFriendsCardOptionsModal(friend) {
   document.body.appendChild(modal);
 }
 
+async function getTribeApplicationsListModal(tribe) {
+  const modal = getModal();
+  const applicants = await getApplicants(tribe);
+  const modalInner = modal.querySelector('.modal-inner');
+  modalInner.classList.add('gtal-modal-inner');
+  const modalScroll = document.createElement('div');
+  modalScroll.className = 'modal-scroll-wrapper';
+  modalInner.appendChild(modalScroll);
+
+  applicants.forEach((applicant) => {
+    const applicantEl = document.createElement('div');
+    applicantEl.className = 'applicant-list-item';
+    applicantEl.innerHTML = `
+      <p class="applicant-name">${applicant.user_name}</p>
+      <p class="application-date">${applicant.application_date}</p>
+    `;
+    
+    applicantEl.addEventListener('click', () => {
+      console.log("showing profile, accept/deny buttons");
+    });
+  });
+
+  document.body.appendChild(modal);
+}
+
 async function getTribeMembersListModal(tribe) {
   const modal = getModal();
   const members = await getTribeMembers(tribe);
@@ -106,7 +131,6 @@ async function getTribeMembersListModal(tribe) {
     memberEl.className = 'member-list-item';
     memberEl.innerHTML = `
       <p class="member-name">${member.user_name}</p>
-
     `;
 
     memberEl.addEventListener('click', () => {
@@ -187,6 +211,7 @@ function getApplyForInvitationModal(tribe) {
 export {
   getModal,
   getTribeMembersListModal,
+  getTribeApplicationsListModal,
   getFriendsCardOptionsModal,
   getApplyForInvitationModal,
 }
