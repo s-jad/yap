@@ -41,10 +41,46 @@ function checkRole(checkData) {
   });
 }
 
+function getApplicants(tribeName) {
+  console.log("tribeName => ", tribeName);
+  return new Promise ((resolve, reject) => {
+    const query = {
+      text: `
+        WITH applicants AS (
+          SELECT 
+            applying_user_id,
+            application_date
+          FROM 
+            private_tribes_invitations
+          WHERE tribe_id = (SELECT tribe_id FROM tribes WHERE tribe_name = \$1)
+          AND application_accepted = false
+          AND application_denied = false
+        ) 
+        SELECT
+          users.user_name, 
+          applicants.application_date
+        FROM 
+          users 
+        JOIN 
+          applicants ON users.user_id = applicants.applying_user_id;
+      `,
+      values: [ tribeName ],
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        logger.info(res);
+        resolve(res);
+      }
+    });
+  });
+}
+
 function postJoinTribeApplication(applicationData) {
   const { applyingUserId, tribeName } = applicationData;
-  console.log("postJoinTribeApplication::applyingUserId => ", applyingUserId);
-  console.log("postJoinTribeApplication::tribeName => ", tribeName);
   return new Promise ((resolve, reject) => {
     const query = {
       text: `
@@ -804,6 +840,10 @@ async function tribesMac(req, data) {
     case 'apply-for-invitation':
       const inviteRes = await postJoinTribeApplication(data);
       return inviteRes;
+
+    case 'get-applicants':
+      const applicants = await getApplicants(data);
+      return applicants;
 
     case 'check-role':
       const roleCheck = await checkRole(data);
