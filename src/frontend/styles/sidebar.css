@@ -14,7 +14,7 @@
 
 
   & .sidebar-list-flex,
-  & .optional-items-container {
+  & .optional-list-flex {
     display: flex;
     flex-direction: column;
     align-items: center;
