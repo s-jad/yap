@@ -50,6 +50,26 @@ async function applyForInvitation(tribeName) {
     });
 }
 
+async function getApplicants(tribeName) {
+  console.log("getApplicants::tribeName => ", tribeName);
+  return fetch(`/api/protected/get-applicants?tribe=${encodeURIComponent(tribeName)}`, {
+    method: 'GET',
+  })
+    .then((response) => {
+      if (!response.ok) {
+        return new Error('Unable to get applicants for invitation');
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const applicants = data.applicants;
+      return applicants;
+    })
+    .catch((error) => {
+      console.error('error returning applicants => ', error);
+    });
+}
+
 async function checkMembership(tribe) {
   return fetch(`/api/protected/check-membership?tribe=${encodeURIComponent(tribe)}`, {
     method: 'GET',
@@ -425,5 +445,6 @@ export {
   postChatMessage,
   postUserReport,
   applyForInvitation,
+  getApplicants,
   checkMembership,
 };
