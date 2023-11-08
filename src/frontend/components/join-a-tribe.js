@@ -51,13 +51,16 @@ async function populateTribesGrid(tribeGrid) {
       } else if (tribePrivacy.textContent === 'Private') {
         ev.preventDefault();
         const memberStatus = await checkMembership(tribes[i].tribe_name);
-
-        if (memberStatus === 'mod' || memberStatus === 'member') {
+        if (
+          memberStatus === 'mod' 
+          || memberStatus === 'member'
+          || memberStatus === 'admin'
+        ) {
           const linkUrl = tribeCardLink.getAttribute('data-link');
           history.pushState(null, null, linkUrl);
           const urlSplit = linkUrl.split('/');
           const tribeUrl = `/${urlSplit[2]}`;
-          handleChatroomLinks(tribeUrl);
+          handleChatroomLinks(tribeUrl, memberStatus);
         } else {
           getApplyForInvitationModal(tribes[i]);
         }
