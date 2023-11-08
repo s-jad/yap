@@ -94,10 +94,10 @@ dialog {
   background: var(--card-clr);
   color: var(--font-clr);
   border-radius: 1rem;
-  padding: var(--p-block) var(--p-inline);
+  padding: calc(var(--p-block) * 3) calc(var(--p-inline) * 3);
   border: 2px solid var(--lemon-chiffon-07);
   top: 50%;
-  z-index: 10;
+  z-index: 1000;
 }
 
 dialog.success {
