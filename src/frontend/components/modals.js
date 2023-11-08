@@ -7,33 +7,86 @@ function closeModal(modal) {
   document.body.removeChild(modal);
 }
 
-function getModal() {
-  const modalOuter = document.createElement('div');
-  modalOuter.className = 'modal-outer';
+function getScrollableModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-outer';
   const modalInner = document.createElement('div');
   modalInner.className = 'modal-inner';
-  const btnContainer = document.createElement('div');
-  btnContainer.className = 'modal-btn-container';
-  btnContainer.innerHTML = `
-    <button type="button" class="invisible-btn"></button>
-    <div class="close-modal-btn">X</div>
+  const headerContainer = document.createElement('div');
+  headerContainer.className = 'modal-header-container';
+  headerContainer.innerHTML = `
+    <div class="modal-headers"></div>
+    <div class="modal-btn-container">
+      <button type="button" class="invisible-btn"></button>
+      <div class="close-modal-btn">X</div>
+    </div>
   `;
 
-  const btn = btnContainer.querySelector('button');
+  const headers = headerContainer.querySelector('.modal-headers');
+  const btn = headerContainer.querySelector('button');
   btn.addEventListener('click', () => {
-    closeModal(modalOuter);
+    closeModal(modal);
   });
 
-  modalInner.appendChild(btnContainer);
-  modalOuter.appendChild(modalInner);
+  modalInner.appendChild(headerContainer);
 
-  return modalOuter;
+  const modalScrollOuter = document.createElement('div');
+  modalScrollOuter.className = 'modal-scroll-wrapper';
+  const modalScrollInner = document.createElement('div');
+  modalScrollInner.className = 'modal-scroll-inner';
+  modalScrollOuter.appendChild(modalScrollInner);
+  modalInner.appendChild(modalScrollOuter);
+
+  modal.appendChild(modalInner);
+
+  return { 
+    modal,
+    modalInner,
+    headers,
+    modalScrollInner
+  };
+}
+
+function getModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-outer';
+  const modalInner = document.createElement('div');
+  modalInner.className = 'modal-inner';
+
+  const headerContainer = document.createElement('div');
+  headerContainer.className = 'modal-header-container';
+  headerContainer.innerHTML = `
+    <div class="modal-headers"></div>
+    <div class="modal-btn-container">
+      <button type="button" class="invisible-btn"></button>
+      <div class="close-modal-btn">X</div>
+    </div>
+  `;
+
+  const headers = headerContainer.querySelector('.modal-headers');
+
+  const btn = headerContainer.querySelector('button');
+  btn.addEventListener('click', () => {
+    closeModal(modal);
+  });
+
+  modalInner.appendChild(headerContainer);
+  modal.appendChild(modalInner);
+
+  return { 
+    modal,
+    modalInner,
+    headers
+  };
 }
 
 function getFriendsCardOptionsModal(friend) {
-  const modal = getModal();
+  const {
+    modal,
+    modalInner,
+    headers, 
+  } = getModal();
 
-  const modalInner = modal.querySelector('.modal-inner');
   modalInner.classList.add('fcmo-modal-inner');
 
   const fcmoBtnContainer = document.createElement('div');
@@ -80,38 +133,46 @@ function getFriendsCardOptionsModal(friend) {
 }
 
 async function getTribeApplicationsListModal(tribe) {
-  const modal = getModal();
+  const { 
+    modal,
+    modalInner,
+    headers,
+    modalScrollInner 
+  } = getScrollableModal();
+
   const applicants = await getApplicants(tribe);
-  const modalInner = modal.querySelector('.modal-inner');
   modalInner.classList.add('gtal-modal-inner');
-  const modalScroll = document.createElement('div');
-  modalScroll.className = 'modal-scroll-wrapper';
-  modalInner.appendChild(modalScroll);
 
   applicants.forEach((applicant) => {
+    const appDate = applicant.application_date.slice(0, applicant.application_date.indexOf('T'));
+
     const applicantEl = document.createElement('div');
     applicantEl.className = 'applicant-list-item';
     applicantEl.innerHTML = `
       <p class="applicant-name">${applicant.user_name}</p>
-      <p class="application-date">${applicant.application_date}</p>
+      <p class="application-date">${appDate}</p>
     `;
     
     applicantEl.addEventListener('click', () => {
       console.log("showing profile, accept/deny buttons");
     });
+    
+    modalScrollInner.appendChild(applicantEl);
   });
-
+  
   document.body.appendChild(modal);
 }
 
 async function getTribeMembersListModal(tribe) {
-  const modal = getModal();
+  const { 
+    modal,
+    modalInner,
+    headers,
+    modalScrollInner 
+  } = getScrollableModal();
+
   const members = await getTribeMembers(tribe);
-  const modalInner = modal.querySelector('.modal-inner');
   modalInner.classList.add('gtml-modal-inner');
-  const modalScroll = document.createElement('div');
-  modalScroll.className = 'modal-scroll-wrapper';
-  modalInner.appendChild(modalScroll);
 
   members.forEach((member) => {
     const activeIndicator = document.createElement('p');
@@ -154,15 +215,19 @@ async function getTribeMembersListModal(tribe) {
 
     memberEl.appendChild(activeIndicator);
 
-    modalScroll.appendChild(memberEl);
+    modalScrollInner.appendChild(memberEl);
   });
 
   document.body.appendChild(modal);
 }
 
 function getApplyForInvitationModal(tribe) {
-  const modal = getModal();
-  const modalInner = modal.querySelector('.modal-inner');
+  const {
+    modal,
+    modalInner,
+    headers,
+  } = getModal();
+
   modalInner.classList.add('afi-modal-inner');
   console.log("Inside the modal!!!");
 
