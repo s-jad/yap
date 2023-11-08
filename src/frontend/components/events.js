@@ -1,4 +1,4 @@
-function emitSidebarLinkEvent() {
+function emitSidebarLinkEvent(memberStatus) {
   const sidebar = document.body.querySelector('.sidebar-container');
   const currentUrl = window.location.pathname;
   const sidebarLinkEvent = new CustomEvent('sidebar-link-change', {
@@ -6,6 +6,7 @@ function emitSidebarLinkEvent() {
     cancelable: true,
     detail: {
       currentUrl,
+      memberStatus,
     },
   });
 
