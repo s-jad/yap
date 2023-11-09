@@ -49,7 +49,7 @@
 
   & .inbox-messages-outer,
   & .outbox-messages-outer {
-    --bmo-height: calc(100vh - calc(150px + calc(75px + calc(var(--p-block) + 4px))));
+    --bmo-height: calc(100vh - calc(var(--header-height) + calc(75px + calc(var(--p-block) + 4px))));
     height: var(--bmo-height);
     max-height: var(--bmo-height);
 
@@ -244,7 +244,7 @@
   }   
 
   & .send-message-outer {
-    --smo-height: calc(100vh - calc(150px + 75px));
+    --smo-height: calc(100vh - calc(var(--header-height) + 75px));
     height: var(--smo-height);
     display: flex;
     align-items: center;
@@ -318,7 +318,7 @@
   }
 
   & .reply-view-outer {
-    --rvo-height: calc(100vh - calc(150px + 75px));
+    --rvo-height: calc(100vh - calc(var(--header-height) + 75px));
     height: var(--rvo-height);
     display: flex;
     flex-direction: column;

@@ -8,7 +8,7 @@
   color: var(--font-clr);
 
   display: grid;
-  grid-template-columns: 150px 6fr;
+  grid-template-columns: var(--header-height) 6fr;
   grid-template-rows: 1fr 6fr;
   transition: grid-template-columns 300ms ease-in-out;
 }
