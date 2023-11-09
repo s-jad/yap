@@ -2,6 +2,7 @@ import '../styles/join-tribe.css';
 import { checkMembership, getTribes } from './tribes-db-access';
 import { handleChatroomLinks } from './fetch_apis';
 import { getApplyForInvitationModal } from './modals';
+import { convertBase64ToIcon, getGenericTribeIcon } from './icons';
 
 async function populateTribesGrid(tribeGrid) {
   const tribes = await getTribes();
@@ -28,7 +29,6 @@ async function populateTribesGrid(tribeGrid) {
         <div class="tribe-card">
           <div class="tribe-card-upper-flex">
             <h2 class="tribe-name">${tribes[i].tribe_name}</h2>
-            <img class="tribe-icon" alt="Tribal Icon">
           </div>
           <h3 class="tribe-cta">${tribes[i].tribe_cta}</h3>
           <p class="tribe-description">${tribes[i].tribe_description}</p>
@@ -36,6 +36,18 @@ async function populateTribesGrid(tribeGrid) {
         </div>
       </a>
     `;
+
+    const tribeCardUpperFlex = tribeCard.querySelector('.tribe-card-upper-flex');
+
+    let icon;
+    if (tribes[i].tribe_icon === null) {
+      icon = getGenericTribeIcon();
+    } else {
+      icon = convertBase64ToIcon(tribes[i].tribe_icon);
+      console.log(`converted icon for ${tribes[i].tribe_name} => `, icon);
+    }
+
+    tribeCardUpperFlex.appendChild(icon);
 
     const tribePrivacy = tribeCard.querySelector('.tribe-privacy');
 
