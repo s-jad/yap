@@ -10,6 +10,7 @@ import messagesSVG from '../assets/imgs/envelope.svg';
 import membersSVG from '../assets/imgs/members.svg';
 import friendsSVG from '../assets/imgs/friends.svg';
 import applicationsSVG from '../assets/imgs/applications.svg';
+import xSVG from '../assets/imgs/x.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -17,6 +18,15 @@ function getLogo() {
   logo.alt = 'Yapp logo';
 
   return logo;
+}
+
+function getX() {
+  const x = new Image();
+  x.src = xSVG;
+  x.alt = 'A cross in a circle';
+  x.className = "modal-close-btn-icon";
+
+  return x;
 }
 
 function getSidebarIcons() {
@@ -101,6 +111,7 @@ export {
   getSidebarIcons,
   getOptionalSidebarIcons,
   getLogo,
+  getX,
 };
 
 
