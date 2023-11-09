@@ -373,7 +373,7 @@ function getSendMsg(userMessagesContainer) {
 
   btns[0].addEventListener('click', async () => {
     if (
-      msgReceiverName.textContent.length < 3
+      msgReceiverName.textContent.length > 3
       && sendMsgTa.value !== undefined
     ) {
       const msgData = {
