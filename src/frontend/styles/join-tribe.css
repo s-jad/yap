@@ -21,21 +21,22 @@
       gap: var(--gap);
       box-shadow: var(--shadow-inset), var(--shadow);
       border-radius: 1rem;
-      padding: var(--p-block);
+      padding: calc(var(--p-block) * 2) var(--p-inline);
       height: 300px;
 
       outline: 0px solid var(--lemon-chiffon-03);
 
       & .tribe-card-upper-flex {
         display: flex;
-        align-items: center;
+        align-items: start;
         justify-content: space-between;
+        gap: var(--gap);
         background: var(--bg-clr);
 
 
         & .tribe-icon {
-          height: 64px;
-          width: 64px;
+          height: 40px;
+          width: 40px;
         }
 
         & .tribe-name {
