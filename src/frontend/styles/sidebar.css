@@ -53,7 +53,15 @@
         color: var(--card-clr);
         font-weight: 700;
         text-align: center;
+        opacity: 1;
+        transition: opacity 150ms ease-in-out;
       }
     }
+  }
+}
+
+#app.hide {
+  & .inbox-msg-count {
+    opacity: 0;
   }
 }
