@@ -11,6 +11,7 @@ import membersSVG from '../assets/imgs/members.svg';
 import friendsSVG from '../assets/imgs/friends.svg';
 import applicationsSVG from '../assets/imgs/applications.svg';
 import xSVG from '../assets/imgs/x.svg';
+import genericTribeSVG from '../assets/imgs/generic-tribe.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -20,13 +21,37 @@ function getLogo() {
   return logo;
 }
 
-function getX() {
+function getXIcon() {
   const x = new Image();
   x.src = xSVG;
   x.alt = 'A cross in a circle';
-  x.className = "modal-close-btn-icon";
+  x.className = 'modal-close-btn-icon';
 
   return x;
+}
+
+function getGenericTribeIcon() {
+  const generic = new Image();
+  generic.src = genericTribeSVG;
+  generic.alt = 'Generic tribe icon';
+  generic.className = 'tribe-icon'
+
+  return generic;
+}
+
+function convertBase64ToIcon(base64Object) {
+  const ascii = base64Object.data;
+  const base64String = String.fromCharCode(...ascii);
+
+  const svgString = btoa(base64String);
+  const svgUrl = 'data:image/svg+xml;base64,' + svgString;
+  
+  const icon = new Image();
+  icon.src = svgUrl;
+  icon.alt = 'Tribe icon';
+  icon.className = 'tribe-icon';
+
+  return icon;
 }
 
 function getSidebarIcons() {
@@ -111,7 +136,9 @@ export {
   getSidebarIcons,
   getOptionalSidebarIcons,
   getLogo,
-  getX,
+  getXIcon,
+  getGenericTribeIcon,
+  convertBase64ToIcon,
 };
 
 
