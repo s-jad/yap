@@ -1,6 +1,7 @@
 import { showDialog } from "./app-state";
 import { emitFocusEvent } from "./events";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
+import { getX } from "./icons";
 import { applyForInvitation, getApplicants, getTribeMembers } from "./tribes-db-access";
 
 function closeModal(modal) {
@@ -18,9 +19,11 @@ function getScrollableModal() {
     <div class="modal-headers"></div>
     <div class="modal-btn-container">
       <button type="button" class="invisible-btn"></button>
-      <div class="close-modal-btn">X</div>
     </div>
   `;
+  
+  const modalBtnContainer = headerContainer.querySelector('.modal-btn-container');
+  modalBtnContainer.appendChild(getX());
 
   const headers = headerContainer.querySelector('.modal-headers');
   const btn = headerContainer.querySelector('button');
@@ -59,9 +62,11 @@ function getModal() {
     <div class="modal-headers"></div>
     <div class="modal-btn-container">
       <button type="button" class="invisible-btn"></button>
-      <div class="close-modal-btn">X</div>
     </div>
   `;
+
+  const modalBtnContainer = headerContainer.querySelector('.modal-btn-container');
+  modalBtnContainer.appendChild(getX());
 
   const headers = headerContainer.querySelector('.modal-headers');
 
