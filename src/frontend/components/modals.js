@@ -1,7 +1,7 @@
 import { showDialog } from "./app-state";
 import { emitFocusEvent } from "./events";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
-import { getX } from "./icons";
+import { getXIcon } from "./icons";
 import { applyForInvitation, getApplicants, getTribeMembers } from "./tribes-db-access";
 
 function closeModal(modal) {
@@ -23,7 +23,7 @@ function getScrollableModal() {
   `;
   
   const modalBtnContainer = headerContainer.querySelector('.modal-btn-container');
-  modalBtnContainer.appendChild(getX());
+  modalBtnContainer.appendChild(getXIcon());
 
   const headers = headerContainer.querySelector('.modal-headers');
   const btn = headerContainer.querySelector('button');
@@ -66,7 +66,7 @@ function getModal() {
   `;
 
   const modalBtnContainer = headerContainer.querySelector('.modal-btn-container');
-  modalBtnContainer.appendChild(getX());
+  modalBtnContainer.appendChild(getXIcon());
 
   const headers = headerContainer.querySelector('.modal-headers');
 
