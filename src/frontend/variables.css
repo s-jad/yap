@@ -57,6 +57,7 @@
   --margin-small: 1rem;
   --margin-mid: 2rem;
   --margin-big: 3rem;
+  --header-height: 80px;
 }
 
 h1 {
