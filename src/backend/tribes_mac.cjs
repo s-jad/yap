@@ -1,15 +1,26 @@
 const { pg_client } = require("./tribes_db.cjs");
 const { logger } = require('./logging.cjs');
 const { hashPassword } = require("./pw_encryption.cjs");
-const { resolve } = require("url");
 
 function getTribes() {
   return new Promise((resolve, reject) => {
-    pg_client.query('SELECT tribe_name, tribe_cta, tribe_description, private FROM tribes', (err, res) => {
+    const query = `
+      SELECT 
+        t.tribe_name,
+        t.tribe_cta, 
+        t.tribe_description, 
+        t.private,
+        ti.tribe_icon
+      FROM tribes t
+      LEFT JOIN tribe_icons ti ON t.tribe_id = ti.tribe_id;
+    `;
+
+    pg_client.query(query, (err, res) => {
       if (err) {
         logger.error(err);
         reject(err);
       } else {
+        logger.info(res);
         resolve(res.rows);
       }
     });
