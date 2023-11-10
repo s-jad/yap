@@ -39,8 +39,8 @@ function getGenericTribeIcon() {
   return generic;
 }
 
-function convertBase64ToIcon(base64Object) {
-  const ascii = base64Object.data;
+function convertAsciiToIcon(iconObject) {
+  const ascii = iconObject.data;
   const base64String = String.fromCharCode(...ascii);
 
   const svgString = btoa(base64String);
@@ -138,7 +138,7 @@ export {
   getLogo,
   getXIcon,
   getGenericTribeIcon,
-  convertBase64ToIcon,
+  convertAsciiToIcon,
 };
 
 
