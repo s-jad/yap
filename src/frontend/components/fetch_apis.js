@@ -195,23 +195,14 @@ function handleCreateTribe(form) {
     event.preventDefault();
 
     const formData = new FormData(form);
-    const tribeData = Object.fromEntries(formData.entries());
     const formationDate = new Date().toISOString().slice(0, 10);
-    const foundingMember = getAppState('username');
-    const valuesArr = [
-      tribeData.tribeName,
-      tribeData.tribeCta,
-      tribeData.tribeDescription,
-      formationDate,
-      foundingMember
-    ];
+    formData.append('formationDate', formationDate)
+    
+    console.log("handleCreateTribe::formData => ", formData);
 
     fetch('/api/protected/create-a-tribe', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(valuesArr),
+      body: formData,
     })
       .then((response) => {
         return response.json();
