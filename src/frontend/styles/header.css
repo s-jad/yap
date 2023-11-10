@@ -1,10 +1,11 @@
 .header-container {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  height: 150px;
+  height: var(--header-height);
   background: var(--card-clr);
   padding: var(--p-block) var(--p-inline);
 
@@ -12,9 +13,8 @@
   grid-row: 1 / 2;
 
   & .username-title {
+    margin-left: 10vw;
     text-align: center;
-    grid-column: 2 / 5;
-    grid-row: 1 / 2;
   }
 
   & .notifications-flex {
@@ -24,8 +24,6 @@
     gap: var(--gap);
     min-width: 18rem;
     padding-block: 0.5rem; 
-    grid-column: 5 / 6;
-    grid-row: 1 / 2;
 
     & [class*="notify"] {
       position: relative;
@@ -54,8 +52,6 @@
   }
 
   & .group-links-container {
-    grid-column: 2 / 5;
-    grid-row: 2 / 4;
     border-radius: 9999px;
     box-shadow: var(--shadow-inset), var(--shadow);
     margin-top: 0.5rem;
@@ -70,7 +66,7 @@
       display: flex;
       align-items: center;
       justify-content: space-evenly;
-      gap: var(--gap);
+      width: clamp(150px, 20vw, 400px);
 
       & .group-list-item {
         text-align: center;
