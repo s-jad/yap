@@ -2,7 +2,7 @@ import '../styles/join-tribe.css';
 import { checkMembership, getTribes } from './tribes-db-access';
 import { handleChatroomLinks } from './fetch_apis';
 import { getApplyForInvitationModal } from './modals';
-import { convertBase64ToIcon, getGenericTribeIcon } from './icons';
+import { convertAsciiToIcon, getGenericTribeIcon } from './icons';
 
 async function populateTribesGrid(tribeGrid) {
   const tribes = await getTribes();
@@ -43,8 +43,7 @@ async function populateTribesGrid(tribeGrid) {
     if (tribes[i].tribe_icon === null) {
       icon = getGenericTribeIcon();
     } else {
-      icon = convertBase64ToIcon(tribes[i].tribe_icon);
-      console.log(`converted icon for ${tribes[i].tribe_name} => `, icon);
+      icon = convertAsciiToIcon(tribes[i].tribe_icon);
     }
 
     tribeCardUpperFlex.appendChild(icon);
