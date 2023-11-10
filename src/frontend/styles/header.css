@@ -13,7 +13,7 @@
   grid-row: 1 / 2;
 
   & .username-title {
-    margin-left: 10vw;
+    margin-left: 5vw;
     text-align: center;
   }
 
@@ -23,7 +23,8 @@
     justify-content: space-evenly;
     gap: var(--gap);
     min-width: 18rem;
-    padding-block: 0.5rem; 
+    padding-block: 0.5rem;
+    margin-right: 3vw;
 
     & [class*="notify"] {
       position: relative;
