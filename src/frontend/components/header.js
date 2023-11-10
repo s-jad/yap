@@ -1,5 +1,6 @@
 import { getAppState } from "./app-state";
 import { handleChatroomLinks } from "./fetch_apis";
+import { convertAsciiToIcon } from "./icons";
 import { getLastTribeLogins } from "./tribes-db-access";
 
 function getNotifications() {
@@ -30,7 +31,8 @@ async function getGroupsLinks() {
   if (tribeSuggestions === undefined || tribeSuggestions === null) {
     tribeSuggestions = await getLastTribeLogins();
   }
-
+  
+  console.log("tribeSuggestions => ", tribeSuggestions);
   groupLinksContainer.innerHTML = `
     <ul class='group-list'>
       <a class="recently-viewed-tribe-link"><li class='group-list-item'></li></a>
@@ -43,7 +45,8 @@ async function getGroupsLinks() {
   const links = Array.from(groupLinksContainer.querySelectorAll('li'));
 
   anchors.forEach((a, index) => {
-    links[index].textContent = tribeSuggestions[index].tribe_name;
+    const icon = convertAsciiToIcon(tribeSuggestions[index].tribe_icon);
+    links[index].appendChild(icon);
     const tribeUrl = `/${tribeSuggestions[index].tribe_name.toLowerCase().replaceAll(' ', '-')}`;
     a.href = `/api/protected/tribe-chat${tribeUrl}`;
     a.setAttribute('data-link', `/tribe-chat${tribeUrl}`);
@@ -67,7 +70,6 @@ export default async function Header() {
   const userName = document.createElement('h1');
   userName.className = 'username-title';
   userName.textContent = getAppState('username');
-  console.log("username => ", getAppState('username'));
   const groupLinksContainer = await getGroupsLinks();
   headerContainer.appendChild(userName);
   headerContainer.appendChild(groupLinksContainer);
