@@ -377,11 +377,11 @@ function getSendMsg(userMessagesContainer) {
       msgReceiverName.textContent.length > 3
       && sendMsgTa.value !== undefined
     ) {
+      const messageWithBr = sendMsgTa.value.replaceAll('\n', '<br>')
       const msgData = {
         receiverName: msgReceiverName.textContent,
-        newMsg: sendMsgTa.value,
+        newMsg: messageWithBr,
       };
-
       const res = await sendInboxMessage(msgData);
 
       if (res) {
