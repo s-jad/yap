@@ -127,12 +127,13 @@ function getLastTribeLogin(userId) {
     const query = {
       text: `
         SELECT 
-          t.tribe_name, 
+          ti.tribe_icon, 
+          t.tribe_name,
           tm.last_login
         FROM 
           tribe_members tm
-        JOIN 
-          tribes t ON tm.tribe_id = t.tribe_id
+        JOIN tribes t ON tm.tribe_id = t.tribe_id
+        JOIN tribe_icons ti ON t.tribe_id = ti.tribe_id
         WHERE 
           tm.member_id = \$1 
           AND tm.last_login IN (
@@ -165,6 +166,7 @@ function getLastTribeLogin(userId) {
             })
             .catch(err => reject(err));
         } else {
+          logger.info(res.rows);
           resolve(res.rows);
         }
       }
@@ -174,7 +176,11 @@ function getLastTribeLogin(userId) {
 
 function getRandomTribeSuggestions() {
   const query = `
-    SELECT tribe_name FROM tribes
+    SELECT 
+      t.tribe_name,
+      ti.tribe_icon
+    FROM tribes t
+    JOIN tribe_icons ti ON t.tribe_id = ti.tribe_id
     ORDER BY RANDOM()
     LIMIT 3;
   `;
