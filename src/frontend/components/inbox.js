@@ -84,11 +84,12 @@ function getReplyView(parentMsg) {
   const replyText = replyViewContainer.querySelector('#reply-text');
 
   const sendBtn = replyViewContainer.querySelector('.send-reply-btn');
+  const userMessagesContainer = document.body.querySelector('#user-messages');
+  const inboxLink = userMessagesContainer.querySelector('.options-list-item[data-link="inbox"]');
+
   sendBtn.addEventListener('click', async () => {
     const replyTxtWithBr = replyText.value.replaceAll('\n', '<br>');
     const result = await replyToInboxMessage(parentMsg.message_id, replyTxtWithBr);
-    const userMessagesContainer = document.body.querySelector('#user-messages');
-    const inboxLink = userMessagesContainer.querySelector('.options-list-item[data-link="inbox"]');
 
     if (result === true) {
       showDialog(
