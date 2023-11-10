@@ -111,24 +111,6 @@ async function getFriends() {
     });
 }
 
-async function createTribe() {
-  return fetch('/api/protected/create-a-tribe')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Unable to create tribe.');
-      }
-      return response.text().then(text => {
-        try {
-          const json = JSON.parse(text);
-          return json;
-        } catch (error) {
-          console.error('createTribe::Error parsing JSON', error);
-          throw new Error('Error parsing JSON');
-        }
-      });
-    });
-}
-
 async function getRandomTribeSuggestions() {
   return fetch(`/api/protected/get-random-tribe-suggestions`, {
     method: 'GET',
@@ -439,7 +421,6 @@ export {
   replyToInboxMessage,
   getLastTribeLogins,
   getRandomTribeSuggestions,
-  createTribe,
   createUser,
   authenticateUser,
   postChatMessage,
