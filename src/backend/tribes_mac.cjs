@@ -255,7 +255,14 @@ function postGlobalMessage(messageData) {
 
   const query = {
     text: `
-      INSERT into chatroom_messages (tribe_name, message_content, sender_id, receiver_id, message_timestamp, message_global)
+      INSERT into chatroom_messages (
+        tribe_name,
+        message_content,
+        sender_id,
+        receiver_id,
+        message_timestamp,
+        message_global
+      )
       VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
       RETURNING *;
     `,
@@ -646,23 +653,55 @@ function getFriends(userId) {
 }
 
 function createTribe(newTribeData) {
-  const values = newTribeData;
-  const query = `
-    INSERT into tribes (tribe_name, tribe_cta, tribe_description, formation_date, founding_member)
-    VALUES (\$1, \$2, \$3, \$4, (SELECT user_id FROM users WHERE user_name = \$5))
-    RETURNING *; 
-  `;
+  const { foundingMember, tribeName, tribeCta, tribeDescription, formationDate, icon } = newTribeData;
+  console.log("createTribe::newTribeData => ", newTribeData);
+  
+  let query;
+  if (icon === undefined) {
+    query = {
+      text: `
+      INSERT into tribes (
+        founding_member,
+        tribe_name,
+        tribe_cta,
+        tribe_description,
+        formation_date
+      )
+      VALUES (\$1, \$2, \$3, \$4, \$5)
+      RETURNING *; 
+      `,
+      values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate ],
+    };
+  } else {
+    query = {
+      text: `
+      WITH new_tribe AS (
+        INSERT into tribes (
+          founding_member,
+          tribe_name,
+          tribe_cta,
+          tribe_description,
+          formation_date
+        )
+        VALUES (\$1, \$2, \$3, \$4, \$5)
+        RETURNING tribe_id
+      )
+      INSERT INTO tribe_icons (tribe_id, tribe_icon)
+      SELECT tribe_id, \$6 FROM new_tribe;
+      `,
+      values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate, icon ],
+    };
+  }
 
   return new Promise((resolve, reject) => {
-    pg_client.query(query, values, (err, res) => {
+    pg_client.query(query, (err, res) => {
       if (err) {
+        console.log("actual error");
         logger.error(err);
         reject(new Error('Cant create tribe.'));
-      } else if (res.rows.length === 0) {
-        logger.error(err);
-        reject(new Error('Cant create tribe'));
-      } else {
-        const newTribeName = values[0];
+      } 
+      else {
+        const newTribeName = tribeName;
         resolve(newTribeName);
       }
     })
