@@ -616,11 +616,12 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
       userId,
     };
     const msgData = await tribesMac('send-inbox-message', data);
-
-    const receiverId = msgData.receiver_id;
-    const receiverSocketId = await redisInboxClient.get(receiverId.toString());
-    inboxNameSpace.to(receiverSocketId).emit('new-inbox-message', msgData);
-    logger.info(msgData);
+    
+    const { receiver_id, ...toSend } = msgData;
+    console.log("receiverId => ", receiver_id);
+    const receiverSocketId = await redisInboxClient.get(receiver_id.toString());
+    inboxNameSpace.to(receiverSocketId).emit('new-inbox-message', toSend);
+    logger.info(toSend);
     res.status(200).json({ message: 'Message sent!' });
   } catch (error) {
     logger.error(error);
