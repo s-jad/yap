@@ -1,6 +1,6 @@
 .btn-container {
   position: absolute;
-  top: -8px;
+  top: -10px;
   left: 100px;
   border: 1px solid var(--thistle);
   transition: left 300ms ease-in-out;
@@ -12,7 +12,7 @@
 
 .invisible-btn {
   position: absolute;
-  top: 10px;
+  top: 34px;
   left: -1rem;
   height: 30px;
   width: 30px;
@@ -36,7 +36,7 @@
 .hamburger-btn-line.line-one.collapse,
 .hamburger-btn-line.line-two.collapse,
 .hamburger-btn-line.line-three.collapse {
-  top: 22px;
+  top: 48px;
 }
 
 
@@ -46,13 +46,13 @@
 }
 
 .hamburger-btn-line.line-one {
-  top: 15px;
+  top: 41px;
 }
 
 .hamburger-btn-line.line-two {
-  top: 22px;
+  top: 48px;
 }
 
 .hamburger-btn-line.line-three {
-  top: 29px;
+  top: 55px;
 }
