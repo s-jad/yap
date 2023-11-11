@@ -20,7 +20,6 @@ function getTribes() {
         logger.error(err);
         reject(err);
       } else {
-        logger.info(res);
         resolve(res.rows);
       }
     });
@@ -53,7 +52,6 @@ function checkRole(checkData) {
 }
 
 function getApplicants(tribeName) {
-  console.log("tribeName => ", tribeName);
   return new Promise ((resolve, reject) => {
     const query = {
       text: `
@@ -356,6 +354,53 @@ function backupChatroomMessages(messageData) {
   }
 }
 
+async function sendInboxMessage(msgData) {
+  const { newMsg, receiverName, userId } = msgData;
+  const query = {
+    text: `
+      WITH msg AS (
+        INSERT INTO user_messages (sender_id, receiver_id, message_content, parent_message_id)
+        VALUES (
+          \$1,
+          (SELECT user_id FROM users WHERE user_name = \$2),
+          \$3,
+          NULL
+        )
+        RETURNING *
+      )
+      SELECT 
+        msg.message_id,
+        msg.message_content,
+        msg.message_timestamp,
+        sender.user_name as sender_name,
+        sender.user_color as sender_color,
+        receiver.user_name as receiver_name,
+        receiver.user_color as receiver_color,
+        msg.message_read,
+        msg.parent_message_id,
+        msg.receiver_id
+      FROM msg 
+      INNER JOIN
+        users sender ON msg.sender_id = sender.user_id
+      INNER JOIN
+        users receiver ON msg.receiver_id = receiver.user_id;
+    `,
+    values: [userId, receiverName, newMsg],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        console.log("res.rows", res.rows[0]);
+        resolve(res.rows[0]);
+      }
+    });
+  });
+}
+
 function getInboxMessages(userId) {
   const query = {
     text: `
@@ -456,33 +501,6 @@ function deleteInboxMessage(deleteMsgData) {
   });
 }
 
-async function sendInboxMessage(msgData) {
-  const { newMsg, receiverName, userId } = msgData;
-  const query = {
-    text: `
-      INSERT INTO user_messages (sender_id, receiver_id, message_content, parent_message_id)
-      VALUES (
-        \$1,
-        (SELECT user_id FROM users WHERE user_name = \$2),
-        \$3,
-        NULL
-      )
-      RETURNING *;
-    `,
-    values: [userId, receiverName, newMsg],
-  };
-
-  return new Promise((resolve, reject) => {
-    pg_client.query(query, (err, res) => {
-      if (err) {
-        logger.error(err);
-        reject(err);
-      } else {
-        resolve(res);
-      }
-    });
-  });
-}
 
 async function replyToInboxMessage(replyMsgData) {
   const { parentMsgId, newMsg, userId } = replyMsgData;
@@ -644,7 +662,6 @@ function getFriends(userId) {
       } else if (res.rows.length === 0) {
         resolve(false);
       } else {
-        console.log('friends list => ', res.rows);
         const friends = res.rows;
         resolve(friends);
       }
