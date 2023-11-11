@@ -74,10 +74,8 @@ function getReplyView(parentMsg) {
     </div>
     <div class="reply-wrapper">
       <textarea id="reply-text" name="reply-text"></textarea>
-      <div class="reply-btn-wrapper">
-        <button class="send-reply-btn">Send</button>
-        <button class="cancel-reply-btn">Cancel</button>
-      </div>
+      <button class="send-reply-btn">Send</button>
+      <button class="cancel-reply-btn">Cancel</button>
     </div>
   `;
 
