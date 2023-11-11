@@ -1,8 +1,7 @@
 import '../styles/general-chatroom-styling.css';
 import { getAppState, showDialog, updateAppState } from './app-state';
 import { getMessages } from './tribes-db-access';
-import { socket } from './sockets';
-
+import { chatroomSocket } from './sockets';
 const activeMembers = [];
 
 const chatState = {
@@ -212,7 +211,7 @@ async function handleMsgPost(msg) {
   const global = messageState.global;
 
   if (global === false) {
-    socket.emit('message', {
+    chatroomSocket.emit('message', {
       tribe_name: tribeName,
       receiver_name: messageState.receiver,
       message_content: editedMsg,
@@ -225,7 +224,7 @@ async function handleMsgPost(msg) {
     chatState.replying = false;
     messageState.global = true;
   } else {
-    socket.emit('message', {
+    chatroomSocket.emit('message', {
       tribe_name: tribeName,
       receiver_name: null,
       message_content: editedMsg,
@@ -294,13 +293,14 @@ export default async function TribeChat(tribe) {
     handleMsgPost(messageInput.value);
   });
 
-  socket.on('connection', (data) => {
+  chatroomSocket.on('connection', (data) => {
     console.log(data.message);
   });
 
-  socket.on('message', (data) => {
+  chatroomSocket.on('message', (data) => {
     try {
       const parsedData = JSON.parse(data);
+      console.log("receivedData => ", parsedData);
       handleMsgReceive(parsedData);
 
       messageInput.value = '';
