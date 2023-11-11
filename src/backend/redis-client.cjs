@@ -5,8 +5,16 @@ const redisChatroomClient = new Redis.createClient({
   port: process.env.REDIS_CHATROOM_PORT,
 });
 
+
+const redisInboxClient = new Redis.createClient({
+  host: process.env.DEV_HOST,
+  port: process.env.REDIS_INBOX_PORT,
+});
+
 redisChatroomClient.connect();
+redisInboxClient.connect();
 
 module.exports = {
   redisChatroomClient,
+  redisInboxClient,
 };
