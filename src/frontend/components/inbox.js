@@ -162,16 +162,8 @@ function getExpandedMsgBtnContainer(msg, msgEl) {
   return btnContainer;
 }
 
-async function populateInboxOutbox(inbox, outbox) {
-  let messages;
-
-  if (userMessagesArr.length === 0) {
-    messages = await fetchUserMessages();
-  } else {
-    messages = userMessagesArr;
-  }
-  const currentUser = getAppState('username');
-
+function createMessage(msg, currentUser, inbox, outbox, newMsgBool) {
+  
   const populateReplyChains = (msg, replyChainContainer) => {
     if (msg.parent_message_id !== null) {
       console.log("original msg => ", msg);
@@ -212,73 +204,105 @@ async function populateInboxOutbox(inbox, outbox) {
     }
   }
 
+  const fullMsgDate = new Date(msg.message_timestamp).toString();
+  const dateParts = fullMsgDate.split(' ');
+  const displayMsgDate = `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
+  const msgTime = dateParts[4];
+
+  const msgEl = document.createElement('div');
+  msgEl.className = 'user-message-wrapper';
+  const replyChainContainer = document.createElement('div');
+  replyChainContainer.className = 'reply-chain-container';
+  const btnContainer = getExpandedMsgBtnContainer(msg, msgEl);
+  btnContainer.className = 'expanded-msg-btn-container';
+
+  msgEl.addEventListener('click', (ev) => {
+    if (ev.target.parentNode.parentNode === replyChainContainer) {
+      return;
+    }
+
+    if (msgEl.classList.contains('expanded')) {
+      msgEl.classList.remove('expanded');
+      replyChainContainer.style.display = 'none';
+      btnContainer.style.display = 'none';
+      setTimeout(() => {
+        replyChainContainer.style.display = 'flex';
+        btnContainer.style.display = 'flex';
+      }, 300);
+    } else {
+      msgEl.classList.add('expanded');
+      if (
+        replyChainContainer.children.length === 0 &&
+        msg.parent_message_id !== null
+      ) {
+        populateReplyChains(msg, replyChainContainer);
+      }
+    }
+  });
+
+  console.log("msg.sender_name => ", msg.sender_name);
+  console.log("msg.receiver_name => ", msg.receiver_name);
+  console.log("currentUser => ", currentUser);
+
+  if (msg.sender_name === currentUser) {
+    msgEl.innerHTML = `
+      <p class="user-message-receiver">
+      To: <span style="color: hsl(${msg.receiver_color}, 100%, 70%)">${msg.receiver_name}</span>
+      </p>
+      <p class="user-message-content">${msg.message_content}</p>
+      
+      <p class="user-message-timestamp">${displayMsgDate}</p>
+    `;
+
+    msgEl.appendChild(btnContainer);
+    msgEl.appendChild(replyChainContainer);
+    if (newMsgBool) {
+      outbox.prepend(msgEl);
+    } else {
+      outbox.appendChild(msgEl);
+    }
+  } else if (msg.receiver_name === currentUser) {
+    msgEl.innerHTML = `
+      <p class="user-message-sender" style="color: hsl(${msg.sender_color}, 100%, 70%)">${msg.sender_name}</p>
+      <p class="user-message-content">${msg.message_content}</p>
+      <p class="user-message-timestamp">${displayMsgDate}</p>
+    `;
+
+    msgEl.appendChild(btnContainer);
+    msgEl.appendChild(replyChainContainer);
+    
+    if (newMsgBool) {
+      inbox.prepend(msgEl);
+    } else {
+      inbox.appendChild(msgEl);
+    }
+  } else {
+    console.error("populateInbox receiving messages it shouldnt");
+  }
+}
+
+async function populateInboxOutbox(inbox, outbox) {
+  let messages;
+
+  if (userMessagesArr.length === 0) {
+    messages = await fetchUserMessages();
+  } else {
+    messages = userMessagesArr;
+  }
+  const currentUser = getAppState('username');
+
   messages.forEach((msg) => {
     if (msg.message_read) {
       return;
     }
-
-    const fullMsgDate = new Date(msg.message_timestamp).toString();
-    const dateParts = fullMsgDate.split(' ');
-    const displayMsgDate = `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
-    const msgTime = dateParts[4];
-
-    const msgEl = document.createElement('div');
-    msgEl.className = 'user-message-wrapper';
-    const replyChainContainer = document.createElement('div');
-    replyChainContainer.className = 'reply-chain-container';
-    const btnContainer = getExpandedMsgBtnContainer(msg, msgEl);
-    btnContainer.className = 'expanded-msg-btn-container';
-
-    msgEl.addEventListener('click', (ev) => {
-      if (ev.target.parentNode.parentNode === replyChainContainer) {
-        return;
-      }
-
-      if (msgEl.classList.contains('expanded')) {
-        msgEl.classList.remove('expanded');
-        replyChainContainer.style.display = 'none';
-        btnContainer.style.display = 'none';
-        setTimeout(() => {
-          replyChainContainer.style.display = 'flex';
-          btnContainer.style.display = 'flex';
-        }, 300);
-      } else {
-        msgEl.classList.add('expanded');
-        if (
-          replyChainContainer.children.length === 0 &&
-          msg.parent_message_id !== null
-        ) {
-          populateReplyChains(msg, replyChainContainer);
-        }
-      }
-    });
-
-    if (msg.sender_name === currentUser) {
-      msgEl.innerHTML = `
-        <p class="user-message-receiver">
-        To: <span style="color: hsl(${msg.receiver_color}, 100%, 70%)">${msg.receiver_name}</span>
-        </p>
-        <p class="user-message-content">${msg.message_content}</p>
-        
-        <p class="user-message-timestamp">${displayMsgDate}</p>
-      `;
-
-      msgEl.appendChild(btnContainer);
-      msgEl.appendChild(replyChainContainer);
-      outbox.appendChild(msgEl);
-    } else if (msg.receiver_name === currentUser) {
-      msgEl.innerHTML = `
-        <p class="user-message-sender" style="color: hsl(${msg.sender_color}, 100%, 70%)">${msg.sender_name}</p>
-        <p class="user-message-content">${msg.message_content}</p>
-        <p class="user-message-timestamp">${displayMsgDate}</p>
-      `;
-
-      msgEl.appendChild(btnContainer);
-      msgEl.appendChild(replyChainContainer);
-      inbox.appendChild(msgEl);
-    } else {
-      console.error("populateInbox receiving messages it shouldnt");
-    }
+    
+    createMessage(
+      msg,
+      currentUser,
+      inbox,
+      outbox,
+      false,
+    );
   });
 }
 
@@ -456,7 +480,7 @@ function messagesDashboardRouting(link) {
   }
 }
 
-function addMessagesDashboardEventListeners(userMessagesContainer, sendMsg) {
+function addMessagesDashboardEventListeners(userMessagesContainer, sendMsg, inbox, outbox) {
   userMessagesContainer.addEventListener('focus-reply-msg', (ev) => {
     const toRemove = userMessagesContainer.querySelector('.messages-component-outer');
     userMessagesContainer.removeChild(toRemove);
@@ -475,6 +499,12 @@ function addMessagesDashboardEventListeners(userMessagesContainer, sendMsg) {
     const sendMsgLink = userMessagesContainer.querySelector('li[data-link="send-msg"]');
     prevLink.classList.remove('displayed');
     sendMsgLink.classList.add('displayed');
+  });
+
+  userMessagesContainer.addEventListener('new-inbox-msg', (ev) => {
+    const msg = ev.detail.msg;
+    const user = getAppState('username');
+    createMessage(msg, user, inbox, outbox, true);
   });
 }
 
@@ -519,7 +549,12 @@ export default async function MessagesDashboard() {
 
   userMessagesContainer.appendChild(inbox);
 
-  addMessagesDashboardEventListeners(userMessagesContainer, sendMsg);
+  addMessagesDashboardEventListeners(
+    userMessagesContainer,
+    sendMsg,
+    inboxMessagesInner,
+    outboxMessagesInner,
+  );
 
   return userMessagesContainer;
 }
