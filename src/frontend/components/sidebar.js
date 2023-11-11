@@ -1,3 +1,4 @@
+import { emitNewInboxMsgEvent } from './events';
 import { 
   handleClientSideLinks,
   handleSidebarOptionalLinks,
@@ -95,9 +96,14 @@ export default async function Sidebar(urls) {
     inboxAnchor.appendChild(inboxMsgCount);
   }
 
-  inboxSocket.on('new-inbox-message', () => {
-    console.log("received new inbox msg");
+  inboxSocket.on('new-inbox-message', (newMsg) => {
     inboxMsgCount.innerText = `${msgCount + 1}`;
+    
+    const removableComponent = document.body.querySelector('.removable');
+
+    if (removableComponent.classList.contains('user-messages-container')) {
+      emitNewInboxMsgEvent(removableComponent, newMsg);
+    }
   });
 
   const icons = getSidebarIcons();
