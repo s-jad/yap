@@ -1,18 +1,22 @@
 .user-messages-container {
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  height: calc(100vh - var(--header-height));
+  
+  --topbar-height: 65px;
 
-  & .user-messages-sidebar {
+  & .user-messages-topbar {
     & .options-list {
       list-style: none;
       padding-left: 0px;
       padding-bottom: 1rem;
+      margin: 0;
       display: flex;
       align-items: center;
       justify-content: space-evenly;
       gap: var(--gap);
-      max-height: 65px;
+      max-height: var(--topbar-height);
+      min-height: var(--topbar-height);
 
       & .options-list-item {
         position: relative;
@@ -49,7 +53,7 @@
 
   & .inbox-messages-outer,
   & .outbox-messages-outer {
-    --bmo-height: calc(100vh - calc(var(--header-height) + calc(75px + calc(var(--p-block) + 4px))));
+    --bmo-height: calc(100vh - calc(var(--header-height) + calc(var(--topbar-height) + calc(var(--p-block) + 4px))));
     height: var(--bmo-height);
     max-height: var(--bmo-height);
 
@@ -244,7 +248,7 @@
   }   
 
   & .send-message-outer {
-    --smo-height: calc(100vh - calc(var(--header-height) + 75px));
+    --smo-height: calc(100vh - calc(var(--header-height) + var(--topbar-height)));
     height: var(--smo-height);
     display: flex;
     align-items: center;
@@ -318,7 +322,7 @@
   }
 
   & .reply-view-outer {
-    --rvo-height: calc(100vh - calc(var(--header-height) + 75px));
+    --rvo-height: calc(100vh - calc(var(--header-height) + var(--topbar-height)));
     height: var(--rvo-height);
     display: flex;
     flex-direction: column;

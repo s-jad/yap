@@ -486,7 +486,7 @@ export default async function MessagesDashboard() {
   userMessagesContainer.id = 'user-messages';
 
   userMessagesContainer.innerHTML = `
-    <div class="user-messages-sidebar">
+    <div class="user-messages-topbar">
       <ul class="options-list">
         <li class="options-list-item displayed" data-link="inbox">Inbox</li>
         <li class="options-list-item" data-link="outbox">Outbox</li>
