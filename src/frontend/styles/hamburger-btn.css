@@ -3,11 +3,23 @@
   top: -10px;
   left: 100px;
   border: 1px solid var(--thistle);
-  transition: left 300ms ease-in-out;
+  opacity: 0.7;
+  scale: 1;
+  transition: top 150ms ease-in-out,
+              opacity 150ms ease-in-out,
+              scale 150ms ease-in-out,
+              left 300ms ease-in-out;
 }
 
 .btn-container.hamburger {
   left: 1rem;
+}
+
+.btn-container:hover,
+.btn-container:focus-visible {
+  top: -13px;
+  opacity: 1;
+  scale: 1.05;
 }
 
 .invisible-btn {
