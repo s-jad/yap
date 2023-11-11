@@ -29,13 +29,17 @@ const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
 const { logger } = require('./src/backend/logging.cjs');
 const { backupChatMessages } = require('./src/backend/job-scheduler.cjs');
-const { redisClient } = require('./src/backend/redis-client.cjs');
+const { redisChatroomClient, redisInboxClient } = require('./src/backend/redis-client.cjs');
 
-redisClient.on('ready', function() {
-  logger.info('Redis client is ready');
+redisChatroomClient.on('ready', function() {
+  logger.info('Redis chatroom client is ready');
 });
 
-backupChatMessages(redisClient);
+redisInboxClient.on('ready', function() {
+  logger.info('Redis inbox client is ready');
+});
+
+backupChatMessages(redisChatroomClient);
 logger.info('Chat message backup is ready');
 
 const app = express();
@@ -58,6 +62,7 @@ const io = new Server(httpServer, {
 async function handleTribeLoginDbUpdate(socket, chatroom) {
   try {
     const member = socket.decoded.id;
+    console.log("socket.decoded => ", socket.decoded);
     const tribe = chatroom;
     const timestamp = new Date().toISOString();
     const patchData = { timestamp, tribe, member };
@@ -88,13 +93,16 @@ io.on("connection_error", (err) => {
   logger.error(err.context);
 });
 
-io.use(function(socket, next) {
+const inboxNameSpace = io.of('/inbox');
+const chatroomNameSpace = io.of('/tribe-chat');
+
+function validateSocketJWT(socket, next) {
   if (socket.request.headers.cookie){
     console.log(socket.request.headers);
     const cookies = socket.request.headers.cookie;
     const parts = cookies.split(';');
-    const signature = parts[1].split('=')[1];
-    const payload = parts[2].split('=')[1];
+    const signature = parts[0].split('=')[1];
+    const payload = parts[1].split('=')[1];
     const token = `${signature}.${payload}`;
     jwt.verify(token, jwtSecret, function(err, decoded) {
       if (err) return next(new Error('Authentication error'));
@@ -105,9 +113,17 @@ io.use(function(socket, next) {
   else {
     next(new Error('Authentication error'));
   }    
+}
+
+inboxNameSpace.use((socket, next) => {
+  validateSocketJWT(socket, next);
 });
 
-io.on('connection', (socket) => {
+chatroomNameSpace.use((socket, next) => {
+  validateSocketJWT(socket, next);
+});
+
+chatroomNameSpace.on('connection', (socket) => {
   try {
     console.log(`A new client connected: ${socket.id}`);
     socket.emit('connection', { message: `A new client has connected! with socket id of ${socket.id}`});
@@ -190,9 +206,9 @@ io.on('connection', (socket) => {
         const msgKey = `${tribe_name}.${message_timestamp}`;
         console.log("msgKey =>", msgKey);
         console.log('msgStr =>', msgStr);
-        redisClient.set(msgKey, msgStr);
-
-        io.to(tribe_name).emit('message', msgStr);
+        redisChatroomClient.set(msgKey, msgStr);
+        
+        chatroomNameSpace.to(tribe_name).emit('message', msgStr);
 
       } catch (error) {
         logger.error(`Error parsing JSON => ${error}`);
@@ -205,14 +221,27 @@ io.on('connection', (socket) => {
     handleTribeLogoutDbUpdate(socket, chatroom);
     socket.disconnect()
   });
+});
 
+inboxNameSpace.on('connection', (socket) => {
+  try {
+    console.log(`A new client connected to inbox: ${socket.id}`);
+    socket.emit('connection', { message: `A new client has connected to their inbox! with socket id of ${socket.id}`});
+    const userId = socket.decoded.id.toString();
+    const socketId = socket.id.toString();
+    redisInboxClient.set(userId, socketId);
+    console.log("userId => ", userId);
+    console.log("socketId => ", socketId);
+  } catch (error) {
+    console.log(`Error connecting client to inbox: ${error}`);
+  }
 });
 
 // FOR DEBUGGING!
-app.use((req, res, next) => {
-  console.log('Request URL:', req.originalUrl);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('Request URL:', req.originalUrl);
+//   next();
+// });
 
 app.use(connectLiveReload());
 
@@ -232,17 +261,18 @@ app.use('/', express.static(path.join(__dirname, '/'), {
 
 app.use('/assets/imgs', express.static(path.join(__dirname, '/assets/imgs')));
 
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: process.env.REDIS_KEY,
-  resave: false,
-  saveUninitialized: true,
-  // change to https to use secure true
-  cookie: { 
-    secure: false,
-    sameSite: 'strict',
-  }
-}));
+// Not sure if necessary yet
+// app.use(session({
+//   store: new RedisStore({ client: redisClient }),
+//   secret: process.env.REDIS_KEY,
+//   resave: false,
+//   saveUninitialized: true,
+//   // change to https to use secure true
+//   cookie: { 
+//     secure: false,
+//     sameSite: 'strict',
+//   }
+// }));
 
 app.use('/api/protected', authorization);
 
@@ -407,7 +437,25 @@ app.get('/api/protected/get-friends', async (req, res) => {
   }
 });
 
+app.get('/api/protected/get-applicants', async (req, res) => {
+  const tribe = req.query.tribe;
+  console.log("server::tribe => ", tribe);
+  try {
+    const result = await tribesMac('get-applicants', tribe);
 
+    let applicants 
+    if (result.rowCount === 0) {
+      applicants = { user_name: 'none', application_date: 'none' };
+    } else {
+      applicants = result;
+    }
+
+    res.send(applicants);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting applicants for invitation' });
+  }
+});
 
 app.get('/api/protected/get-random-tribe-suggestions', async (req, res) => {
   try {
@@ -552,7 +600,6 @@ app.post('/api/protected/report-user-incident', upload.none(), async (req, res) 
 });
 
 app.post('/api/protected/send-inbox-message', async (req, res) => {
-  console.log("msgData => ", req.body.msgData);
   try {
     const tokenParts = req.cookies.jwt_signature.split('.');
     let payload;
@@ -568,10 +615,13 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
       receiverName: req.body.msgData.receiverName,
       userId,
     };
-    console.log("server::data => ", data);
-    const result = await tribesMac('send-inbox-message', data);
-    logger.info(result);
-    res.send(result);
+    const msgData = await tribesMac('send-inbox-message', data);
+
+    const receiverId = msgData.receiver_id;
+    const receiverSocketId = await redisInboxClient.get(receiverId.toString());
+    inboxNameSpace.to(receiverSocketId).emit('new-inbox-message', msgData);
+    logger.info(msgData);
+    res.status(200).json({ message: 'Message sent!' });
   } catch (error) {
     logger.error(error);
     res.status(500).json({ message: 'An error occured whilst sending inbox message.' });
@@ -625,14 +675,40 @@ app.post('/api/protected/post-message', async (req, res) => {
 });
 
 
-app.post('/api/protected/create-a-tribe', async (req, res) => {
+app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req, res) => {
+  const tokenParts = req.cookies.jwt_signature.split('.');
+  let payload;
   try {
-    const tribe = await tribesMac('create-tribe', req.body);
-
-    res.status(200).json({ tribe });
+    payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
   } catch (error) {
-    logger.error(error);
-    res.status(500).json({ message: 'An error occurred while creating the tribe.' });
+    logger.error('Error parsing JWT payload: ', error);
+    throw new Error('JWT payload is not valid JSON');
+  }
+  const foundingMember = payload.id;
+  const tribeData = { foundingMember, ...req.body};
+
+  if (req.file.buffer === undefined) {
+    try {
+      console.log("icon === undefined => ", tribeData);
+      const tribe = await tribesMac('create-tribe', tribeData);
+      logger.info(tribe);
+      res.status(200).json({ tribe });
+    } catch (error) {
+      logger.error(error);
+      res.status(500).json({ message: 'An error occurred while creating the tribe.' });
+    }
+  } else {
+    const icon = req.file.buffer.toString('base64');
+    const dataWithIcon = { ...tribeData, icon }; 
+    console.log("icon !== undefined => ", dataWithIcon);
+    try {
+      const tribe = await tribesMac('create-tribe', dataWithIcon);
+      logger.info(tribe);
+      res.status(200).json({ tribe });
+    } catch (error) {
+      logger.error(error);
+      res.status(500).json({ message: 'An error occurred while creating the tribe.' });
+    }
   }
 });
 
