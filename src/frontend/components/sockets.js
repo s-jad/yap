@@ -1,33 +1,53 @@
 import { io } from "socket.io-client";
 import { getAppState } from "./app-state";
 
-let initialized = false;
-let socket;
+let chatroomSocketInitialized = false;
+let inboxSocketInitialized = false;
+let chatroomSocket;
+let inboxSocket;
 
-function disconnectSocket() {
-  initialized = false;
-  if (socket !== null) {
+function disconnectSocket(namespace) {
+  if (chatroomSocket !== null && namespace === '/tribe-chat') {
+    chatroomSocketInitialized = false;
     const chatroom = getAppState('current-room');
-    socket.emit('user disconnect', chatroom);
-    socket = null;
+    chatroomSocket.emit('user disconnect', chatroom);
+    chatroomSocket = null;
+  } else if (inboxSocket !== null && namespace === '/inbox') {
+    inboxSocketInitialized = false;
+    inboxSocket.emit('user disconnect', chatroom);
+    inboxSocket = null;
   }
 }
 
-function initialiseSocket() {
-  console.log("Calling initialiseSocket!!");
-  socket = io(process.env.SERVER_URL);
-  initialized = true;
+function initialiseSocket(namespace) {
+  if (namespace === '/tribe-chat') {
+    chatroomSocket = io(`${process.env.SERVER_URL}${namespace}`);
+    chatroomSocketInitialized = true;
+  } else if (namespace === '/inbox') {
+    inboxSocket = io(`${process.env.SERVER_URL}${namespace}`);
+    inboxSocketInitialized = true;
+  }
   window.addEventListener('beforeunload', () => {
-    disconnectSocket();
+    if (chatroomSocketInitialized && inboxSocketInitialized) {
+      disconnectSocket('/inbox');
+      disconnectSocket('/tribe-chat');
+    } else {
+      disconnectSocket(namespace);
+    }
   });
 }
 
-function getSocketInitState() {
-  return initialized;
+function getSocketInitState(namespace) {
+  if (namespace === '/tribe-chat') {
+    return chatroomSocketInitialized;
+  } else if (namespace === '/inbox') {
+    return inboxSocketInitialized;
+  }
 }
 
 export {
-  socket,
+  chatroomSocket,
+  inboxSocket,
   getSocketInitState,
   disconnectSocket,
   initialiseSocket,
