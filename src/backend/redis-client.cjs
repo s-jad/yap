@@ -1,12 +1,20 @@
 const Redis = require('redis');
 
-const redisClient = new Redis.createClient({
+const redisChatroomClient = new Redis.createClient({
   host: process.env.DEV_HOST,
-  port: process.env.REDIS_PORT,
+  port: process.env.REDIS_CHATROOM_PORT,
 });
 
-redisClient.connect();
+redisChatroomClient.connect();
+
+const redisInboxClient = new Redis.createClient({
+  host: process.env.DEV_HOST,
+  port: process.env.REDIS_INBOX_PORT,
+});
+
+redisInboxClient.connect();
 
 module.exports = {
-  redisClient,
+  redisChatroomClient,
+  redisInboxClient,
 };
