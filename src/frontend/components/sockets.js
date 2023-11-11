@@ -14,19 +14,12 @@ function disconnectSocket(namespace) {
     chatroomSocket = null;
   } else if (inboxSocket !== null && namespace === '/inbox') {
     inboxSocketInitialized = false;
-    inboxSocket.emit('user disconnect', chatroom);
+    inboxSocket.emit('user disconnect');
     inboxSocket = null;
   }
 }
 
 function initialiseSocket(namespace) {
-  if (namespace === '/tribe-chat') {
-    chatroomSocket = io(`${process.env.SERVER_URL}${namespace}`);
-    chatroomSocketInitialized = true;
-  } else if (namespace === '/inbox') {
-    inboxSocket = io(`${process.env.SERVER_URL}${namespace}`);
-    inboxSocketInitialized = true;
-  }
   window.addEventListener('beforeunload', () => {
     if (chatroomSocketInitialized && inboxSocketInitialized) {
       disconnectSocket('/inbox');
@@ -35,6 +28,16 @@ function initialiseSocket(namespace) {
       disconnectSocket(namespace);
     }
   });
+
+  if (namespace === '/tribe-chat') {
+    chatroomSocket = io(`${process.env.SERVER_URL}${namespace}`);
+    chatroomSocketInitialized = true;
+    return chatroomSocket;
+  } else if (namespace === '/inbox') {
+    inboxSocket = io(`${process.env.SERVER_URL}${namespace}`);
+    inboxSocketInitialized = true;
+    return inboxSocket;
+  }
 }
 
 function getSocketInitState(namespace) {
