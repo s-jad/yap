@@ -13,6 +13,19 @@ function emitSidebarLinkEvent(memberStatus) {
   sidebar.dispatchEvent(sidebarLinkEvent);
 }
 
+function emitNewInboxMsgEvent(inbox, msg) {
+  console.log("emitNewInboxMsgEvent::msg => ", msg);
+  const newInboxMsgEvent = new CustomEvent('new-inbox-msg', {
+    bubbles: true,
+    cancelable: true,
+    detail: {
+      msg,
+    }
+  });
+
+  inbox.dispatchEvent(newInboxMsgEvent);
+}
+
 function emitFocusEvent(page, element, focus) {
   
   switch (page) {
@@ -48,4 +61,5 @@ function emitFocusEvent(page, element, focus) {
 export {
   emitSidebarLinkEvent,
   emitFocusEvent,
+  emitNewInboxMsgEvent,
 }
