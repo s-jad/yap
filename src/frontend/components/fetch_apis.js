@@ -1,7 +1,12 @@
 import { getAppState } from './app-state';
 import { emitFocusEvent, emitSidebarLinkEvent } from './events';
 import { getTribeApplicationsListModal, getTribeMembersListModal } from './modals';
-import { disconnectSocket, getSocketInitState, initialiseSocket, socket } from './sockets';
+import {
+  chatroomSocket,
+  disconnectSocket,
+  getSocketInitState,
+  initialiseSocket,
+} from './sockets';
 
 let prevChatroom;
 
@@ -32,11 +37,11 @@ function getComponent(fn) {
 async function getChatroom(fn, tribe) {
   prevChatroom = getAppState('current-room');
 
-  if (getSocketInitState()) {
-    disconnectSocket();
+  if (getSocketInitState('/tribe-chat')) {
+    disconnectSocket('/tribe-chat');
   }
 
-  initialiseSocket();
+  initialiseSocket('/tribe-chat');
   const chatroom = await fn(tribe);
   return chatroom;
 }
@@ -246,6 +251,7 @@ async function handleSidebarOptionalLinks(url) {
 function handleChatroomLinks(tribe, memberStatus) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
+  console.log("handleChatroomLinks::page => ", tribe);
 
   importChatroom(tribe)
     .then((toAdd) => {
@@ -259,9 +265,9 @@ function handleChatroomLinks(tribe, memberStatus) {
 
         if (prevChatroom !== tribeName) {
           console.log(`Leaving ${prevChatroom}`);
-          socket.emit('leave chatroom', prevChatroom);
+          chatroomSocket.emit('leave chatroom', prevChatroom);
         }
-        socket.emit('join chatroom', tribeName);
+        chatroomSocket.emit('join chatroom', tribeName);
 
         emitSidebarLinkEvent(memberStatus);
       }
@@ -274,9 +280,10 @@ function handleChatroomLinks(tribe, memberStatus) {
 function handleClientSideLinks(page, focus) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
-
-  if (getSocketInitState()) {
-    disconnectSocket();
+  console.log("handleClientSideLinks::page => ", page);
+  
+  if (getSocketInitState('/tribe-chat')) {
+    disconnectSocket('/tribe-chat');
   }
 
   importModules(page)
