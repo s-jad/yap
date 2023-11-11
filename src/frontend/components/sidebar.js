@@ -7,6 +7,7 @@ import {
   getOptionalSidebarIcons,
   getLogo,
 } from './icons';
+import { getSocketInitState, initialiseSocket } from './sockets';
 import { getInboxMessageCount } from './tribes-db-access';
 
 function getOptionalSidebarItems(urls, memberStatus) {
@@ -78,14 +79,26 @@ export default async function Sidebar(urls) {
   `;
   
   const inboxAnchor = sidebarListFlex.querySelector('a[data-link="/inbox"]');
-  const msgCount = await getInboxMessageCount();
+
+  let inboxSocket
+  if (!getSocketInitState('/inbox')) {
+    inboxSocket = initialiseSocket('/inbox')
+  }
   
+
+  const msgCount = await getInboxMessageCount();
+  const inboxMsgCount = document.createElement('div'); 
+ 
   if (msgCount !== 0) {
-    const inboxMsgCount = document.createElement('div'); 
     inboxMsgCount.className = 'inbox-msg-count';
     inboxMsgCount.innerText = `${msgCount}`;
     inboxAnchor.appendChild(inboxMsgCount);
   }
+
+  inboxSocket.on('new-inbox-message', () => {
+    console.log("received new inbox msg");
+    inboxMsgCount.innerText = `${msgCount + 1}`;
+  });
 
   const icons = getSidebarIcons();
   const links = Array.from(sidebarListFlex.querySelectorAll('[data-link]'));
@@ -117,6 +130,8 @@ export default async function Sidebar(urls) {
     sidebarContainer.removeChild(toRemove);
     sidebarContainer.appendChild(newOptionalListFlex);
   });
+
+
 
   return sidebarContainer;
 }
