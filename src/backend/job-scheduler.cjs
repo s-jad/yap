@@ -2,13 +2,13 @@ const scheduler = require('node-schedule');
 const { logger } = require('./logging.cjs');
 const { tribesMac } = require('./tribes_mac.cjs');
 
-function backupChatMessages(redis) {
+function backupChatMessages(redisChatroomClient) {
   return scheduler.scheduleJob('*/30 * * * *', async function() {
-    const msgKeys = await redis.keys('*');
+    const msgKeys = await redisChatroomClient.keys('*');
     const backupCheck = [];
 
     for (let msgKey of msgKeys) {
-      const msgData = await redis.get(msgKey);
+      const msgData = await redisChatroomClient.get(msgKey);
       try {
         const parsedData = JSON.parse(msgData);
         
@@ -26,9 +26,9 @@ function backupChatMessages(redis) {
     }
 
     if (backupCheck.some((result) => result === false)) {
-      logger.error("failed to backup redis store to pg db");
+      logger.error("failed to backup redisChatroomClient store to pg db");
     } else {
-      await redis.flushDb();
+      await redisChatroomClient.flushDb();
     }
   });
 }
