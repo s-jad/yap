@@ -77,7 +77,7 @@ async function checkMembership(tribe) {
   })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Unable to fetch friends list');
+        throw new Error('Unable to check membership');
       }
       return response.json();
     })
@@ -164,7 +164,7 @@ async function getMessages(tribeUrl) {
           const json = JSON.parse(text);
           return json;
         } catch (error) {
-          console.error('createTribe::Error parsing JSON', error);
+          console.error('getMessages::Error parsing JSON', error);
           throw new Error('Error parsing JSON');
         }
       });
@@ -260,7 +260,7 @@ async function getInboxMessages() {
           const json = JSON.parse(text);
           return json;
         } catch (error) {
-          console.error('createTribe::Error parsing JSON', error);
+          console.error('getInboxMessages::Error parsing JSON', error);
           throw new Error('Error parsing JSON');
         }
       });
