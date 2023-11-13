@@ -670,7 +670,7 @@ function getFriends(userId) {
 }
 
 function createTribe(newTribeData) {
-  const { foundingMember, tribeName, tribeCta, tribeDescription, formationDate, icon } = newTribeData;
+  const { foundingMember, tribeName, tribeCta, tribeDescription, formationDate, icon, tribePrivacy } = newTribeData;
   console.log("createTribe::newTribeData => ", newTribeData);
   
   let query;
@@ -682,12 +682,13 @@ function createTribe(newTribeData) {
         tribe_name,
         tribe_cta,
         tribe_description,
-        formation_date
+        formation_date,
+        private
       )
-      VALUES (\$1, \$2, \$3, \$4, \$5)
+      VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
       RETURNING *; 
       `,
-      values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate ],
+      values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate, tribePrivacy ],
     };
   } else {
     query = {
@@ -698,15 +699,17 @@ function createTribe(newTribeData) {
           tribe_name,
           tribe_cta,
           tribe_description,
-          formation_date
+          formation_date,
+          private
         )
-        VALUES (\$1, \$2, \$3, \$4, \$5)
+        VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
         RETURNING tribe_id
       )
       INSERT INTO tribe_icons (tribe_id, tribe_icon)
-      SELECT tribe_id, decode(\$6, 'base64') FROM new_tribe;
+      SELECT tribe_id, decode(\$7, 'base64') FROM new_tribe
+      RETURNING tribe_id;
       `,
-      values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate, icon ],
+      values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate, tribePrivacy, icon ],
     };
   }
 
@@ -719,9 +722,36 @@ function createTribe(newTribeData) {
       } 
       else {
         const newTribeName = tribeName;
-        resolve(newTribeName);
+        const tribeId = res.rows[0].tribe_id;
+        const returnData = { newTribeName, tribeId };
+        console.log("new tribeID => ", tribeId);
+        resolve(returnData);
       }
     })
+  });
+}
+
+function addNewTribeMember(newMemberData) {
+  const { userId, tribeId, memberRole } = newMemberData;
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: `
+        INSERT INTO tribe_members (member_id, tribe_id, member_role)
+        VALUES (\$1, \$2, \$3)
+        RETURNING *;
+      `,
+      values: [ userId, tribeId, memberRole ],
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        logger.info(res);
+        resolve(res);
+      }
+    });
   });
 }
 
@@ -767,9 +797,6 @@ function getTribeMembers(tribe) {
       if (err) {
         logger.error(err);
         reject(err);
-      } else if (res.rows.length === 0) {
-        logger.error('Tribe has no members');
-        reject(new Error('Tribe has no members'));
       } else {
         const members = res.rows;
         resolve(members);
@@ -807,7 +834,7 @@ function updateTribeMemberLogin(loginData) {
   });
 }
 
-function reportUserIncident(incidentData) {
+function postUserIncidentReport(incidentData) {
   const {
     userId,
     incidentDescription,
@@ -926,6 +953,10 @@ async function tribesMac(req, data) {
       const tribe = await createTribe(data);
       return tribe;
 
+    case 'add-user-to-tribe-members':
+      const newMember = await addNewTribeMember(data);
+      return newMember;
+
     case 'get-messages':
       const messages = await getChatroomMessages(data);
       return messages;
@@ -955,7 +986,7 @@ async function tribesMac(req, data) {
       return msg;
 
     case 'report-user-incident':
-      const reportResult = await reportUserIncident(data);
+      const reportResult = await postUserIncidentReport(data);
       return reportResult;
 
     case 'get-password':
