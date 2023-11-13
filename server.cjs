@@ -62,7 +62,6 @@ const io = new Server(httpServer, {
 async function handleTribeLoginDbUpdate(socket, chatroom) {
   try {
     const member = socket.decoded.id;
-    console.log("socket.decoded => ", socket.decoded);
     const tribe = chatroom;
     const timestamp = new Date().toISOString();
     const patchData = { timestamp, tribe, member };
@@ -685,15 +684,25 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
     logger.error('Error parsing JWT payload: ', error);
     throw new Error('JWT payload is not valid JSON');
   }
-  const foundingMember = payload.id;
-  const tribeData = { foundingMember, ...req.body};
+  const userId = payload.id;
 
-  if (req.file.buffer === undefined) {
+  const privacyChoice = req.body.tribePrivacy === 'private';
+  req.body.tribePrivacy = privacyChoice;
+  const tribeData = { userId, ...req.body };
+
+  if (req.file === undefined) {
     try {
-      console.log("icon === undefined => ", tribeData);
-      const tribe = await tribesMac('create-tribe', tribeData);
-      logger.info(tribe);
-      res.status(200).json({ tribe });
+      const { newTribeName, tribeId } = await tribesMac('create-tribe', tribeData);
+      logger.info(`tribe formed with tribeID = ${tribeId} and tribeName = ${newTribeName}`);
+      
+      try {
+        const foundingMemberData = { userId, tribeId, memberRole: 'founder' };
+        await tribesMac('add-user-to-tribe-members', foundingMemberData);
+        res.status(200).json({ newTribeName });
+      } catch (error) {
+        logger.error(error);
+        res.status(500).json({ message: 'An error occurred while creating the tribe.' });
+      }
     } catch (error) {
       logger.error(error);
       res.status(500).json({ message: 'An error occurred while creating the tribe.' });
@@ -701,10 +710,18 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
   } else {
     const icon = req.file.buffer.toString('base64');
     const dataWithIcon = { ...tribeData, icon }; 
-    console.log("icon !== undefined => ", dataWithIcon);
     try {
-      const tribe = await tribesMac('create-tribe', dataWithIcon);
-      logger.info(tribe);
+      const { newTribeName, tribeId } = await tribesMac('create-tribe', dataWithIcon);
+      logger.info(`tribe formed with tribeID = ${tribeId} and tribeName = ${newTribeName}`);
+
+      try {
+        const foundingMemberData = { userId, tribeId, memberRole: 'founder' };
+        await tribesMac('add-user-to-tribe-members', foundingMemberData);
+        res.status(200).json({ newTribeName });
+      } catch (error) {
+        logger.error(error);
+        res.status(500).json({ message: 'An error occurred while creating the tribe.' });
+      }
       res.status(200).json({ tribe });
     } catch (error) {
       logger.error(error);
