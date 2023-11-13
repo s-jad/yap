@@ -63,7 +63,8 @@ async function populateTribesGrid(tribeGrid) {
         ev.preventDefault();
         const memberStatus = await checkMembership(tribes[i].tribe_name);
         if (
-          memberStatus === 'mod' 
+          memberStatus === 'mod'
+          || memberStatus === 'founder'
           || memberStatus === 'member'
           || memberStatus === 'admin'
         ) {
