@@ -704,7 +704,7 @@ function createTribe(newTribeData) {
         RETURNING tribe_id
       )
       INSERT INTO tribe_icons (tribe_id, tribe_icon)
-      SELECT tribe_id, \$6 FROM new_tribe;
+      SELECT tribe_id, decode(\$6, 'base64') FROM new_tribe;
       `,
       values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate, icon ],
     };
