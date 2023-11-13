@@ -670,7 +670,7 @@ function getFriends(userId) {
 }
 
 function createTribe(newTribeData) {
-  const { foundingMember, tribeName, tribeCta, tribeDescription, formationDate, icon, tribePrivacy } = newTribeData;
+  const { userId, tribeName, tribeCta, tribeDescription, formationDate, icon, tribePrivacy } = newTribeData;
   console.log("createTribe::newTribeData => ", newTribeData);
   
   let query;
@@ -688,7 +688,7 @@ function createTribe(newTribeData) {
       VALUES (\$1, \$2, \$3, \$4, \$5, \$6)
       RETURNING *; 
       `,
-      values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate, tribePrivacy ],
+      values: [ userId, tribeName, tribeCta, tribeDescription, formationDate, tribePrivacy ],
     };
   } else {
     query = {
@@ -709,7 +709,7 @@ function createTribe(newTribeData) {
       SELECT tribe_id, decode(\$7, 'base64') FROM new_tribe
       RETURNING tribe_id;
       `,
-      values: [ foundingMember, tribeName, tribeCta, tribeDescription, formationDate, tribePrivacy, icon ],
+      values: [ userId, tribeName, tribeCta, tribeDescription, formationDate, tribePrivacy, icon ],
     };
   }
 
@@ -798,7 +798,9 @@ function getTribeMembers(tribe) {
         logger.error(err);
         reject(err);
       } else {
+        console.log("tribes_mac::getTribeMembers::res => ", res);
         const members = res.rows;
+        console.log("tribes_mac::getTribeMembers::members => ", members);
         resolve(members);
       }
     });
