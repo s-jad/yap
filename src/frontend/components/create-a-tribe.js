@@ -18,6 +18,17 @@ export default function CreateTribe() {
           <input class="create-tribe-input" name="tribeCta" type="text" maxLength="50" required/>
           <label for="tribeDescription">Write a short description explaining what your tribe is about.</label> 
           <textarea class="create-tribe-input" name="tribeDescription" maxLength="150" required></textarea>
+          <p>Would you like your tribe to be open to the public or private for invited members only?</p>
+          <div class="radio-btn-wrapper">
+            <label for="radio-private">
+              Private
+              <input id="radio-private" class="create-tribe-privacy", name="tribePrivacy" type="radio" value="private"/>
+            </label>
+            <label for="radio-public">
+              Public
+              <input id="radio-public" class="create-tribe-privacy", name="tribePrivacy" type="radio" value="public"/>
+           </label>
+          </div>
           <label for="tribeIcon">Optional* Attach an svg file as an icon for the tribe</label>
           <div class="browse-btn-wrapper">
             <input class="create-tribe-input" name="tribeIcon" type="file"/>
@@ -32,6 +43,7 @@ export default function CreateTribe() {
   const form = createTribeContainer.querySelector('#create-tribe-form');
   const inputTribeIcon = createTribeContainer.querySelector('input[type="file"]');
   const fileNameDisplay = createTribeContainer.querySelector('.attached-icon-display'); 
+
   inputTribeIcon.addEventListener('change', () => {
     fileNameDisplay.textContent = `${inputTribeIcon.files[0].name}`;
   });
