@@ -26,6 +26,26 @@ function emitNewInboxMsgEvent(inbox, msg) {
   inbox.dispatchEvent(newInboxMsgEvent);
 }
 
+function emitUpdateSearchbarEvent(searchbar) {
+  console.log("emitUpdateSearchbarEvent::searchbar => ", searchbar);
+  const updateSearchBarEvent = new CustomEvent('update-searchbar', {
+    bubbles: true,
+    cancelable: true,
+  });
+
+  searchbar.dispatchEvent(updateSearchBarEvent);
+}
+
+function emitSetupSearchbarEvent(element) {
+  console.log("emitSetupSearchbarEvent::element => ", element);
+  const setupSearchBarEvent = new CustomEvent('setup-searchbar', {
+    bubbles: true,
+    cancelable: true,
+  });
+
+  element.dispatchEvent(setupSearchBarEvent);
+}
+
 function emitFocusEvent(page, element, focus) {
   
   switch (page) {
@@ -62,4 +82,6 @@ export {
   emitSidebarLinkEvent,
   emitFocusEvent,
   emitNewInboxMsgEvent,
+  emitSetupSearchbarEvent,
+  emitUpdateSearchbarEvent,
 }
