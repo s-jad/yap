@@ -25,7 +25,11 @@ function getOptionalSidebarItems(urls, memberStatus) {
 }
 
 function setSidebarTribeChat(optionalListFlex, tribe, memberStatus) {
-  if (memberStatus === 'mod' || memberStatus === 'admin') {
+  if (
+      memberStatus === 'mod' 
+      || memberStatus === 'admin'
+      || memberStatus === 'founder'
+  ) {
     optionalListFlex.innerHTML = `
       <li class="sidebar-list-item">
         <a class="sidebar-list-anchor"
