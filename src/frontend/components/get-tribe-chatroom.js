@@ -234,16 +234,11 @@ async function handleMsgPost(msg) {
   }
 }
 
-// async function handleUpdateLogin() {
-//   console.log("WE SHOULDNT BE HERE!!!!!!");
-//   const newLogin = new Date().toISOString();
-//   await updateTribeMemberLogin(newLogin, chatState.tribeName);
-// }
-
 export default async function TribeChat(tribe) {
+  console.log("tribeChat::tribe =>", tribe);
   chatState.tribeName = tribe
-    .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
-    .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+    .replaceAll('-', ' ')
+    .replace('/', '');
 
   updateAppState('current-room', chatState.tribeName);
 
