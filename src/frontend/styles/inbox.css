@@ -53,7 +53,13 @@
 
   & .inbox-messages-outer,
   & .outbox-messages-outer {
-    --bmo-height: calc(100vh - calc(var(--header-height) + calc(var(--topbar-height) + calc(var(--p-block) + 4px))));
+    --bmo-height: calc(100vh - 
+                    calc(var(--header-height) + 
+                    calc(var(--topbar-height) + 
+                    calc(var(--p-block) + 4px)
+                  )));
+    --searchbar-height: 45px;
+
     height: var(--bmo-height);
     max-height: var(--bmo-height);
 
@@ -62,21 +68,29 @@
     position: relative;
     transition: height 300ms ease-in-out;
     
+    & .searchbar-wrapper {
+      height: var(--searchbar-height);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding-left: 2rem;
+    }
+
     & .messages-scroll-wrapper {
-      min-height: var(--bmo-height);
-      max-height: var(--bmo-height);
+      min-height: calc(var(--bmo-height) - var(--searchbar-height));
+      max-height: calc(var(--bmo-height) - var(--searchbar-height));
       width: 100%;
       overflow-y: scroll;
       scrollbar-gutter: stable;
 
       & .inbox-messages-inner {
-        & .user-message-wrapper {
+        & .message-wrapper {
           grid-template-columns: 100px 1fr 1fr 1fr 100px;
         }
       }
 
       & .outbox-messages-inner {
-        & .user-message-wrapper {
+        & .message-wrapper {
           grid-template-columns: 150px 1fr 1fr 1fr 100px;
         }
       }
@@ -91,11 +105,11 @@
         flex-direction: column;
         gap: var(--gap);
 
-        & .user-message-wrapper:hover {
+        & .message-wrapper:hover {
           outline: 1px solid var(--lemon-chiffon-03);
         }
 
-        & .user-message-wrapper {
+        & .message-wrapper {
           display: grid;
           grid-template-columns: max-content 1fr 1fr 1fr 100px;
           grid-template-rows: 0px 1fr 0px;
@@ -224,7 +238,7 @@
         }
       }
 
-      & .user-message-wrapper.expanded {
+      & .message-wrapper.expanded {
         border-block: 2px solid var(--thistle-07);
         grid-template-rows: 50px auto 1fr;
 
