@@ -9,7 +9,6 @@ async function populateTribesGrid(tribeGrid) {
 
   for (let i = 0; i < tribes.length; i += 1) {
     const tribeUrl = tribes[i].tribe_name
-      .toLowerCase()
       .replaceAll(' ', '-');
 
     let privacy;
