@@ -201,9 +201,7 @@ function handleCreateTribe(form) {
 
     const formData = new FormData(form);
     const formationDate = new Date().toISOString().slice(0, 10);
-    formData.append('formationDate', formationDate)
-    
-    console.log("handleCreateTribe::formData => ", formData);
+    formData.append('formationDate', formationDate);
 
     fetch('/api/protected/create-a-tribe', {
       method: 'POST',
@@ -213,12 +211,12 @@ function handleCreateTribe(form) {
         return response.json();
       })
       .then((data) => {
-        const newTribeName = data.tribe;
+        const newTribeName = data.newTribeName;
         if (newTribeName) {
-          const tribeUrl = newTribeName.toLowerCase().replaceAll(' ', '-');
+          const tribeUrl = newTribeName.replaceAll(' ', '-');
           const newUrl = `/join-a-tribe/${tribeUrl}`;
           history.pushState(null, null, newUrl);
-          handleChatroomLinks(newTribeName);
+          handleChatroomLinks(newTribeName, 'founder');
         }
       })
       .catch((error) => {
@@ -232,9 +230,8 @@ async function handleSidebarOptionalLinks(url) {
 
   switch (urlSplit[1]) {
     case 'tribe-chat':
-      const tribe = `/${urlSplit[2]}`
-        .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
-        .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+      const tribe = `${urlSplit[2]}`
+        .replaceAll('-', ' ');
 
       if (urlSplit[3] === 'members') {
         await getTribeMembersListModal(tribe);
@@ -260,10 +257,12 @@ function handleChatroomLinks(tribe, memberStatus) {
         app.appendChild(toAdd);
 
         const tribeName = tribe
-          .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
-          .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+          .replaceAll('-', ' ')
+          .replace('/', '');
 
-        if (prevChatroom !== tribeName) {
+        if (prevChatroom !== tribeName
+            && prevChatroom !== undefined
+        ) {
           console.log(`Leaving ${prevChatroom}`);
           chatroomSocket.emit('leave chatroom', prevChatroom);
         }
