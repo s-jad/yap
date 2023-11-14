@@ -1,9 +1,9 @@
 import '../styles/searchbar.css';
 
 function findMatches(wordToMatch, searchItems) {
-    return searchItems.filter((element) => {
+    return searchItems.filter((item) => {
         const regex = new RegExp(wordToMatch, 'gi');
-        return element.title.match(regex);
+        return item.innerText.match(regex);
     });
 };
 
@@ -13,28 +13,29 @@ function displayMatches(
   searchItems,
   searchItemClassName
 ) {
-  console.log("displayMatches::params => ", wordToMatch, searchField, searchItemClassName);
   const matches = findMatches(wordToMatch, searchItems);
-  
-  const currentlyDisplayed = Array.from(searchField.querySelectorAll(`${searchItemClassName}:not(.hidden)`));
+  const currentlyDisplayed = Array.from(searchField.querySelectorAll(`.${searchItemClassName}:not(.hidden)`));
 
   searchItems.forEach((item) => {
     const targetItemText = item.innerText;
     const match = matches.some((match) => match.innerText === targetItemText)
 
     if (!match && currentlyDisplayed.some((displayedItem) => displayedItem.innerText === targetItemText)) {
-        item.parentNode.classList.add('hidden');
+      item.classList.add('hidden');
+      item.parentNode.classList.add('hidden');
     } else if (match && !currentlyDisplayed.some((hiddenItem) => hiddenItem.innerText === targetItemText)) {
-        item.parentNode.classList.remove('hidden');
+      item.classList.remove('hidden');
+      item.parentNode.classList.remove('hidden');
     }
   });
 }
 
 function populateSearchField(searchField, searchItemClassName) {
-  const hiddenItems = Array.from(searchField.querySelectorAll(`${searchItemClassName}.hidden`));
+  const hiddenItems = Array.from(searchField.querySelectorAll(`.${searchItemClassName}.hidden`));
 
   hiddenItems.forEach((item) => {
     item.classList.remove('hidden');
+    item.parentNode.classList.remove('hidden');
   });
 }
 
@@ -47,36 +48,36 @@ export default function Searchbar(
   searchbar.className = `searchbar ${subClass}`;
   searchbar.type = 'text';
   
-  let searchItems = Array.from(searchField.querySelectorAll(`${searchItemClassName}`));
+  let searchItems = Array.from(searchField.querySelectorAll(`.${searchItemClassName}`));
 
   searchbar.addEventListener('update-searchbar', () => {
-    searchItems = Array.from(searchField.querySelectorAll(`${searchItemClassName}`));
-    console.log("updated Searchbar::searchItems => ", searchItems);
-  })
-  console.log("Searchbar::searchItems => ", searchItems);
+    searchItems = Array.from(searchField.querySelectorAll(`.${searchItemClassName}`));
+  });
 
   searchbar.addEventListener('change', () => {
     if (searchbar.value === '') {
-       populateSearchField(searchField, searchItemClassName);
+      console.log("value is ''");
+      populateSearchField(searchField, searchItemClassName);
     } else {
       displayMatches(
         searchbar.value,
         searchField,
         searchItems,
-        searchItemClassName
+        searchItemClassName,
       );
     }
   });
 
   searchbar.addEventListener('keyup', () => {
     if (searchbar.value === '') {
-       populateSearchField(searchField, searchItemClassName);
+      console.log("value is ''");
+      populateSearchField(searchField, searchItemClassName);
     } else {
       displayMatches(
         searchbar.value,
         searchField,
         searchItems,
-        searchItemClassName
+        searchItemClassName,
       );
     }
   });
