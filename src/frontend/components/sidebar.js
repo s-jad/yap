@@ -1,4 +1,4 @@
-import { emitNewInboxMsgEvent } from './events';
+import { emitNewInboxMsgEvent, emitSetupSearchbarEvent, emitUpdateSearchbarEvent } from './events';
 import { 
   handleClientSideLinks,
   handleSidebarOptionalLinks,
@@ -103,6 +103,11 @@ export default async function Sidebar(urls) {
 
     if (removableComponent.classList.contains('user-messages-container')) {
       emitNewInboxMsgEvent(removableComponent, newMsg);
+
+      const searchbar = removableComponent.querySelector('.searchbar');
+      if (searchbar) {
+        emitUpdateSearchbarEvent(searchbar);
+      }
     }
   });
 
