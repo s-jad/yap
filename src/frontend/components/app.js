@@ -10,8 +10,7 @@ import {
   importChatroom,
   getChatroom, 
 } from './fetch_apis';
-
-
+import { emitSetupSearchbarEvent } from './events';
 
 async function clientRouting(currentRoute) {
   sessionStorage.setItem('lastPage', currentRoute);
@@ -97,13 +96,23 @@ export default async function App() {
   appContainer.appendChild(sidebar);
   appContainer.appendChild(HamburgerBtn());
 
+  if (currentRoute === '/inbox') {
+    const searchable = currentComponent.querySelector('.searchable')
+    emitSetupSearchbarEvent(searchable);
+  }
+
   window.addEventListener('popstate', async() => {
     const toRemove = appContainer.querySelector('.removable');
+    const prevRoute = window.location.pathname;
     appContainer.removeChild(toRemove);
-    const toAdd = await clientRouting();
+    const toAdd = await clientRouting(prevRoute);
     appContainer.appendChild(toAdd);
-  });
 
+    if (prevRoute === '/inbox') {
+      const searchable = toAdd.querySelector('.searchable')
+      emitSetupSearchbarEvent(searchable);
+    }
+  });
 
   return appContainer;
 }
