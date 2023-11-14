@@ -1,0 +1,8 @@
+.searchbar {
+  background: var(--card-clr);
+  box-shadow: var(--shadow), var(--shadow-inset), var(--shadow-inset-hl);
+  border-radius: 9999px;
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+  color: var(--font-clr);
+}
