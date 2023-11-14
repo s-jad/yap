@@ -1,5 +1,7 @@
 import '../styles/inbox.css';
 import { showDialog, getAppState } from "./app-state";
+import { emitSetupSearchbarEvent } from './events';
+import Searchbar from './searchbar';
 import {
   deleteInboxMessage,
   replyToInboxMessage,
@@ -15,7 +17,6 @@ async function fetchUserMessages() {
   messages.forEach((msg) => {
     userMessagesArr.push(msg);
   });
-  console.log("userMsgs => ", userMessagesArr);
   return messages;
 }
 
@@ -166,7 +167,6 @@ function createMessage(msg, currentUser, inbox, outbox, newMsgBool) {
   
   const populateReplyChains = (msg, replyChainContainer) => {
     if (msg.parent_message_id !== null) {
-      console.log("original msg => ", msg);
       const parentMsgs = getReplies(msg.parent_message_id);
 
       // TODO - think of better way to ensure db doesnt have
@@ -210,7 +210,7 @@ function createMessage(msg, currentUser, inbox, outbox, newMsgBool) {
   const msgTime = dateParts[4];
 
   const msgEl = document.createElement('div');
-  msgEl.className = 'user-message-wrapper';
+  msgEl.className = 'message-wrapper';
   const replyChainContainer = document.createElement('div');
   replyChainContainer.className = 'reply-chain-container';
   const btnContainer = getExpandedMsgBtnContainer(msg, msgEl);
@@ -239,10 +239,6 @@ function createMessage(msg, currentUser, inbox, outbox, newMsgBool) {
       }
     }
   });
-
-  console.log("msg.sender_name => ", msg.sender_name);
-  console.log("msg.receiver_name => ", msg.receiver_name);
-  console.log("currentUser => ", currentUser);
 
   if (msg.sender_name === currentUser) {
     msgEl.innerHTML = `
@@ -308,8 +304,9 @@ async function populateInboxOutbox(inbox, outbox) {
 
 function getInbox() {
   const inboxOuter = document.createElement('div');
-  inboxOuter.className = 'inbox-messages-outer messages-component-outer';
+  inboxOuter.className = 'inbox-messages-outer messages-component-outer searchable';
   inboxOuter.innerHTML = `
+    <div class="searchbar-wrapper"></div>
     <div class="messages-scroll-wrapper">
       <div class="inbox-messages-inner">
         
@@ -317,19 +314,50 @@ function getInbox() {
     </div>
   `;
 
+  const inboxInner = inboxOuter.querySelector('.inbox-messages-inner');
+  const searchbarWrapper = inboxOuter.querySelector('.searchbar-wrapper');
+  
+  inboxOuter.addEventListener('setup-searchbar', () => {
+    if (searchbarWrapper.childElementCount === 0) {
+      searchbarWrapper.appendChild(
+        Searchbar(
+          'inbox-searchbar',
+          inboxInner,
+          '[class^="user-message-"]',
+        )
+      );
+    }
+  });
+
   return inboxOuter;
 }
 
 function getOutbox() {
   const outboxOuter = document.createElement('div');
-  outboxOuter.className = 'outbox-messages-outer messages-component-outer';
+  outboxOuter.className = 'outbox-messages-outer messages-component-outer searchable';
   outboxOuter.innerHTML = `
+    <div class="searchbar-wrapper"></div>
     <div class="messages-scroll-wrapper">
       <div class="outbox-messages-inner">
         
       </div> 
     </div>
   `;
+
+  const searchbarWrapper = outboxOuter.querySelector('.searchbar-wrapper');
+  const outboxInner = outboxOuter.querySelector('.outbox-messages-inner');
+  
+  outboxOuter.addEventListener('setup-searchbar', () => {
+    if (searchbarWrapper.childElementCount === 0) {
+      searchbarWrapper.appendChild(
+        Searchbar(
+          'outbox-searchbar',
+          outboxInner,
+          '[class^="user-message-"]',
+        )
+      );
+    }
+  });
 
   return outboxOuter;
 }
@@ -463,10 +491,14 @@ function messagesDashboardRouting(link) {
   switch (linkTo) {
     case 'inbox':
       userMessagesContainer.appendChild(messagesDashboardComponents[0]);
+      const inbox = userMessagesContainer.querySelector('.searchable');
+      emitSetupSearchbarEvent(inbox);
       break;
 
     case 'outbox':
       userMessagesContainer.appendChild(messagesDashboardComponents[1]);
+      const outbox = userMessagesContainer.querySelector('.searchable');
+      emitSetupSearchbarEvent(outbox);
       break;
 
     case 'send-msg':
