@@ -32,7 +32,6 @@ async function getGroupsLinks() {
     tribeSuggestions = await getLastTribeLogins();
   }
   
-  console.log("tribeSuggestions => ", tribeSuggestions);
   groupLinksContainer.innerHTML = `
     <ul class='group-list'>
       <a class="recently-viewed-tribe-link"><li class='group-list-item'></li></a>
@@ -47,7 +46,7 @@ async function getGroupsLinks() {
   anchors.forEach((a, index) => {
     const icon = convertAsciiToIcon(tribeSuggestions[index].tribe_icon);
     links[index].appendChild(icon);
-    const tribeUrl = `/${tribeSuggestions[index].tribe_name.toLowerCase().replaceAll(' ', '-')}`;
+    const tribeUrl = `/${tribeSuggestions[index].tribe_name.replaceAll(' ', '-')}`;
     a.href = `/api/protected/tribe-chat${tribeUrl}`;
     a.setAttribute('data-link', `/tribe-chat${tribeUrl}`);
     a.tabIndex = index + 1;
