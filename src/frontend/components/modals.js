@@ -122,7 +122,7 @@ function getFriendsCardOptionsModal(friend) {
   });
 
   joinChatBtn.addEventListener('click', () => {
-    const tribe = `/${friend.tribe_name.replaceAll(' ', '-').toLowerCase()}`;
+    const tribe = `/${friend.tribe_name.replaceAll(' ', '-')}`;
     handleChatroomLinks(tribe);
     closeModal(modal);
   });
@@ -178,7 +178,6 @@ async function getTribeMembersListModal(tribe) {
 
   const members = await getTribeMembers(tribe);
   modalInner.classList.add('gtml-modal-inner');
-
   members.forEach((member) => {
     const activeIndicator = document.createElement('p');
     activeIndicator.className = 'active-indicator';
