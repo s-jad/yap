@@ -1,5 +1,5 @@
 import { getAppState } from './app-state';
-import { emitFocusEvent, emitSidebarLinkEvent } from './events';
+import { emitFocusEvent, emitSetupSearchbarEvent, emitSidebarLinkEvent } from './events';
 import { getTribeApplicationsListModal, getTribeMembersListModal } from './modals';
 import {
   chatroomSocket,
@@ -293,6 +293,11 @@ function handleClientSideLinks(page, focus) {
 
         if (focus) {
           emitFocusEvent(page, toAdd, focus);
+        }
+
+        const searchable = app.querySelector('.searchable');
+        if (searchable) {
+          emitSetupSearchbarEvent(searchable);
         }
 
         emitSidebarLinkEvent();
