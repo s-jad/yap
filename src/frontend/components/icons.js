@@ -12,6 +12,7 @@ import friendsSVG from '../assets/imgs/friends.svg';
 import applicationsSVG from '../assets/imgs/applications.svg';
 import xSVG from '../assets/imgs/x.svg';
 import genericTribeSVG from '../assets/imgs/generic-tribe.svg';
+import searchMessagesSVG from '../assets/imgs/search-messages.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -28,6 +29,33 @@ function getXIcon() {
   x.className = 'modal-close-btn-icon';
 
   return x;
+}
+
+function getSearchBarIcons(searchWrapper) {
+  const searchIconWrapper = document.createElement('div');
+  searchIconWrapper.className = 'search-icon-wrapper-outer';
+  searchIconWrapper.innerHTML = `
+    <div class="search-icon-wrapper-inner">
+      <button class="invisible-btn"></button>
+      <div class="magnifying-glass"></div>
+      <div class="magnifying-glass-handle left"></div>
+      <div class="magnifying-glass-handle right"></div>
+    </div>
+  `;
+
+  const btn = searchIconWrapper.querySelector('.invisible-btn');
+
+  btn.addEventListener('click', (ev) => {
+    ev.stopImmediatePropagation();
+    
+    if (searchWrapper.classList.contains('minimized')) {
+      searchWrapper.classList.remove('minimized');
+    } else {
+      searchWrapper.classList.add('minimized');
+    }
+  });
+
+  return searchIconWrapper;
 }
 
 function getGenericTribeIcon() {
@@ -138,6 +166,7 @@ export {
   getLogo,
   getXIcon,
   getGenericTribeIcon,
+  getSearchBarIcons,
   convertAsciiToIcon,
 };
 
