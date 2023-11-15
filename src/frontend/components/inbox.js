@@ -1,6 +1,7 @@
 import '../styles/inbox.css';
 import { showDialog, getAppState } from "./app-state";
 import { emitSetupSearchbarEvent } from './events';
+import { getSearchBarIcons } from './icons';
 import Searchbar from './searchbar';
 import {
   deleteInboxMessage,
@@ -306,7 +307,7 @@ function getInbox() {
   const inboxOuter = document.createElement('div');
   inboxOuter.className = 'inbox-messages-outer messages-component-outer searchable';
   inboxOuter.innerHTML = `
-    <div class="searchbar-wrapper"></div>
+    <div class="searchbar-wrapper minimized"></div>
     <div class="messages-scroll-wrapper">
       <div class="inbox-messages-inner">
         
@@ -321,11 +322,12 @@ function getInbox() {
     if (searchbarWrapper.childElementCount === 0) {
       searchbarWrapper.appendChild(
         Searchbar(
-          'inbox-searchbar',
+          'inbox-searchbar hidden',
           inboxInner,
           'user-message-content',
         )
       );
+      searchbarWrapper.appendChild(getSearchBarIcons(searchbarWrapper));
     }
   });
 
@@ -336,7 +338,7 @@ function getOutbox() {
   const outboxOuter = document.createElement('div');
   outboxOuter.className = 'outbox-messages-outer messages-component-outer searchable';
   outboxOuter.innerHTML = `
-    <div class="searchbar-wrapper"></div>
+    <div class="searchbar-wrapper minimized"></div>
     <div class="messages-scroll-wrapper">
       <div class="outbox-messages-inner">
         
@@ -351,11 +353,12 @@ function getOutbox() {
     if (searchbarWrapper.childElementCount === 0) {
       searchbarWrapper.appendChild(
         Searchbar(
-          'outbox-searchbar',
+          'outbox-searchbar hidden',
           outboxInner,
           'user-message-content',
         )
       );
+      searchbarWrapper.appendChild(getSearchBarIcons(searchbarWrapper));
     }
   });
 
