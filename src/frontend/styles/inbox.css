@@ -58,7 +58,6 @@
                     calc(var(--topbar-height) + 
                     calc(var(--p-block) + 4px)
                   )));
-    --searchbar-height: 45px;
 
     height: var(--bmo-height);
     max-height: var(--bmo-height);
@@ -68,13 +67,6 @@
     position: relative;
     transition: height 300ms ease-in-out;
     
-    & .searchbar-wrapper {
-      height: var(--searchbar-height);
-      width: 100%;
-      display: flex;
-      align-items: center;
-      padding-left: 2rem;
-    }
 
     & .messages-scroll-wrapper {
       min-height: calc(var(--bmo-height) - var(--searchbar-height));
