@@ -44,7 +44,7 @@
   width: var(--searchbar-wrapper-width);
   display: flex;
   align-items: center;
-  padding-left: 1rem;
+  padding-left: 3rem;
   padding-bottom: 1rem;
 
   & .searchbar {
@@ -98,11 +98,12 @@
 .searchbar-wrapper.minimized {
   & .searchbar {
     width: 30px;
+    color: hsla(0, 0%, 0%, 0.0);
   }
 
   & .search-icon-wrapper-outer {
     top: 0px;
-    left: 11px;
+    left: 31px;
     height: 30px;
     width: 30px;
 

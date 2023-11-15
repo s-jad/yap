@@ -45,7 +45,7 @@ export default function Searchbar(
   searchItemClassName,
 ) {
   const searchbar = document.createElement('input');
-  searchbar.className = `searchbar ${subClass}`;
+  searchbar.className = `searchbar ${subClass} minimized`;
   searchbar.type = 'text';
   
   let searchItems = Array.from(searchField.querySelectorAll(`.${searchItemClassName}`));
