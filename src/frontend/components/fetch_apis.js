@@ -214,7 +214,7 @@ function handleCreateTribe(form) {
         const newTribeName = data.newTribeName;
         if (newTribeName) {
           const tribeUrl = newTribeName.replaceAll(' ', '-');
-          const newUrl = `/join-a-tribe/${tribeUrl}`;
+          const newUrl = `/tribe-chat/${tribeUrl}`;
           history.pushState(null, null, newUrl);
           handleChatroomLinks(newTribeName, 'founder');
         }
@@ -261,7 +261,7 @@ function handleChatroomLinks(tribe, memberStatus) {
           .replace('/', '');
 
         if (prevChatroom !== tribeName
-            && prevChatroom !== undefined
+            && prevChatroom !== null
         ) {
           console.log(`Leaving ${prevChatroom}`);
           chatroomSocket.emit('leave chatroom', prevChatroom);
