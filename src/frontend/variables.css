@@ -54,6 +54,8 @@
   --btn-width: clamp(fit-content, calc(fit-content + 2vw), 300px);
   --btn-height: clamp(fit-content, calc(fit-content + 2vh), 150px);
 
+  --searchbar-height: 40px;
+
   --margin-small: 1rem;
   --margin-mid: 2rem;
   --margin-big: 3rem;
