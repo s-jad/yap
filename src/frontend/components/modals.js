@@ -148,24 +148,36 @@ async function getTribeApplicationsListModal(tribe) {
   const applicants = await getApplicants(tribe);
   modalInner.classList.add('gtal-modal-inner');
 
-  applicants.forEach((applicant) => {
-    const appDate = applicant.application_date.slice(0, applicant.application_date.indexOf('T'));
+  if (applicants === undefined) {
+    const tribeChat = document.body.querySelector('#tribe-chat-container');
+    showDialog(
+      tribeChat,
+      'No applicants to join the tribe at the current time.',
+      'applicants-modal-failure',
+      'fail',
+    );
+    return;
+  } else {
+    applicants.forEach((applicant) => {
+      const appDate = applicant.application_date.slice(0, applicant.application_date.indexOf('T'));
 
-    const applicantEl = document.createElement('div');
-    applicantEl.className = 'applicant-list-item';
-    applicantEl.innerHTML = `
-      <p class="applicant-name">${applicant.user_name}</p>
-      <p class="application-date">${appDate}</p>
-    `;
-    
-    applicantEl.addEventListener('click', () => {
-      console.log("showing profile, accept/deny buttons");
+      const applicantEl = document.createElement('div');
+      applicantEl.className = 'applicant-list-item';
+      applicantEl.innerHTML = `
+        <p class="applicant-name">${applicant.user_name}</p>
+        <p class="application-date">${appDate}</p>
+        `;
+
+      applicantEl.addEventListener('click', () => {
+        console.log("showing profile, accept/deny buttons");
+      });
+
+      modalScrollInner.appendChild(applicantEl);
     });
-    
-    modalScrollInner.appendChild(applicantEl);
-  });
+
+    document.body.appendChild(modal);
+  }
   
-  document.body.appendChild(modal);
 }
 
 async function getTribeMembersListModal(tribe) {

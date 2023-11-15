@@ -323,7 +323,7 @@ function getInbox() {
         Searchbar(
           'inbox-searchbar',
           inboxInner,
-          '[class^="user-message-"]',
+          'user-message-content',
         )
       );
     }
@@ -353,7 +353,7 @@ function getOutbox() {
         Searchbar(
           'outbox-searchbar',
           outboxInner,
-          '[class^="user-message-"]',
+          'user-message-content',
         )
       );
     }
