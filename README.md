@@ -26,3 +26,8 @@ Link: [svgrepo](https://www.svgrepo.com/svg/438908/travel)
 ### coffee-connoisseurs.svg
 Artist: Kate Musaieva
 Link: [svgrepo](https://www.svgrepo.com/svg/492607/fashion)
+
+### logout.svg
+Artist: Esri
+Link: [svgrepo](https://www.svgrepo.com/svg/451441/walk-through-door)
+Original image altered using Figma
