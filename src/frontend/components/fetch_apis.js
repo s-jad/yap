@@ -7,6 +7,7 @@ import {
   getSocketInitState,
   initialiseSocket,
 } from './sockets';
+import { logoutUser } from './tribes-db-access';
 
 let prevChatroom;
 
@@ -276,13 +277,37 @@ function handleChatroomLinks(tribe, memberStatus) {
     });
 }
 
+function deleteCookie(name) {
+  document.cookie = name + '=; expires= Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+async function handleLogout() {
+  const logout = await logoutUser();
+  console.log("handleLogout::logout => ", logout);
+  if (logout) {
+    deleteCookie('jwt_payload');
+    deleteCookie('jwt_signature');
+    disconnectSocket('/inbox');
+    if (getSocketInitState('/tribe-chat')) {
+      disconnectSocket('/tribe-chat');
+    }
+    window.location.href = '/';
+  }
+}
+
 function handleClientSideLinks(page, focus) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
   console.log("handleClientSideLinks::page => ", page);
   
+
   if (getSocketInitState('/tribe-chat')) {
     disconnectSocket('/tribe-chat');
+  }
+
+  if (page === '/logout') {
+    handleLogout();
+    return;
   }
 
   importModules(page)
