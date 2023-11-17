@@ -1,3 +1,21 @@
+async function logoutUser() {
+  return fetch('/api/logout-user')
+    .then(response => {
+      if (!response.ok) {
+        console.log('Unable to logout user');
+      }
+      return response.json().then(data => {
+        console.log("logoutUser::data => ", data);
+        try {
+          const logout = data.logout;
+          return logout;
+        } catch (error) {
+          console.error('logoutUser::Error parsing JSON', error);
+        }
+      })
+    });
+}
+
 async function getTribes() {
   return fetch('/api/protected/join-a-tribe')
     .then(response => {
@@ -33,7 +51,6 @@ async function getTribeMembers(tribe) {
 }
 
 async function applyForInvitation(tribeName) {
-  console.log("applyForInvitation::tribeName => ", tribeName);
   return fetch('/api/protected/apply-for-invitation', {
     method: 'POST',
     credentials: 'include',
@@ -428,4 +445,5 @@ export {
   applyForInvitation,
   getApplicants,
   checkMembership,
+  logoutUser,
 };
