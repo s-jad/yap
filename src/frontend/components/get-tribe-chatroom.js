@@ -34,7 +34,6 @@ function createNewMessage(msg) {
   }
 
   const { sender_name, receiver_name, message_content } = msg;
-
   const newMessage = document.createElement('div');
   newMessage.setAttribute('data-sender', sender_name);
 
@@ -62,6 +61,7 @@ function createNewMessage(msg) {
   }
 
   const sender = activeMembers.find(member => member.username === sender_name);
+  console.log("createNewMessage::activeMembers => ", activeMembers);
   const msgSenderEl = newMessage.querySelector('.msg-sender');
   msgSenderEl.style.color = `hsl(${sender.color}, 100%, 70%)`;
 
@@ -211,7 +211,7 @@ async function handleMsgPost(msg) {
   const global = messageState.global;
 
   if (global === false) {
-    chatroomSocket.emit('message', {
+    chatroomSocket.emit('posting-message', {
       tribe_name: tribeName,
       receiver_name: messageState.receiver,
       message_content: editedMsg,
@@ -224,7 +224,7 @@ async function handleMsgPost(msg) {
     chatState.replying = false;
     messageState.global = true;
   } else {
-    chatroomSocket.emit('message', {
+    chatroomSocket.emit('posting-message', {
       tribe_name: tribeName,
       receiver_name: null,
       message_content: editedMsg,
@@ -235,7 +235,6 @@ async function handleMsgPost(msg) {
 }
 
 export default async function TribeChat(tribe) {
-  console.log("tribeChat::tribe =>", tribe);
   chatState.tribeName = tribe
     .replaceAll('-', ' ')
     .replace('/', '');
@@ -295,19 +294,32 @@ export default async function TribeChat(tribe) {
   chatroomSocket.on('message', (data) => {
     try {
       const parsedData = JSON.parse(data);
-      console.log("receivedData => ", parsedData);
       handleMsgReceive(parsedData);
-
+      
       messageInput.value = '';
       messageInput.focus();
       messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
     } catch (error) {
+      console.log("chatroomSocket.on.error => ", error);
       showDialog(
         tribeChatContainer,
         `Something went wrong, please check the @username you input exists`,
         'message-error',
         'fail'
       );
+    }
+  });
+
+  chatroomSocket.on('member login', (data) => {
+    if (!activeMembers.some(member => member.username === data.username)) {
+      activeMembers.push(getMemberState(data.username));
+    }
+  });
+
+  chatroomSocket.on('member logout', (data) => {
+    const index = activeMembers.findIndex(user => user.username === data.username);
+    if (index !== -1) {
+      activeMembers.splice(index, 1);
     }
   });
 
