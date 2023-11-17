@@ -12,7 +12,7 @@ import friendsSVG from '../assets/imgs/friends.svg';
 import applicationsSVG from '../assets/imgs/applications.svg';
 import xSVG from '../assets/imgs/x.svg';
 import genericTribeSVG from '../assets/imgs/generic-tribe.svg';
-import searchMessagesSVG from '../assets/imgs/search-messages.svg';
+import logoutSVG from '../assets/imgs/logout.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -95,10 +95,15 @@ function getSidebarIcons() {
   friends.src = friendsSVG;
   friends.alt = 'A person with magnifying glass';
 
+  const logout = new Image();
+  logout.src = logoutSVG;
+  logout.alt = 'An open door';
+
   return [
     home,
     messages,
     friends,
+    logout,
   ];
 }
 
