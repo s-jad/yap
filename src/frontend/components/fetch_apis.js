@@ -1,4 +1,4 @@
-import { getAppState } from './app-state';
+import { getAppState, updateAppState } from './app-state';
 import { emitFocusEvent, emitSetupSearchbarEvent, emitSidebarLinkEvent } from './events';
 import { getTribeApplicationsListModal, getTribeMembersListModal } from './modals';
 import {
@@ -262,13 +262,12 @@ function handleChatroomLinks(tribe, memberStatus) {
           .replace('/', '');
 
         if (prevChatroom !== tribeName
-            && prevChatroom !== null
+            && prevChatroom !== undefined 
         ) {
           console.log(`Leaving ${prevChatroom}`);
           chatroomSocket.emit('leave chatroom', prevChatroom);
         }
         chatroomSocket.emit('join chatroom', tribeName);
-
         emitSidebarLinkEvent(memberStatus);
       }
     })
@@ -283,7 +282,6 @@ function deleteCookie(name) {
 
 async function handleLogout() {
   const logout = await logoutUser();
-  console.log("handleLogout::logout => ", logout);
   if (logout) {
     deleteCookie('jwt_payload');
     deleteCookie('jwt_signature');
@@ -291,7 +289,10 @@ async function handleLogout() {
     if (getSocketInitState('/tribe-chat')) {
       disconnectSocket('/tribe-chat');
     }
-    window.location.href = '/';
+
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 100);
   }
 }
 
@@ -300,8 +301,9 @@ function handleClientSideLinks(page, focus) {
   const toRemove = app.querySelector('.removable');
   console.log("handleClientSideLinks::page => ", page);
   
-
   if (getSocketInitState('/tribe-chat')) {
+    console.log(`Leaving ${prevChatroom}`);
+    chatroomSocket.emit('leave chatroom', prevChatroom);
     disconnectSocket('/tribe-chat');
   }
 
