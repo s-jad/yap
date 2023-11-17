@@ -26,7 +26,7 @@
 
         .friends-list-header {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           align-items: center;
           justify-content: space-between;
           padding: 1rem;
@@ -38,7 +38,7 @@
 
         .friend-card {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           align-items: center;
           justify-content: space-between;
           padding: 1rem;
@@ -46,15 +46,17 @@
           border-radius: 1rem;
           cursor: pointer;
 
-          .friend-active-status {
+          .friend-tribe-active-status {
             text-align: right;
           }
 
-          .friend-active-status.active {
+          .friend-active-status.active,
+          .friend-tribe-active-status.active {
             color: var(--success-clr);
           }
 
-          .friend-active-status.inactive {
+          .friend-active-status.inactive,
+          .friend-tribe-active-status.inactive {
             color: var(--error-clr);
           }
         }
