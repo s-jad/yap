@@ -66,7 +66,6 @@ async function handleTribeLoginDbUpdate(socket, chatroom) {
     const timestamp = new Date().toISOString();
     const patchData = { timestamp, tribe, member };
     const res = await tribesMac('update-tribe-member-login', patchData);
-    console.log("result of login => ", res);
   } catch (error) {
     console.error(`Error updating ${member} login of ${tribe}`);
   }
@@ -79,7 +78,6 @@ async function handleTribeLogoutDbUpdate(socket, chatroom) {
     const timestamp = new Date().toISOString();
     const patchData = { timestamp, tribe, member };
     const res = await tribesMac('update-tribe-member-logout', patchData);
-    console.log("result of logout => ", res);
   } catch (error) {
     console.error(`Error updating ${member} logout of ${tribe}`);
   }
@@ -181,9 +179,10 @@ chatroomNameSpace.on('connection', (socket) => {
     }
   })
 
-  socket.on('message', (data) => {
+  socket.on('posting-message', (data) => {
     let toStore;
     if (data.receiver_name === null) {
+      console.log("receiver_name was null");
       toStore = { 
         ...data, 
         receiver_name: socket.decoded.userName, 
@@ -356,6 +355,11 @@ app.post('/api/create-user', async (req, res) => {
   }
 });
 
+app.get('/api/logout-user', async (req, res) => {
+  logger.info("user logging out");
+  res.json({ logout: true });
+});
+
 // PROTECTED ROUTES
 
 app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
@@ -494,6 +498,7 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
 
   try {
     const members = await tribesMac('get-tribe-members', tribe);
+    console.log("get-tribe-members::members => ", members);
     res.send(members);
   } catch (error) {
     logger.error(error);
@@ -722,7 +727,6 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
         logger.error(error);
         res.status(500).json({ message: 'An error occurred while creating the tribe.' });
       }
-      res.status(200).json({ tribe });
     } catch (error) {
       logger.error(error);
       res.status(500).json({ message: 'An error occurred while creating the tribe.' });
