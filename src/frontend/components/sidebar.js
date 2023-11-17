@@ -1,4 +1,7 @@
-import { emitNewInboxMsgEvent, emitSetupSearchbarEvent, emitUpdateSearchbarEvent } from './events';
+import {
+  emitNewInboxMsgEvent,
+  emitUpdateSearchbarEvent,
+} from './events';
 import { 
   handleClientSideLinks,
   handleSidebarOptionalLinks,
@@ -81,6 +84,7 @@ export default async function Sidebar(urls) {
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/dashboard" href="/dashboard"></a></li>
     <li class="sidebar-list-item inbox-icon"><a class="sidebar-list-anchor" data-link="/inbox" href="/inbox"></a></li>
     <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/friends" href="/friends"></a></li>
+    <li class="sidebar-list-item"><a class="sidebar-list-anchor" data-link="/logout" href="/logout"></a></li>
   `;
   
   const inboxAnchor = sidebarListFlex.querySelector('a[data-link="/inbox"]');
@@ -136,17 +140,16 @@ export default async function Sidebar(urls) {
   sidebarContainer.appendChild(optionalListFlex);
   
   sidebarContainer.addEventListener('sidebar-link-change', (ev) => {
+    console.log("receiving sidebar-link-change");
     const newUrls = []
     const currentUrlSplit = ev.detail.currentUrl.split('/');
     const memberStatus = ev.detail.memberStatus;
     newUrls.push(currentUrlSplit[1], currentUrlSplit[2]);
     const toRemove = sidebarContainer.querySelector('.optional-list-flex');
-    const newOptionalListFlex = getOptionalSidebarItems(newUrls, memberStatus);
     sidebarContainer.removeChild(toRemove);
+    const newOptionalListFlex = getOptionalSidebarItems(newUrls, memberStatus);
     sidebarContainer.appendChild(newOptionalListFlex);
   });
-
-
 
   return sidebarContainer;
 }
