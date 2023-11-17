@@ -1,4 +1,9 @@
-import { authenticateUser, createUser, getLastTribeLogins, getRandomTribeSuggestions } from "./tribes-db-access";
+import {
+  authenticateUser,
+  createUser,
+  getLastTribeLogins,
+  getRandomTribeSuggestions
+} from "./tribes-db-access";
 import { updateAppState } from "./app-state";
 import App from "./app";
 
