@@ -56,6 +56,61 @@ function userExists(userData) {
   });
 }
 
+function updateUserLogin(user) {
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: `
+        UPDATE 
+          users
+        SET
+          last_login = NOW()
+        WHERE
+          user_id = \$1
+        RETURNING last_login;
+      `,
+      values: [user]
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err)
+        reject(new Error('Failed to update user login'));
+      } else {
+        const login = res.rows[0].last_login;
+        logger.info('Updated user login => ', login);
+        resolve(login);
+      }
+    })
+  })
+}
+
+function updateUserLogout(user) {
+  return new Promise((resolve, reject) => {
+    const query = {
+      text: `
+        UPDATE 
+          users
+        SET
+          last_logout = NOW()
+        WHERE
+          user_id = \$1
+        RETURNING last_logout;
+      `,
+      values: [user]
+    };
+
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err)
+        reject(new Error('Failed to update user logout'));
+      } else {
+        const login = res.rows[0].last_logout;
+        logger.info('Updated user login => ', login);
+        resolve(login);
+      }
+    })
+  })
+}
 
 function getPwHash(user) {
   return new Promise((resolve, reject) => {
@@ -84,9 +139,11 @@ function getFriends(userId) {
     text: `
       SELECT 
         u.user_name,
+        u.last_login,
+        u.last_logout,
         t.tribe_name,
-        tm.last_login,
-        tm.last_logout
+        tm.last_login AS last_tribe_login, 
+        tm.last_logout AS last_tribe_logout
       FROM users u
       JOIN friends f ON u.user_id = f.friend_id
       JOIN tribe_members tm ON u.user_id = tm.member_id
@@ -102,9 +159,11 @@ function getFriends(userId) {
       UNION ALL
       SELECT 
         u.user_name,
+        u.last_login,
+        u.last_logout,
         t.tribe_name,
-        tm.last_login,
-        tm.last_logout
+        tm.last_login AS last_tribe_login,
+        tm.last_logout AS last_tribe_logout
       FROM users u
       JOIN friends f ON u.user_id = f.user_id
       JOIN tribe_members tm ON u.user_id = tm.member_id
@@ -993,6 +1052,14 @@ async function tribesMac(req, data) {
     case 'report-user-incident':
       const reportResult = await postUserIncidentReport(data);
       return reportResult;
+
+    case 'update-user-login':
+      const userLogin = await updateUserLogin(data);
+      return userLogin;
+
+    case 'update-user-logout':
+      const userLogout = await updateUserLogout(data);
+      return userLogout;
 
     case 'get-password':
       const result = await getPwHash(data);
