@@ -292,6 +292,7 @@ export default async function TribeChat(tribe) {
   });
 
   chatroomSocket.on('message', (data) => {
+    console.log("Receiving message signal");
     try {
       const parsedData = JSON.parse(data);
       handleMsgReceive(parsedData);
@@ -322,10 +323,12 @@ export default async function TribeChat(tribe) {
       activeMembers.splice(index, 1);
     }
   });
-
-  messageInput.value = '';
-  messageInput.focus();
-  messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+  
+  setTimeout(() => {
+    messageInput.value = '';
+    messageInput.focus();
+    messagesScrollWrapper.scrollTop = messagesScrollWrapper.scrollHeight;
+  }, 200);
 
   tribeChatContainer.addEventListener('focus-tribe-chat-members', (ev) => {
     messageInput.value = `@${ev.detail.focus.replyTo} `;
