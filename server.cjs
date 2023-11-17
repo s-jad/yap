@@ -137,19 +137,22 @@ chatroomNameSpace.on('connection', (socket) => {
   const referer = socket.request.headers.referer
   if (referer.includes('/tribe-chat')) {
     const urlParts = referer.split('/');
-    const tribe = `/${urlParts[4]}`;
+    const tribe = `${urlParts[4]}`;
 
     const chatroom = tribe
-      .replace(/-([a-z])/g, function(g) { return ' ' + g[1].toUpperCase(); })
-      .replace(/\/([a-z])/g, function(g) { return '' + g[1].toUpperCase(); });
+      .replaceAll('-', ' ');
   
-
     if (!socket.rooms.has(chatroom)) {
       try {
-        console.log("joining chatroom via page refresh");
         socket.join(chatroom);
         console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
         handleTribeLoginDbUpdate(socket, chatroom);
+
+        const updateActiveMembers = {
+          username: socket.decoded.userName,
+        };
+        
+        chatroomNameSpace.to(chatroom).emit('member login', updateActiveMembers);
       } catch (error) {
         console.log(`Error joining ${chatroom}: ${error}`);
       }
@@ -159,10 +162,15 @@ chatroomNameSpace.on('connection', (socket) => {
   socket.on('join chatroom', (chatroom) => {
     if (!socket.rooms.has(chatroom)) {
       try {
-        console.log("joining chatroom via page socket.on('join chatroom')");
         socket.join(chatroom);
         console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
         handleTribeLoginDbUpdate(socket, chatroom);
+        
+        const updateActiveMembers = {
+          username: socket.decoded.userName,
+        };
+        
+        chatroomNameSpace.to(chatroom).emit('member login', updateActiveMembers);
       } catch (error) {
         console.log(`Error joining ${chatroom}: ${error}`);
       }
@@ -174,10 +182,16 @@ chatroomNameSpace.on('connection', (socket) => {
       socket.leave(chatroom);
       console.log(`Socket ${socket.id} left chatroom ${chatroom}`);
       handleTribeLogoutDbUpdate(socket, chatroom);
+
+      const updateActiveMembers = {
+        username: socket.decoded.userName,
+      };
+
+      chatroomNameSpace.to(chatroom).emit('member logout', updateActiveMembers);
     } catch (error) {
       console.log(`Error leaving ${chatroom}: ${error}`);
     }
-  })
+  });
 
   socket.on('posting-message', (data) => {
     let toStore;
@@ -301,6 +315,8 @@ app.post('/api/authenticate-user', async (req, res) => {
           sameSite: 'strict',
         });
 
+        await tribesMac('update-user-login', userId);
+
         res.status(200).json({ 
           message: 'Login Succesful.',
           userColor,
@@ -357,7 +373,22 @@ app.post('/api/create-user', async (req, res) => {
 
 app.get('/api/logout-user', async (req, res) => {
   logger.info("user logging out");
-  res.json({ logout: true });
+  try {
+    const tokenParts = req.cookies.jwt_signature.split('.');
+    let payload;
+    try {
+      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    } catch (error) {
+      logger.error('Error parsing JWT payload: ', error);
+      throw new Error('JWT payload is not valid JSON');
+    }
+    const userId = payload.id;
+    await tribesMac('update-user-logout', userId);
+    res.json({ logout: true });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst logging the user out.' });
+  }
 });
 
 // PROTECTED ROUTES
