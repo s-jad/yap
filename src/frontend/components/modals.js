@@ -144,6 +144,15 @@ async function getTribeApplicationsListModal(tribe) {
     headers,
     modalScrollInner 
   } = getScrollableModal();
+  
+  const headerContent = document.createElement('div');
+  headerContent.className = 'header-sub-wrapper';
+  headerContent.innerHTML = `
+    <h3 class="leading-header">Applying</h3>
+    <h3>Date</h3>
+  `;
+
+  headers.appendChild(headerContent);
 
   const applicants = await getApplicants(tribe);
   modalInner.classList.add('gtal-modal-inner');
@@ -187,7 +196,15 @@ async function getTribeMembersListModal(tribe) {
     headers,
     modalScrollInner 
   } = getScrollableModal();
+  
+  const headerContent = document.createElement('div');
+  headerContent.className = 'header-sub-wrapper';
+  headerContent.innerHTML = `
+    <h3 class="leading-header">Member</h3>
+    <h3>Activity</h3>
+  `;
 
+  headers.appendChild(headerContent);
   const members = await getTribeMembers(tribe);
   modalInner.classList.add('gtml-modal-inner');
   members.forEach((member) => {
@@ -245,13 +262,20 @@ function getApplyForInvitationModal(tribe) {
   } = getModal();
 
   modalInner.classList.add('afi-modal-inner');
-  console.log("Inside the modal!!!");
+  
+  const headerContent = document.createElement('h3');
+  headerContent.className = 'header-content';
+  headerContent.textContent = `Apply for an invitation to ${tribe.tribe_name}?`
+  headers.appendChild(headerContent);
 
-  modalInner.innerHTML = `
-    <h2 class="afi-modal-header">Apply for an invitation to ${tribe.tribe_name}?</h2>
+  const btnWrapper = document.createElement('div');
+  btnWrapper.className = 'btn-wrapper';
+  btnWrapper.innerHTML = `
     <button class="afi-apply-btn">Apply</button>
     <button class="afi-cancel-btn">Cancel</button>
   `;
+  
+  modalInner.appendChild(btnWrapper);
 
   const afiApplyBtn = modalInner.querySelector('.afi-apply-btn');
   const joinTribe = document.querySelector('#join-tribe-container');
@@ -283,8 +307,6 @@ function getApplyForInvitationModal(tribe) {
   afiCancelBtn.addEventListener('click', () => {
     closeModal(modal);
   });
-
-  modal.appendChild(modalInner);
 
   document.body.appendChild(modal);
 }
