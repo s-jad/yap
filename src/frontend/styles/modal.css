@@ -17,13 +17,18 @@
 
     & .modal-header-container {
       display: grid;
-      grid-template-columns: 120px 1fr;
+      grid-template-columns: 80% 1fr;
       gap: calc(var(--gap) * 2);
       padding: 1rem;
       width: 100%;
-      height: 50px;
+      height: auto;
       background: var(--card-clr);
       border-radius: 1rem 1rem 0 0;
+      margin-bottom: 1rem;
+        
+      & .header-text {
+        padding-left: 1rem;
+      }
 
       & .modal-btn-container {
         position: relative;
@@ -51,6 +56,13 @@
         scale: 1.05;
       }
     }
+
+    & .btn-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      margin-bottom: 1rem;
+    }
   }
   
   & .modal-inner.gtml-modal-inner {
@@ -58,9 +70,20 @@
     width: clamp(300px, 70vw, 900px);
   }
 
+  & .header-sub-wrapper {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--gap) * 2);
+    padding: var(--p-block);
+
+    & .leading-header {
+      width: 120px;
+    }
+  }
+
   & .modal-inner.gtal-modal-inner {
     height: 50vh;
-    width: clamp(300px, 40vw, 700px);
+    width: clamp(300px, 40vw, 400px);
   }
 
   & .modal-inner.gtml-modal-inner,
@@ -75,7 +98,7 @@
         flex-direction: column;
         align-items: start;
         justify-content: center;
-        padding: var(--p-block) var(--p-inline);
+        padding: var(--p-block);
         gap: var(--gap);
       }
     }
@@ -100,9 +123,8 @@
     outline: 1px solid var(--thistle-07);
   }
 
-  & .applicantion-date {
+  & .application-date {
     opacity: 0.7;
-    text-align: right;
   }
 
   & .active-indicator.member-active {
