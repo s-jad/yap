@@ -87,7 +87,7 @@ async function handleTribeLogoutDbUpdate(socket, chatroom) {
   }
 }
 
-io.on("connection_error", (err) => {
+io.on("connect_error", (err) => {
   logger.error(err.req);
   logger.error(err.code);
   logger.error(err.message);
@@ -129,6 +129,10 @@ chatroomNameSpace.on('connection', (socket) => {
     console.log(`A new client connected: ${socket.id}`);
     socket.emit('connection', { message: `A new client has connected! with socket id of ${socket.id}`});
   } catch (error) {
+    socket.emit('connect_error', {
+      code: err.code,
+      message: err.message,
+    });
     console.log(`Error connecting client: ${error}`);
   }
 
@@ -246,9 +250,11 @@ inboxNameSpace.on('connection', (socket) => {
     const userId = socket.decoded.id.toString();
     const socketId = socket.id.toString();
     redisInboxClient.set(userId, socketId);
-    console.log("userId => ", userId);
-    console.log("socketId => ", socketId);
   } catch (error) {
+    socket.emit('connect_error', {
+      code: err.code,
+      message: err.message,
+    });
     console.log(`Error connecting client to inbox: ${error}`);
   }
 });
