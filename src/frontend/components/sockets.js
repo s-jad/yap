@@ -2,9 +2,9 @@ import { io } from "socket.io-client";
 import { getAppState } from "./app-state";
 
 let chatroomSocketInitialized = false;
-let inboxSocketInitialized = false;
+let notificationsSocketInitialized = false;
 let chatroomSocket;
-let inboxSocket;
+let notificationsSocket;
 
 function disconnectSocket(namespace) {
   if (chatroomSocket !== null && namespace === '/tribe-chat') {
@@ -12,17 +12,17 @@ function disconnectSocket(namespace) {
     const chatroom = getAppState('current-room');
     chatroomSocket.emit('user disconnect', chatroom);
     chatroomSocket = null;
-  } else if (inboxSocket !== null && namespace === '/inbox') {
-    inboxSocketInitialized = false;
-    inboxSocket.emit('user disconnect');
-    inboxSocket = null;
+  } else if (notificationsSocket !== null && namespace === '/notifications') {
+    notificationsSocketInitialized = false;
+    notificationsSocket.emit('user disconnect');
+    notificationsSocket = null;
   }
 }
 
 function initialiseSocket(namespace) {
   window.addEventListener('beforeunload', () => {
-    if (chatroomSocketInitialized && inboxSocketInitialized) {
-      disconnectSocket('/inbox');
+    if (chatroomSocketInitialized && notificationsSocketInitialized) {
+      disconnectSocket('/notifications');
       disconnectSocket('/tribe-chat');
     } else {
       disconnectSocket(namespace);
@@ -45,22 +45,22 @@ function initialiseSocket(namespace) {
     chatroomSocketInitialized = true;
 
     return chatroomSocket;
-  } else if (namespace === '/inbox') {
-    inboxSocket = io(`${process.env.SERVER_URL}${namespace}`, {
+  } else if (namespace === '/notifications') {
+    notificationsSocket = io(`${process.env.SERVER_URL}${namespace}`, {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax : 5000,
       reconnectionAttempts: 20,
     });
 
-    inboxSocket.on('connect_error', function () {
-      inboxSocket.io.readyState = 'closed';
-      inboxSocket.io.reconnect();
+    notificationsSocket.on('connect_error', function () {
+      notificationsSocket.io.readyState = 'closed';
+      notificationsSocket.io.reconnect();
     });
 
-    inboxSocketInitialized = true;
+    notificationsSocketInitialized = true;
 
-    return inboxSocket;
+    return notificationsSocket;
   }
 }
 
@@ -68,13 +68,13 @@ function getSocketInitState(namespace) {
   if (namespace === '/tribe-chat') {
     return chatroomSocketInitialized;
   } else if (namespace === '/inbox') {
-    return inboxSocketInitialized;
+    return notificationsSocketInitialized;
   }
 }
 
 export {
   chatroomSocket,
-  inboxSocket,
+  notificationsSocket,
   getSocketInitState,
   disconnectSocket,
   initialiseSocket,
