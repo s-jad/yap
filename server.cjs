@@ -57,6 +57,10 @@ const io = new Server(httpServer, {
     allowedHeaders: ['*'],
     credentials: true,
   },
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 120 * 1000,
+    skipMiddlewares: false,
+  },
 });
 
 async function handleTribeLoginDbUpdate(socket, chatroom) {
