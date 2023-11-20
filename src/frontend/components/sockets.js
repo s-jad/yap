@@ -30,11 +30,21 @@ function initialiseSocket(namespace) {
   });
 
   if (namespace === '/tribe-chat') {
-    chatroomSocket = io(`${process.env.SERVER_URL}${namespace}`);
+    chatroomSocket = io(`${process.env.SERVER_URL}${namespace}`, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax : 5000,
+      reconnectionAttempts: 20,
+    });
     chatroomSocketInitialized = true;
     return chatroomSocket;
   } else if (namespace === '/inbox') {
-    inboxSocket = io(`${process.env.SERVER_URL}${namespace}`);
+    inboxSocket = io(`${process.env.SERVER_URL}${namespace}`, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax : 5000,
+      reconnectionAttempts: 20,
+    });
     inboxSocketInitialized = true;
     return inboxSocket;
   }
