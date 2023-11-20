@@ -62,7 +62,8 @@ export default function ReportUserIncidentForm() {
         reportFormContainer,
         'Report sent!',
         'report-msg-success',
-        'success'
+        'success',
+        'center',
       );
     } else {
       showDialog(
@@ -70,7 +71,8 @@ export default function ReportUserIncidentForm() {
         `Something went wrong,
         please check if you input the correct usernames`,
         'report-failure',
-        'fail'
+        'fail',
+        'center',
       );
     }
   });

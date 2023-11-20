@@ -306,7 +306,8 @@ export default async function TribeChat(tribe) {
         tribeChatContainer,
         `Something went wrong, please check the @username you input exists`,
         'message-error',
-        'fail'
+        'fail',
+        'center',
       );
     }
   });
@@ -315,12 +316,32 @@ export default async function TribeChat(tribe) {
     if (!activeMembers.some(member => member.username === data.username)) {
       activeMembers.push(getMemberState(data.username));
     }
+
+    if (data.username !== getAppState('username')) {
+      showDialog(
+        tribeChatContainer,
+        `${data.username} has joined the chat!`,
+        `${data.username}-join`,
+        'success',
+        'top-right',
+      );
+    }
   });
 
   chatroomSocket.on('member logout', (data) => {
     const index = activeMembers.findIndex(user => user.username === data.username);
     if (index !== -1) {
       activeMembers.splice(index, 1);
+    }
+
+    if (data.username !== getAppState('username')) {
+      showDialog(
+        tribeChatContainer,
+        `${data.username} has left the chat!`,
+        `${data.username}-leave`,
+        'success',
+        'top-right',
+      );
     }
   });
   

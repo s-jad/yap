@@ -164,6 +164,7 @@ async function getTribeApplicationsListModal(tribe) {
       'No applicants to join the tribe at the current time.',
       'applicants-modal-failure',
       'fail',
+      'center',
     );
     return;
   } else {
@@ -241,7 +242,8 @@ async function getTribeMembersListModal(tribe) {
           tribeChat,
           'Can only post messages to currently active members',
           'post-msg-failure',
-          'fail'
+          'fail',
+          'center',
         );
       }
     });
@@ -288,6 +290,7 @@ function getApplyForInvitationModal(tribe) {
         `Application sent to ${tribe.tribe_name}!`,
         'afi-modal-success',
         'success',
+        'center',
       );
     } else {
       showDialog(
@@ -295,6 +298,7 @@ function getApplyForInvitationModal(tribe) {
         `${applicationRes}`,
         'afi-modal-failure',
         'fail',
+        'center',
       );
     }
 

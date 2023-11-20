@@ -96,7 +96,8 @@ function getReplyView(parentMsg) {
         userMessagesContainer,
         'Reply sent!',
         'reply-msg-success',
-        'success'
+        'success',
+        'center',
       );
       messagesDashboardRouting(inboxLink);
     } else {
@@ -104,7 +105,8 @@ function getReplyView(parentMsg) {
         userMessagesContainer,
         'Something went wrong, please try again later.',
         'inbox-error',
-        'fail'
+        'fail',
+        'center',
       );
     }
   });
@@ -149,14 +151,16 @@ function getExpandedMsgBtnContainer(msg, msgEl) {
         userMessagesContainer,
         'Message succesfully deleted!',
         'delete-msg-info-success',
-        'success'
+        'success',
+        'center',
       );
     } else {
       showDialog(
         userMessagesContainer,
         'Something went wrong, please try again later.',
         'inbox-error',
-        'fail'
+        'fail',
+        'center',
       );
     }
   });
@@ -443,6 +447,7 @@ function getSendMsg(userMessagesContainer) {
           'Message sent!',
           'msg-sent-success',
           'success',
+          'center',
         );
         messagesDashboardRouting(inboxLink);
       } else {
@@ -450,7 +455,8 @@ function getSendMsg(userMessagesContainer) {
           userMessagesContainer,
           'Failed to send message, please check the receivers username',
           'msg-sent-failure',
-          'fail'
+          'fail',
+          'center',
         );
         msgReceiverName.textContent = '';
         msgReceiverName.classList.add('hidden');
@@ -462,7 +468,8 @@ function getSendMsg(userMessagesContainer) {
         userMessagesContainer,
         'Please enter a valid member name and/or a message (minimum 3 characters)',
         'msg-sent-failure',
-        'fail'
+        'fail',
+        'center',
       );
       msgReceiverName.textContent = '';
       msgReceiverName.classList.add('hidden');
