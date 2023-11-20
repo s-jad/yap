@@ -90,7 +90,7 @@
   & .modal-inner.gtal-modal-inner {
 
     & .modal-scroll-wrapper {
-      max-height: calc(50vh - 60px);
+      max-height: calc(50vh - calc(60px + 2rem));
       overflow-y: scroll;
 
       & .modal-scroll-inner {
