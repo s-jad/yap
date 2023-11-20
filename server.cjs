@@ -29,13 +29,13 @@ const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
 const { logger } = require('./src/backend/logging.cjs');
 const { backupChatMessages } = require('./src/backend/job-scheduler.cjs');
-const { redisChatroomClient, redisInboxClient } = require('./src/backend/redis-client.cjs');
+const { redisChatroomClient, redisNotificationsClient } = require('./src/backend/redis-client.cjs');
 
 redisChatroomClient.on('ready', function() {
   logger.info('Redis chatroom client is ready');
 });
 
-redisInboxClient.on('ready', function() {
+redisNotificationsClient.on('ready', function() {
   logger.info('Redis inbox client is ready');
 });
 
@@ -94,7 +94,7 @@ io.on("connect_error", (err) => {
   logger.error(err.context);
 });
 
-const inboxNameSpace = io.of('/inbox');
+const notificationsNameSpace = io.of('/notifications');
 const chatroomNameSpace = io.of('/tribe-chat');
 
 function validateSocketJWT(socket, next) {
@@ -116,7 +116,7 @@ function validateSocketJWT(socket, next) {
   }    
 }
 
-inboxNameSpace.use((socket, next) => {
+notificationsNameSpace.use((socket, next) => {
   validateSocketJWT(socket, next);
 });
 
@@ -243,13 +243,13 @@ chatroomNameSpace.on('connection', (socket) => {
   });
 });
 
-inboxNameSpace.on('connection', (socket) => {
+notificationsNameSpace.on('connection', (socket) => {
   try {
     console.log(`A new client connected to inbox: ${socket.id}`);
     socket.emit('connection', { message: `A new client has connected to their inbox! with socket id of ${socket.id}`});
     const userId = socket.decoded.id.toString();
     const socketId = socket.id.toString();
-    redisInboxClient.set(userId, socketId);
+    redisNotificationsClient.set(userId, socketId);
   } catch (error) {
     socket.emit('connect_error', {
       code: err.code,
@@ -664,8 +664,8 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
     
     const { receiver_id, ...toSend } = msgData;
     console.log("receiverId => ", receiver_id);
-    const receiverSocketId = await redisInboxClient.get(receiver_id.toString());
-    inboxNameSpace.to(receiverSocketId).emit('new-inbox-message', toSend);
+    const receiverSocketId = await redisNotificationsClient.get(receiver_id.toString());
+    notificationsNameSpace.to(receiverSocketId).emit('new-inbox-message', toSend);
     logger.info(toSend);
     res.status(200).json({ message: 'Message sent!' });
   } catch (error) {
