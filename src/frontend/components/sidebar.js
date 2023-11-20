@@ -89,9 +89,9 @@ export default async function Sidebar(urls) {
   
   const inboxAnchor = sidebarListFlex.querySelector('a[data-link="/inbox"]');
 
-  let inboxSocket
-  if (!getSocketInitState('/inbox')) {
-    inboxSocket = initialiseSocket('/inbox')
+  let notificationsSocket
+  if (!getSocketInitState('/notifications')) {
+    notificationsSocket = initialiseSocket('/notifications')
   }
   
 
@@ -104,7 +104,7 @@ export default async function Sidebar(urls) {
     inboxAnchor.appendChild(inboxMsgCount);
   }
 
-  inboxSocket.on('new-inbox-message', (newMsg) => {
+  notificationsSocket.on('new-inbox-message', (newMsg) => {
     inboxMsgCount.innerText = `${msgCount + 1}`;
     
     const removableComponent = document.body.querySelector('.removable');
@@ -140,7 +140,6 @@ export default async function Sidebar(urls) {
   sidebarContainer.appendChild(optionalListFlex);
   
   sidebarContainer.addEventListener('sidebar-link-change', (ev) => {
-    console.log("receiving sidebar-link-change");
     const newUrls = []
     const currentUrlSplit = ev.detail.currentUrl.split('/');
     const memberStatus = ev.detail.memberStatus;
