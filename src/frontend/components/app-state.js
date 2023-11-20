@@ -29,12 +29,12 @@ function getAppState(key) {
   }
 }
 
-function showDialog(container, info, category, dialogType) {
+function showDialog(container, info, category, dialogType, position) {
   let dialog = container.querySelector(`.${category}`)
 
   if (!dialog) {
     dialog = document.createElement('dialog');
-    dialog.className = `short-lived-dialog ${category} ${dialogType}`;
+    dialog.className = `short-lived-dialog ${category} ${dialogType} ${position}`;
     dialog.open = true;
     dialog.innerHTML = `
         <p class="dialog-msg">${info}</p>
