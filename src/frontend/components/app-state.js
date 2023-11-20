@@ -1,3 +1,5 @@
+import '../styles/dialog.css';
+
 function updateAppState(key, value) {
   if (typeof value === 'object') {
     try {
