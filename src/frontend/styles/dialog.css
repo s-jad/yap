@@ -1,0 +1,36 @@
+dialog {
+  background: var(--card-clr);
+  color: var(--font-clr);
+  border-radius: 1rem;
+  padding: calc(var(--p-block) * 3) calc(var(--p-inline) * 3);
+  border: 2px solid var(--lemon-chiffon-07);
+  z-index: 1000;
+}
+
+dialog.success {
+  box-shadow: var(--shadow), var(--shadow-inset-success);
+}
+
+dialog.fail {
+  box-shadow: var(--shadow), var(--shadow-inset-error);
+}
+
+dialog.info {
+  box-shadow: var(--shadow), var(--shadow-inset);
+}
+
+dialog.center {
+  top: 50%;
+}
+
+dialog.top-left {
+  top: 15%;
+  margin: 0;
+  margin-left: 60%;
+}
+
+dialog.top-right {
+  top: 15%;
+  margin: 0;
+  margin-left: 60%;
+}
