@@ -36,6 +36,11 @@ function initialiseSocket(namespace) {
       reconnectionDelayMax : 5000,
       reconnectionAttempts: 20,
     });
+
+    chatroomSocket.on('error', function () {
+     socket.io.readyState = 'closed'; 
+     socket.io.reconnect();
+    });
     chatroomSocketInitialized = true;
     return chatroomSocket;
   } else if (namespace === '/inbox') {
@@ -44,6 +49,11 @@ function initialiseSocket(namespace) {
       reconnectionDelay: 1000,
       reconnectionDelayMax : 5000,
       reconnectionAttempts: 20,
+    });
+
+    inboxSocket.on('error', function () {
+     socket.io.readyState = 'closed';
+     socket.io.reconnect();
     });
     inboxSocketInitialized = true;
     return inboxSocket;
