@@ -37,11 +37,13 @@ function initialiseSocket(namespace) {
       reconnectionAttempts: 20,
     });
 
-    chatroomSocket.on('error', function () {
-     socket.io.readyState = 'closed'; 
-     socket.io.reconnect();
+    chatroomSocket.on('connect_error', function () {
+      chatroomSocket.io.readyState = 'closed'; 
+      chatroomSocket.io.reconnect();
     });
+
     chatroomSocketInitialized = true;
+
     return chatroomSocket;
   } else if (namespace === '/inbox') {
     inboxSocket = io(`${process.env.SERVER_URL}${namespace}`, {
@@ -51,11 +53,13 @@ function initialiseSocket(namespace) {
       reconnectionAttempts: 20,
     });
 
-    inboxSocket.on('error', function () {
-     socket.io.readyState = 'closed';
-     socket.io.reconnect();
+    inboxSocket.on('connect_error', function () {
+      inboxSocket.io.readyState = 'closed';
+      inboxSocket.io.reconnect();
     });
+
     inboxSocketInitialized = true;
+
     return inboxSocket;
   }
 }
