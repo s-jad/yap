@@ -1,3 +1,4 @@
+import { getAppState, storeUserMessages  } from './app-state';
 import {
   emitNewInboxMsgEvent,
   emitUpdateSearchbarEvent,
@@ -12,7 +13,26 @@ import {
   getLogo,
 } from './icons';
 import { getSocketInitState, initialiseSocket } from './sockets';
-import { getInboxMessageCount } from './tribes-db-access';
+import { getInboxMessages } from './tribes-db-access';
+
+async function fetchUserMessages() {
+  const messages = await getInboxMessages();
+  const userMessagesArr = [];
+  let inboxCount = 0;
+  messages.forEach((msg) => {
+    userMessagesArr.push(msg);
+    if (
+      msg.receiver_name === getAppState('username')
+      && !msg.message_read
+    ) {
+      inboxCount += 1;
+    }
+  });
+
+  storeUserMessages(userMessagesArr);
+
+  return inboxCount;
+}
 
 function getOptionalSidebarItems(urls, memberStatus) {
   const optionalListFlex = document.createElement('ul');
@@ -94,8 +114,7 @@ export default async function Sidebar(urls) {
     notificationsSocket = initialiseSocket('/notifications')
   }
   
-
-  const msgCount = await getInboxMessageCount();
+  const msgCount = await fetchUserMessages();
   const inboxMsgCount = document.createElement('div'); 
  
   if (msgCount !== 0) {
