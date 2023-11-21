@@ -18,7 +18,7 @@
       max-height: var(--filter-bar-height);
       min-height: var(--filter-bar-height);
 
-      & .filter-list-item {
+      & .filter-list-option {
         position: relative;
         color: var(--font-clr);
         text-align: center;
@@ -26,7 +26,7 @@
         min-width: 15rem;
       }
 
-      & .filter-list-item::after {
+      & .filter-list-option::after {
         position: absolute;
         content: "";
         bottom: -1rem;
@@ -39,12 +39,12 @@
         transform-origin: center;
       }
 
-      & .filter-list-item:hover::after,
-      & .filter-list-item:focus-within::after {
+      & .filter-list-option:hover::after,
+      & .filter-list-option:focus-within::after {
         scale: 1 1;
       }
 
-      & .filter-list-item.displayed::after {
+      & .filter-list-option.displayed::after {
         scale: 1 1;
         background: var(--thistle-07);
       }
@@ -81,6 +81,59 @@
         display: flex;
         flex-direction: column;
         gap: var(--gap);
+
+        & .notification-card:hover {
+          outline: 1px solid var(--lemon-chiffon-03);
+        }
+
+        & .notification-card.hidden {
+          display: none;
+        }
+
+        & .notification-card {
+          display: grid;
+          grid-template-columns: max-content 1fr 1fr 1fr 100px;
+          grid-template-rows: 0px 1fr 0px;
+          padding-inline: var(--p-inline);
+          padding-block: var(--p-block);
+          background: var(--card-clr);
+          outline: 1px solid transparent;
+          border-radius: 1rem; 
+          transition: grid-template-rows 300ms ease-in-out,
+                      outline 150ms ease-in-out;
+          overflow: hidden;
+
+          & .notification-sender {
+            padding-right: 1rem;
+            grid-row: 2 / 3;
+            grid-column: 1 / 2;
+          }
+
+          & .notification-sender {
+            color: var(--font-clr-05);
+          }
+
+          & .notification-content {
+            grid-row: 2 / 3;
+            grid-column: 2 / 5;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 25px;
+            padding: 0px;
+            border-radius: 0px;
+            transition: background 500ms ease-in-out,
+                        padding 300ms ease-in-out,
+                        border-radius 300ms ease-in-out,
+                        max-height 200ms ease-in-out;
+          }
+
+          & .notification-timestamp {
+            grid-row: 2 / 3;
+            grid-column: 5 / 6;
+            opacity: 0.7;
+            text-align: right;
+          }
+        }
       }
     }
   }
