@@ -701,34 +701,6 @@ function getInboxMessages(userId) {
   });
 }
 
-function getInboxMessageCount(userId) {
-  const query = {
-    text: `
-      SELECT COUNT(*)
-      FROM user_messages
-      WHERE (
-        receiver_id = \$1
-        AND receiver_deleted = false
-        AND message_read = false
-      );
-    `,
-    values: [userId]
-  }
-
-  return new Promise((resolve, reject) => {
-    pg_client.query(query, (err, res) => {
-      if (err) {
-        logger.error(err)
-        reject(err);
-      } else if (res.rows.length === 0) {
-        resolve(0);
-      } else {
-        resolve(res.rows[0].count); 
-      }
-    });
-  });
-}
-
 function getNotifications(userId) {
   const query = {
     text: `
@@ -844,7 +816,6 @@ async function replyToInboxMessage(replyMsgData) {
     throw error;
   }
 }
-
 
 function addNewTribeMember(newMemberData) {
   const { userId, tribeId, memberRole } = newMemberData;
@@ -1076,10 +1047,6 @@ async function tribesMac(req, data) {
     case 'get-inbox-messages':
       const inboxMessages = await getInboxMessages(data);
       return inboxMessages;
-
-    case 'get-inbox-message-count':
-      const inboxMessageCount = await getInboxMessageCount(data);
-      return inboxMessageCount;
 
     case 'backup-chatroom-messages':
       const msg = await backupChatroomMessages(data);
