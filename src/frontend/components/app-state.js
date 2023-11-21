@@ -53,12 +53,23 @@ function showDialog(container, info, category, dialogType, position) {
 }
 
 const notificationsArr = [];
-const inboxMessagesArr = [];
+
+function getUserMessages() {
+  const json = sessionStorage.getItem('user-messages');
+  const msgs = JSON.parse(json);
+  return msgs;
+}
+
+function storeUserMessages(msgs) {
+  const msgString = JSON.stringify(msgs);
+  sessionStorage.setItem('user-messages', msgString);
+}
 
 export {
   updateAppState,
   getAppState,
   showDialog,
   notificationsArr,
-  inboxMessagesArr,
+  getUserMessages,
+  storeUserMessages,
 }
