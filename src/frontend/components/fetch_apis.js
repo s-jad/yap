@@ -18,6 +18,7 @@ const importedList = {
   tribeChat: false,
   messagesDashboard: false,
   friendsDashboard: false,
+  notificationsDashboard: false,
 };
 
 const importedComponents = {
@@ -28,6 +29,7 @@ const importedComponents = {
   tribeChat: () => { },
   messagesDashboard: () => { },
   friendsDashboard: () => { },
+  notificationsDashboard: () => { },
 }
 
 function getComponent(fn) {
@@ -168,6 +170,27 @@ function importModules(page) {
         }
         break;
 
+      case '/notifications':
+        if (importedList.notifications !== true) {
+          try {
+            const notificationsDashboardModule = await import(/* webpackChunkName: "notifications" */ './notifications')
+            const NotificationsDashboard = notificationsDashboardModule.default;
+            const fn = NotificationsDashboard;
+            importedList.notificationsDashboard = true;
+            importedComponents.notificationsDashboard = fn;
+            component = getAsyncComponent(fn)
+            resolve(component);
+          }
+          catch (error) {
+            console.error(error);
+            reject(error);
+          }
+        } else {
+          component = getAsyncComponent(importedComponents.notificationsDashboard);
+          resolve(component);
+        }
+        break;
+
       case '/create-a-tribe':
         if (importedList.createTribe !== true) {
           try {
@@ -249,7 +272,6 @@ async function handleSidebarOptionalLinks(url) {
 function handleChatroomLinks(tribe, memberStatus) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
-  console.log("handleChatroomLinks::page => ", tribe);
 
   importChatroom(tribe)
     .then((toAdd) => {
@@ -299,7 +321,6 @@ async function handleLogout() {
 function handleClientSideLinks(page, focus) {
   const app = document.body.querySelector('#app');
   const toRemove = app.querySelector('.removable');
-  console.log("handleClientSideLinks::page => ", page);
   
   if (getSocketInitState('/tribe-chat')) {
     console.log(`Leaving ${prevChatroom}`);
