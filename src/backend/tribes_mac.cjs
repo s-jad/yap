@@ -729,6 +729,28 @@ function getInboxMessageCount(userId) {
   });
 }
 
+function getNotifications(userId) {
+  const query = {
+    text: `
+      SELECT * FROM unique_notifications WHERE notification_id IN
+      (SELECT notification_id FROM notifications WHERE user_id = \$1);
+    `,
+    values: [userId],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        console.log(res.rows);
+        resolve(res.rows);
+      }
+    });
+  });
+}
+
 function deleteInboxMessage(deleteMsgData) {
   const { msgIds, userId } = deleteMsgData;
 
@@ -976,6 +998,10 @@ async function tribesMac(req, data) {
     case 'get-friends':
       const friends = await getFriends(data);
       return friends;
+
+    case 'get-notifications':
+      const notifications = await getNotifications(data);
+      return notifications;
 
     case 'update-tribe-member-login':
       const login = await updateTribeMemberLogin(data);
