@@ -5,7 +5,6 @@ async function logoutUser() {
         console.log('Unable to logout user');
       }
       return response.json().then(data => {
-        console.log("logoutUser::data => ", data);
         try {
           const logout = data.logout;
           return logout;
@@ -185,6 +184,24 @@ async function getMessages(tribeUrl) {
           throw new Error('Error parsing JSON');
         }
       });
+    });
+}
+
+async function getNotifications() {
+  return fetch('/api/protected/get-notifications', {
+    method: 'GET',
+    credentials: 'include',
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Unable to get notifications')
+      }
+      try {
+        const notifications = response.json();
+        return notifications;
+      } catch (error) {
+        console.error('getNotifications::Error parsing JSON', error);
+      }
     });
 }
 
@@ -430,6 +447,7 @@ export {
   getFriends,
   //  updateTribeMemberLogin,
   //  updateTribeMemberLogout,
+  getNotifications,
   getMessages,
   getInboxMessages,
   getInboxMessageCount,
