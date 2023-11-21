@@ -21,21 +21,21 @@ export default async function Notifications() {
     </div>
   `;
 
-  const nInner = nContainer.querySelector('notifications-inner');
-
+  const nInner = nContainer.querySelector('.notifications-inner');
   const notifications = await getNotifications();
 
-  notifications.forEach(notification => {
+  console.log("notifications => ", notifications);
+  notifications.forEach((n) => {
     const nCard = document.createElement('div');
-    nCard.className = `notification-card ${notification.type}`;
+    nCard.className = `notification-card ${n.notification_type}`;
 
     nCard.innerHTML = `
-      <h3 class="notification-sender">${notification.sender}</h3>
-      <div class="notification-msg">${notification.message}</div>
-      <div class="notification-timestamp">${notification.timestamp}</div>
+      <h3 class="notification-sender">${n.notification_sender}</h3>
+      <div class="notification-msg">${n.notification_content}</div>
+      <div class="notification-timestamp">${n.notification_timestamp}</div>
     `;
 
-    nInner.appenedChild(notification);
+    nInner.appendChild(nCard);
   });
 
   return nContainer;
