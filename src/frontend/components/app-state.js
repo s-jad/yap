@@ -55,14 +55,39 @@ function showDialog(container, info, category, dialogType, position) {
 const notificationsArr = [];
 
 function getUserMessages() {
-  const json = sessionStorage.getItem('user-messages');
-  const msgs = JSON.parse(json);
+  const userMsgJson = sessionStorage.getItem('user-messages');
+  let msgs = JSON.parse(userMsgJson);
+
+  const newMsgsJson = sessionStorage.getItem('new-user-messages');
+  if (newMsgsJson) {
+    const newMsgs = JSON.parse(newMsgsJson);
+    msgs = [...newMsgs, ...msgs];
+  }
+
   return msgs;
 }
 
 function storeUserMessages(msgs) {
   const msgString = JSON.stringify(msgs);
   sessionStorage.setItem('user-messages', msgString);
+}
+
+function updateUserMessages(msg) {
+  const newMsgsJson = sessionStorage.getItem('new-user-messages');
+  
+  if (newMsgsJson) {
+    const prevMsgs = JSON.parse(newMsgsJson);
+    prevMsgs.push(msg);
+    const newMsgsString = JSON.stringify(prevMsgs);
+    sessionStorage.setItem('new-user-messages', newMsgsString);
+  } else {
+    const msgString = JSON.stringify([msg]);
+    sessionStorage.setItem('new-user-messages', msgString);
+  }
+}
+
+function clearNewMessages() {
+  sessionStorage.removeItem('new-user-messages');
 }
 
 export {
@@ -72,4 +97,6 @@ export {
   notificationsArr,
   getUserMessages,
   storeUserMessages,
+  updateUserMessages,
+  clearNewMessages,
 }
