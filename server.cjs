@@ -403,17 +403,22 @@ app.get('/api/logout-user', async (req, res) => {
 
 // PROTECTED ROUTES
 
+function getUserId(req) {
+  const tokenParts = req.cookies.jwt_signature.split('.');
+  let payload;
+  try {
+    payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+  } catch (error) {
+    logger.error('Error parsing JWT payload: ', error);
+    throw new Error('JWT payload is not valid JSON');
+  }
+  
+  return payload.id;
+}
+
 app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
+    const userId = getUserId(req);
     const lastLogins = await tribesMac('get-last-tribe-logins', userId);
     res.send(lastLogins);
   } catch (error) {
@@ -424,15 +429,7 @@ app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
 
 app.get('/api/protected/get-inbox-message-count', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
+    const userId = getUserId(req);
     console.log("get-inbox-message-count::userId => ", userId);
     const count = await tribesMac('get-inbox-message-count', userId);
     console.log("get-inbox-message-count::count => ", count);
@@ -443,17 +440,22 @@ app.get('/api/protected/get-inbox-message-count', async (req, res) => {
   }
 });
 
+app.get('/api/protected/get-notifications', async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    console.log("get-inbox-message-count::userId => ", userId);
+    const count = await tribesMac('get-inbox-message-count', userId);
+    console.log("get-inbox-message-count::count => ", count);
+    res.send(count);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst getting inbox message count.' });
+  }
+})
+
 app.get('/api/protected/get-inbox-messages', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
+    const userId = getUserId(req);
     const messages = await tribesMac('get-inbox-messages', userId);
     res.send(messages);
   } catch (error) {
@@ -464,15 +466,7 @@ app.get('/api/protected/get-inbox-messages', async (req, res) => {
 
 app.get('/api/protected/get-friends', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
+    const userId = getUserId(req);
     const friends = await tribesMac('get-friends', userId);
     res.send(friends);
   } catch (error) {
@@ -549,16 +543,7 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
 
 app.get('/api/protected/check-membership', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
-
+    const userId = getUserId(req);
     const data = { 
       userId,
       tribeName: req.query.tribe,
@@ -584,15 +569,7 @@ app.get('/api/protected/check-membership', async (req, res) => {
 
 app.post('/api/protected/apply-for-invitation', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const applyingUserId = payload.id;
+    const applyingUserId = getUserId(req);
 
     const data = { 
       applyingUserId,
@@ -611,15 +588,7 @@ app.post('/api/protected/apply-for-invitation', async (req, res) => {
 
 app.post('/api/protected/report-user-incident', upload.none(), async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
+    const userId = getUserId(req);
     const uneditedUserArr = req.body.involvedUsers.split(',');
     const involvedUsers = uneditedUserArr.map((user) => user.replace(' ', ''));
 
@@ -646,15 +615,8 @@ app.post('/api/protected/report-user-incident', upload.none(), async (req, res) 
 
 app.post('/api/protected/send-inbox-message', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
+    const userId = getUserId(req);
+
     const data = { 
       newMsg: req.body.msgData.newMsg,
       receiverName: req.body.msgData.receiverName,
@@ -676,15 +638,8 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
 
 app.post('/api/protected/reply-to-inbox-message', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
+    const userId = getUserId(req);
+
     const data = { 
       parentMsgId: req.body.parentMsgId,
       newMsg: req.body.newMsg,
@@ -702,15 +657,7 @@ app.post('/api/protected/reply-to-inbox-message', async (req, res) => {
 
 app.post('/api/protected/post-message', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const sender = payload.id;
+    const sender = getUserId(req);
     const postData = { ...req.body, sender };
     await tribesMac('post-message', postData);
     res.status(201).json({ message: 'Message succesfully posted.' });
@@ -722,15 +669,7 @@ app.post('/api/protected/post-message', async (req, res) => {
 
 
 app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req, res) => {
-  const tokenParts = req.cookies.jwt_signature.split('.');
-  let payload;
-  try {
-    payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-  } catch (error) {
-    logger.error('Error parsing JWT payload: ', error);
-    throw new Error('JWT payload is not valid JSON');
-  }
-  const userId = payload.id;
+  const userId = getUserId(req);
 
   const privacyChoice = req.body.tribePrivacy === 'private';
   req.body.tribePrivacy = privacyChoice;
@@ -779,15 +718,7 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
 
 app.delete('/api/protected/delete-inbox-message', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
+    const userId = getUserId(req);
     const data = { msgIds: req.body.msgIds, userId };
     const messages = await tribesMac('delete-inbox-message', data);
     logger.info("delete-user-message::messages");
@@ -803,16 +734,7 @@ app.delete('/api/protected/delete-inbox-message', async (req, res) => {
 
 app.patch('/api/protected/update-tribe-member-login', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const { timestamp, tribe } = req.body;
-    const member = payload.id;
+    const member = getUserId(req);
     const patchData = { timestamp, tribe, member };
     const result = await tribesMac('update-tribe-member-login', patchData);
     logger.info(result);
@@ -825,16 +747,8 @@ app.patch('/api/protected/update-tribe-member-login', async (req, res) => {
 
 app.patch('/api/protected/update-tribe-member-logout', async (req, res) => {
   try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
+    const member = getUserId(req);
     const { timestamp, tribe } = req.body;
-    const member = payload.id;
     const patchData = { timestamp, tribe, member };
     const result = await tribesMac('update-tribe-member-logout', patchData);
     logger.info(result);
