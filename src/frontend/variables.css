@@ -93,24 +93,3 @@ button {
   padding: var(--p-block) var(--p-inline);
 }
 
-dialog {
-  background: var(--card-clr);
-  color: var(--font-clr);
-  border-radius: 1rem;
-  padding: calc(var(--p-block) * 3) calc(var(--p-inline) * 3);
-  border: 2px solid var(--lemon-chiffon-07);
-  top: 50%;
-  z-index: 1000;
-}
-
-dialog.success {
-  box-shadow: var(--shadow), var(--shadow-inset-success);
-}
-
-dialog.fail {
-  box-shadow: var(--shadow), var(--shadow-inset-error);
-}
-
-dialog.info {
-  box-shadow: var(--shadow), var(--shadow-inset);
-}
