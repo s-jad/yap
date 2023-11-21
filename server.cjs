@@ -430,9 +430,7 @@ app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
 app.get('/api/protected/get-inbox-message-count', async (req, res) => {
   try {
     const userId = getUserId(req);
-    console.log("get-inbox-message-count::userId => ", userId);
     const count = await tribesMac('get-inbox-message-count', userId);
-    console.log("get-inbox-message-count::count => ", count);
     res.send(count);
   } catch (error) {
     logger.error(error);
@@ -443,15 +441,14 @@ app.get('/api/protected/get-inbox-message-count', async (req, res) => {
 app.get('/api/protected/get-notifications', async (req, res) => {
   try {
     const userId = getUserId(req);
-    console.log("get-inbox-message-count::userId => ", userId);
-    const count = await tribesMac('get-inbox-message-count', userId);
-    console.log("get-inbox-message-count::count => ", count);
-    res.send(count);
+    const notifications = await tribesMac('get-notifications', userId);
+    console.log("get-notifications => ", notifications);
+    res.send(notifications);
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ message: 'An error occured whilst getting inbox message count.' });
+    res.status(500).json({ message: 'An error occured whilst getting notifications.' });
   }
-})
+});
 
 app.get('/api/protected/get-inbox-messages', async (req, res) => {
   try {
