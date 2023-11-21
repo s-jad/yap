@@ -1,4 +1,5 @@
 import '../styles/notifications.css';
+import { notificationsArr } from './app-state';
 import { getNotifications } from './tribes-db-access';
 
 function filterNotifications(nContainer, dataFilter) {
@@ -24,7 +25,7 @@ function filterNotifications(nContainer, dataFilter) {
   });
 }
 
-export default async function Notifications() {
+export default function Notifications() {
   const nContainer = document.createElement('div');
   nContainer.className = 'notifications-container removable';
 
@@ -45,9 +46,8 @@ export default async function Notifications() {
   `;
 
   const nInner = nContainer.querySelector('.notifications-inner');
-  const notifications = await getNotifications();
 
-  notifications.forEach((n) => {
+  notificationsArr.forEach((n) => {
     const nCard = document.createElement('div');
     nCard.className = `notification-card ${n.notification_type}`;
 
