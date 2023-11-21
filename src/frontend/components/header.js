@@ -8,13 +8,13 @@ function getNotifications() {
   notificationsFlex.className = 'notifications-flex';
 
   notificationsFlex.innerHTML = `
-    <div class="notify-friends">
+    <div class="notify-friends" data-focus="friends">
       <p class="fn-alert">0</p>
     </div>
-    <div class="notify-tribes">
+    <div class="notify-tribes" data-focus="tribe">
       <p class="tn-alert">3</p>
     </div>
-    <div class="notify-yapp">
+    <div class="notify-yapp" data-focus="yapp">
       <p class="yn-alert">12</p>
     </div>
   `;
@@ -22,8 +22,9 @@ function getNotifications() {
   const notifications = Array.from(notificationsFlex.querySelectorAll('[class^="notify"]'));
 
   notifications.forEach(notification => {
-    notification.addEventListener('click', (ev) => {
-      handleClientSideLinks('/notifications');
+    const focus = notification.getAttribute('data-focus');
+    notification.addEventListener('click', () => {
+      handleClientSideLinks('/notifications', focus);
     });
   });
 
