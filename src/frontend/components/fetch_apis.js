@@ -157,7 +157,7 @@ function importModules(page) {
             const fn = MessagesDashboard;
             importedList.messagesDashboard = true;
             importedComponents.messagesDashboard = fn;
-            component = getAsyncComponent(fn)
+            component = getComponent(fn)
             resolve(component);
           }
           catch (error) {
@@ -165,7 +165,7 @@ function importModules(page) {
             reject(error);
           }
         } else {
-          component = getAsyncComponent(importedComponents.messagesDashboard);
+          component = getComponent(importedComponents.messagesDashboard);
           resolve(component);
         }
         break;
