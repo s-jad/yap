@@ -1,4 +1,4 @@
-import { getAppState, storeUserMessages  } from './app-state';
+import { clearNewMessages, getAppState, storeUserMessages, updateUserMessages  } from './app-state';
 import {
   emitNewInboxMsgEvent,
   emitUpdateSearchbarEvent,
@@ -17,6 +17,9 @@ import { getInboxMessages } from './tribes-db-access';
 
 async function fetchUserMessages() {
   const messages = await getInboxMessages();
+
+  clearNewMessages();
+
   const userMessagesArr = [];
   let inboxCount = 0;
   messages.forEach((msg) => {
@@ -114,7 +117,7 @@ export default async function Sidebar(urls) {
     notificationsSocket = initialiseSocket('/notifications')
   }
   
-  const msgCount = await fetchUserMessages();
+  let msgCount = await fetchUserMessages();
   const inboxMsgCount = document.createElement('div'); 
  
   if (msgCount !== 0) {
@@ -124,8 +127,10 @@ export default async function Sidebar(urls) {
   }
 
   notificationsSocket.on('new-inbox-message', (newMsg) => {
-    inboxMsgCount.innerText = `${msgCount + 1}`;
-    
+    msgCount += 1;
+    inboxMsgCount.innerText = msgCount;
+    updateUserMessages(newMsg);
+
     const removableComponent = document.body.querySelector('.removable');
 
     if (removableComponent.classList.contains('user-messages-container')) {
