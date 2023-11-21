@@ -1,25 +1,17 @@
 import '../styles/inbox.css';
-import { showDialog, getAppState } from "./app-state";
+import { showDialog, getAppState, getUserMessages } from "./app-state";
 import { emitSetupSearchbarEvent } from './events';
 import { getSearchBarIcons } from './icons';
 import Searchbar from './searchbar';
 import {
   deleteInboxMessage,
   replyToInboxMessage,
-  getInboxMessages,
   sendInboxMessage
 } from "./tribes-db-access";
 
 const messagesDashboardComponents = [];
-const userMessagesArr = [];
-
-async function fetchUserMessages() {
-  const messages = await getInboxMessages();
-  messages.forEach((msg) => {
-    userMessagesArr.push(msg);
-  });
-  return messages;
-}
+const userMessagesArr = getUserMessages();
+console.log('userMessagesArr => ', userMessagesArr);
 
 function getReplies(parentMsgId) {
   const replyChain = [];
@@ -282,21 +274,13 @@ function createMessage(msg, currentUser, inbox, outbox, newMsgBool) {
   }
 }
 
-async function populateInboxOutbox(inbox, outbox) {
-  let messages;
-
-  if (userMessagesArr.length === 0) {
-    messages = await fetchUserMessages();
-  } else {
-    messages = userMessagesArr;
-  }
+function populateInboxOutbox(inbox, outbox) {
   const currentUser = getAppState('username');
-
-  messages.forEach((msg) => {
+  userMessagesArr.forEach((msg) => {
     if (msg.message_read) {
       return;
     }
-    
+
     createMessage(
       msg,
       currentUser,
@@ -550,7 +534,7 @@ function addMessagesDashboardEventListeners(userMessagesContainer, sendMsg, inbo
   });
 }
 
-export default async function MessagesDashboard() {
+export default function MessagesDashboard() {
   const userMessagesContainer = document.createElement('div');
   userMessagesContainer.className = 'user-messages-container removable';
   userMessagesContainer.id = 'user-messages';
@@ -582,7 +566,7 @@ export default async function MessagesDashboard() {
   const inboxMessagesInner = inbox.querySelector('.inbox-messages-inner');
   const outboxMessagesInner = outbox.querySelector('.outbox-messages-inner');
 
-  await populateInboxOutbox(inboxMessagesInner, outboxMessagesInner);
+  populateInboxOutbox(inboxMessagesInner, outboxMessagesInner);
 
   messagesDashboardComponents.push(inbox);
   messagesDashboardComponents.push(outbox);
