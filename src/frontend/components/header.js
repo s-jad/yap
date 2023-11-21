@@ -1,5 +1,5 @@
 import { getAppState } from "./app-state";
-import { handleChatroomLinks } from "./fetch_apis";
+import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
 import { convertAsciiToIcon } from "./icons";
 import { getLastTribeLogins } from "./tribes-db-access";
 
@@ -11,13 +11,21 @@ function getNotifications() {
     <div class="notify-friends">
       <p class="fn-alert">0</p>
     </div>
-    <div class="notify-groups">
-      <p class="gn-alert">3</p>
+    <div class="notify-tribes">
+      <p class="tn-alert">3</p>
     </div>
     <div class="notify-yapp">
       <p class="yn-alert">12</p>
     </div>
   `;
+
+  const notifications = Array.from(notificationsFlex.querySelectorAll('[class^="notify"]'));
+
+  notifications.forEach(notification => {
+    notification.addEventListener('click', (ev) => {
+      handleClientSideLinks('/notifications');
+    });
+  });
 
   return notificationsFlex;
 }
