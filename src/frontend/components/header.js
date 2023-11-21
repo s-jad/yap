@@ -1,32 +1,53 @@
-import { getAppState } from "./app-state";
+import { getAppState, notificationsArr } from "./app-state";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
 import { convertAsciiToIcon } from "./icons";
-import { getLastTribeLogins } from "./tribes-db-access";
+import { getLastTribeLogins, getNotifications } from "./tribes-db-access";
 
-function getNotifications() {
+async function getNotificationLinks() {
   const notificationsFlex = document.createElement('div');
   notificationsFlex.className = 'notifications-flex';
 
+  const notifications = await getNotifications();
+  let fnCount = 0, tnCount = 0, ynCount = 0;
+
+  notifications.forEach((n) => {
+    notificationsArr.push(n);
+    switch (n.notification_type) {
+      case 'friends':
+        fnCount += 1;
+        break;
+
+      case 'tribe':
+        tnCount += 1;
+        break;
+
+      case 'yapp':
+        ynCount += 1;
+        break;
+    }
+  });
+
   notificationsFlex.innerHTML = `
     <div class="notify-friends" data-focus="friends">
-      <p class="fn-alert">0</p>
+      <p class="fn-alert">${fnCount}</p>
     </div>
     <div class="notify-tribes" data-focus="tribe">
-      <p class="tn-alert">3</p>
+      <p class="tn-alert">${tnCount}</p>
     </div>
     <div class="notify-yapp" data-focus="yapp">
-      <p class="yn-alert">12</p>
+      <p class="yn-alert">${ynCount}</p>
     </div>
   `;
 
-  const notifications = Array.from(notificationsFlex.querySelectorAll('[class^="notify"]'));
+  const notificationLinks = Array.from(notificationsFlex.querySelectorAll('[class^="notify"]'));
 
-  notifications.forEach(notification => {
-    const focus = notification.getAttribute('data-focus');
-    notification.addEventListener('click', () => {
+  notificationLinks.forEach(link => {
+    const focus = link.getAttribute('data-focus');
+    link.addEventListener('click', () => {
       handleClientSideLinks('/notifications', focus);
     });
   });
+
 
   return notificationsFlex;
 }
@@ -79,9 +100,10 @@ export default async function Header() {
   userName.className = 'username-title';
   userName.textContent = getAppState('username');
   const groupLinksContainer = await getGroupsLinks();
+  const notificationLinks = await getNotificationLinks();
   headerContainer.appendChild(userName);
   headerContainer.appendChild(groupLinksContainer);
-  headerContainer.appendChild(getNotifications());
+  headerContainer.appendChild(notificationLinks);
 
   return headerContainer;
 }
