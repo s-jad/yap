@@ -1,6 +1,29 @@
 import '../styles/notifications.css';
 import { getNotifications } from './tribes-db-access';
 
+function filterNotifications(nContainer, dataFilter) {
+  const displayedCards = Array.from(nContainer.querySelectorAll('.notification-card'));
+        
+  displayedCards.forEach((card) => {
+    if (dataFilter === 'all') {
+      card.classList.remove('hidden');
+      return;
+    }
+
+    if (
+      card.classList.contains(dataFilter)
+      && card.classList.contains('hidden')
+    ) {
+      card.classList.remove('hidden');
+    } else if (
+      !card.classList.contains(dataFilter)
+      && !card.classList.contains('hidden')
+    ) {
+      card.classList.add('hidden');
+    }
+  });
+}
+
 export default async function Notifications() {
   const nContainer = document.createElement('div');
   nContainer.className = 'notifications-container removable';
@@ -49,29 +72,20 @@ export default async function Notifications() {
         option.classList.add('displayed');
 
         const dataFilter = option.getAttribute('data-filter');
-
-        const displayedCards = Array.from(nContainer.querySelectorAll('.notification-card'));
-        
-        displayedCards.forEach((card) => {
-          if (dataFilter === 'all') {
-            card.classList.remove('hidden');
-            return;
-          }
-
-          if (
-            card.classList.contains(dataFilter)
-            && card.classList.contains('hidden')
-          ) {
-            card.classList.remove('hidden');
-          } else if (
-            !card.classList.contains(dataFilter)
-            && !card.classList.contains('hidden')
-          ) {
-            card.classList.add('hidden');
-          }
-        });
+        filterNotifications(nContainer, dataFilter);
       }
     });
+  });
+
+  nContainer.addEventListener('focus-notifications', (ev) => {
+    const focus = ev.detail.focus;
+    const toDisplay = nContainer.querySelector(`[data-filter=${focus}]`);
+    const currentlyDisplayed = nContainer.querySelector('.displayed');
+    currentlyDisplayed.classList.remove('displayed');
+    toDisplay.classList.add('displayed');
+    
+    const dataFilter = toDisplay.getAttribute('data-filter');
+    filterNotifications(nContainer, dataFilter);
   });
 
   return nContainer;
