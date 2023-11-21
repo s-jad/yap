@@ -73,6 +73,18 @@ function emitFocusEvent(page, element, focus) {
       element.dispatchEvent(tribeChatMembersFocusEvent);
       break;
 
+    case '/notifications':
+      const notificationsFocusEvent = new CustomEvent('focus-notifications', {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          focus,
+        },
+      });
+
+      element.dispatchEvent(notificationsFocusEvent);
+      break;
+
     default:
       break;
   }
