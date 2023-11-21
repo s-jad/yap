@@ -732,7 +732,17 @@ function getInboxMessageCount(userId) {
 function getNotifications(userId) {
   const query = {
     text: `
-      SELECT * FROM unique_notifications WHERE notification_id IN
+      SELECT 
+        unique_notifications.*, 
+        users.user_name AS sender_name, 
+        users.user_color AS sender_color
+      FROM 
+        unique_notifications
+      INNER JOIN
+        users 
+      ON unique_notifications.notification_sender = users.user_id
+      WHERE
+        unique_notifications.notification_id IN 
       (SELECT notification_id FROM notifications WHERE user_id = \$1);
     `,
     values: [userId],
