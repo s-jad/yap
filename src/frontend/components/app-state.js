@@ -52,8 +52,13 @@ function showDialog(container, info, category, dialogType, position) {
   }, 2500);
 }
 
+const notificationsArr = [];
+const inboxMessagesArr = [];
+
 export {
   updateAppState,
   getAppState,
   showDialog,
+  notificationsArr,
+  inboxMessagesArr,
 }
