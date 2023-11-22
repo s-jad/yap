@@ -1020,6 +1020,27 @@ function postUserIncidentReport(incidentData) {
   });
 }
 
+function checkAdminStatus(userId) {
+  const query = {
+    text: `
+      SELECT user_role FROM users WHERE user_id = \$1;
+    `,
+    values: [userId],
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        const admin = res.rows[0].user_role === 'admin';
+        resolve(admin);
+      }
+    });
+  });
+}
+
 
 async function tribesMac(req, data) {
   switch (req) {
@@ -1130,6 +1151,10 @@ async function tribesMac(req, data) {
     case 'get-password':
       const result = await getPwHash(data);
       return result;
+
+    case 'check-admin-status':
+      const admin = await checkAdminStatus(data);
+      return admin;
 
     default:
       break;
