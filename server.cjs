@@ -433,28 +433,6 @@ app.post('/api/create-user', async (req, res) => {
   }
 });
 
-app.get('/api/logout-user', async (req, res) => {
-  logger.info("user logging out");
-  try {
-    const tokenParts = req.cookies.jwt_signature.split('.');
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    } catch (error) {
-      logger.error('Error parsing JWT payload: ', error);
-      throw new Error('JWT payload is not valid JSON');
-    }
-    const userId = payload.id;
-    await tribesMac('update-user-logout', userId);
-    res.json({ logout: true });
-  } catch (error) {
-    logger.error(error);
-    res.status(500).json({ message: 'An error occured whilst logging the user out.' });
-  }
-});
-
-// PROTECTED ROUTES
-
 function getUserId(req) {
   const tokenParts = req.cookies.jwt_signature.split('.');
   let payload;
@@ -467,6 +445,57 @@ function getUserId(req) {
   
   return payload.id;
 }
+
+app.get('/api/logout-user', async (req, res) => {
+  logger.info("user logging out");
+  try {
+    const userId = getUserId(req);
+    await tribesMac('update-user-logout', userId);
+    res.json({ logout: true });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst logging the user out.' });
+  }
+});
+
+// ADMIN ROUTES 
+async function verifyAdmin(req, res, next) {
+  if (!req.cookies.jwt_signature) {
+    return next(new Error('No JWT signature found in cookies'));
+  }
+
+  const tokenParts = req.cookies.jwt_signature.split('.');
+  let admin;
+
+  try {
+    const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+    const dbAuth = await tribesMac('check-admin-status', payload.id);
+    admin = (payload.role === 'admin' && dbAuth);
+    req.admin = admin;
+  } catch (error) {
+    return next(new Error('Error parsing JWT payload: ' + error));
+  }
+
+  next();
+}
+
+app.get('/api/admin/admin-tools', verifyAdmin, async(req, res) => {
+  try {
+   const admin = req.admin;
+    console.log("user is admin = ", admin);
+   if (admin) {
+     res.send('')
+   } else {
+     res.status(404).json({ message: 'Forbidden' })
+   }
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'Admin check failed.' });
+  }
+});
+
+// PROTECTED ROUTES
+
 
 app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
   try {
