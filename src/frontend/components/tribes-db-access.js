@@ -441,6 +441,27 @@ async function authenticateUser(username, password) {
     });
 }
 
+async function getAdminDashboard() {
+  return fetch('/api/admin/get-dashboard', {
+    method: 'GET',
+    credentials: 'include',
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('You do not have admin privileges')
+    }
+    return response.text().then(text => {
+      try {
+          const json = JSON.parse(text);
+          return json;
+        } catch (error) {
+          console.error('authenticateUser::Error parsing JSON', error);
+          throw new Error('Error parsing JSON');
+        }
+      });
+  });
+}
+
 export {
   getTribes,
   getTribeMembers,
@@ -464,4 +485,5 @@ export {
   getApplicants,
   checkMembership,
   logoutUser,
+  getAdminDashboard,
 };
