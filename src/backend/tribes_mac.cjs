@@ -134,6 +134,36 @@ function getPwHash(user) {
   });
 }
 
+function getFriendIds(userId) {
+  const query = {
+    text: `
+      SELECT 
+        f.user_id 
+      FROM 
+        friends f
+      WHERE f.friend_id = \$1
+      UNION ALL
+      SELECT 
+        f.friend_id 
+      FROM 
+        friends f
+      WHERE f.user_id = \$1;
+    `,
+    values: [userId]
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        resolve(res.rows);
+      }
+    });
+  });
+}
+
 function getFriends(userId) {
   const query = {
     text: `
@@ -975,6 +1005,10 @@ async function tribesMac(req, data) {
     case 'user-exists':
       const exists = await userExists(data);
       return exists;
+
+    case 'get-friend-ids':
+      const friendIds = await getFriendIds(data);
+      return friendIds;
 
     case 'get-friends':
       const friends = await getFriends(data);
