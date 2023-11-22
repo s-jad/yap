@@ -87,6 +87,13 @@ module.exports = {
           priority: 10,
           enforce: true,
         },
+        notifications: {
+          test: /[\\/]notifications[\\/]/,
+          name: 'notifications',
+          chunks: 'all',
+          priority: 10,
+          enforce: true,
+        },
         tribeChat: {
           test: /[\\/]get-tribe-chatroom[\\/]/,
           name: 'get-tribe-chatroom',
