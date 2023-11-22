@@ -8,9 +8,10 @@ import {
   getAsyncComponent,
   importModules,
   importChatroom,
-  getChatroom, 
+  getChatroom,
 } from './fetch_apis';
 import { emitSetupSearchbarEvent } from './events';
+import { notificationsSocket } from './sockets';
 
 async function clientRouting(currentRoute) {
   sessionStorage.setItem('lastPage', currentRoute);
@@ -73,6 +74,28 @@ async function clientRouting(currentRoute) {
   }
 }
 
+function renderNotification(n) {
+  const nWrapper = document.createElement('div');
+  nWrapper.className = `notification-wrapper ${n.notification_type}`;
+  
+  nWrapper.innerHTML = `
+    <h3 class="notification-sender">${n.notification_sender}</h3>
+    <p class="notification-content">${n.notification_content}</p>
+  `;
+
+  return nWrapper;
+}
+
+function setupNotifications(appContainer) {
+  notificationsSocket.on('yapp-notification', (n) => {
+    const notification = renderNotification(n); 
+    appContainer.appendChild(notification);
+    setTimeout(() => {
+      appContainer.removeChild(notification);
+    }, 3000);
+  });
+}
+
 export default async function App() {
   const appContainer = document.createElement('div');
   appContainer.classList.add('app-container');
@@ -113,6 +136,8 @@ export default async function App() {
       emitSetupSearchbarEvent(searchable);
     }
   });
+
+  setupNotifications(appContainer);
 
   return appContainer;
 }
