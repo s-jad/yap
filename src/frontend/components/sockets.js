@@ -37,7 +37,7 @@ function initialiseSocket(namespace) {
       reconnectionAttempts: 20,
     });
 
-    chatroomSocket.on('connect_error', function () {
+    chatroomSocket.on('connection error', function () {
       chatroomSocket.io.readyState = 'closed'; 
       chatroomSocket.io.reconnect();
     });
@@ -53,7 +53,14 @@ function initialiseSocket(namespace) {
       reconnectionAttempts: 20,
     });
 
-    notificationsSocket.on('connect_error', function () {
+    notificationsSocket.on('connection error', function () {
+      showDialog(
+        document.body,
+        'An error has occured connecting to the notifications system, retrying in 1second',
+        'notifcations-socket-connection-failure',
+        'fail',
+        'top-right',
+      );
       notificationsSocket.io.readyState = 'closed';
       notificationsSocket.io.reconnect();
     });
