@@ -10,8 +10,7 @@ import {
 } from "./tribes-db-access";
 
 const messagesDashboardComponents = [];
-const userMessagesArr = getUserMessages();
-console.log('userMessagesArr => ', userMessagesArr);
+let userMessagesArr;
 
 function getReplies(parentMsgId) {
   const replyChain = [];
@@ -557,6 +556,8 @@ export default function MessagesDashboard() {
       messagesDashboardRouting(link);
     });
   });
+
+  userMessagesArr = getUserMessages();
 
   const inbox = getInbox();
   const outbox = getOutbox();
