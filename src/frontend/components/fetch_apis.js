@@ -1,4 +1,4 @@
-import { getAppState, updateAppState } from './app-state';
+import { getAppState, showDialog, updateAppState } from './app-state';
 import { emitFocusEvent, emitSetupSearchbarEvent, emitSidebarLinkEvent } from './events';
 import { getTribeApplicationsListModal, getTribeMembersListModal } from './modals';
 import {
@@ -7,7 +7,7 @@ import {
   getSocketInitState,
   initialiseSocket,
 } from './sockets';
-import { logoutUser } from './tribes-db-access';
+import { getAdminDashboard, logoutUser } from './tribes-db-access';
 
 let prevChatroom;
 
@@ -263,6 +263,24 @@ async function handleSidebarOptionalLinks(url) {
         await getTribeApplicationsListModal(tribe);
       }
       break;
+    
+    case 'admin-tools':
+      const appContainer = document.body.querySelector('#app');
+      const currentComponent = document.body.querySelector('.removable');
+      try {
+        const adminDashboard = await getAdminDashboard();
+        appContainer.removeChild(currentComponent);
+        appContainer.appendChild(adminDashboard);
+      } catch (error) {
+        showDialog(
+          currentComponent,
+          `${error}`,
+          'admin-login-failure',
+          'fail',
+          'center',
+        );
+      }
+      break;
 
     default:
       break;
@@ -361,6 +379,7 @@ export {
   handleChatroomLinks,
   handleCreateTribe,
   handleSidebarOptionalLinks,
+  handleLogout,
   importModules,
   importChatroom,
   importedComponents,
