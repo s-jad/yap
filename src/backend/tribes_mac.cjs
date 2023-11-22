@@ -134,7 +134,7 @@ function getPwHash(user) {
   });
 }
 
-function getFriendIds(userId) {
+function getUsersFriendIds(userId) {
   const query = {
     text: `
       SELECT 
@@ -148,6 +148,31 @@ function getFriendIds(userId) {
       FROM 
         friends f
       WHERE f.user_id = \$1;
+    `,
+    values: [userId]
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        resolve(res.rows);
+      }
+    });
+  });
+}
+
+function getUsersTribeMemberships(userId) {
+  const query = {
+    text: `
+      SELECT 
+        t.tribe_name 
+      FROM 
+        tribes t
+      INNER JOIN tribe_members tm ON t.tribe_id = tm.tribe_id
+      WHERE tm.member_id = \$1;
     `,
     values: [userId]
   };
@@ -1006,8 +1031,12 @@ async function tribesMac(req, data) {
       const exists = await userExists(data);
       return exists;
 
+    case 'get-users-tribe-memberships':
+      const tribeNames = await getUsersTribeMemberships(data);
+      return tribeNames;
+
     case 'get-friend-ids':
-      const friendIds = await getFriendIds(data);
+      const friendIds = await getUsersFriendIds(data);
       return friendIds;
 
     case 'get-friends':
