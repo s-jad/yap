@@ -11,6 +11,7 @@ import {
   getSidebarIcons,
   getOptionalSidebarIcons,
   getLogo,
+  getAdminSidebarIcons,
 } from './icons';
 import { getSocketInitState, initialiseSocket } from './sockets';
 import { getInboxMessages } from './tribes-db-access';
@@ -38,16 +39,35 @@ async function fetchUserMessages() {
 }
 
 function getOptionalSidebarItems(urls, memberStatus) {
-  const optionalListFlex = document.createElement('ul');
+  let optionalListFlex = document.createElement('ul');
   optionalListFlex.className = 'optional-list-flex';
 
   if (urls[0] === 'tribe-chat') {
     const tribe = urls[1];
-    const res = setSidebarTribeChat(optionalListFlex, tribe, memberStatus);
-    return res;
-  } else {
-    return optionalListFlex;
+    optionalListFlex = setSidebarTribeChat(optionalListFlex, tribe, memberStatus);
   }
+  
+  if (getAppState('userRole') === 'admin') {
+    const adminTools = document.createElement('li');
+    adminTools.className = 'sidebar-list-item admin-tools';
+    const adminToolLink = document.createElement('a')
+    adminToolLink.className = 'sidebar-list-anchor'
+    adminToolLink.setAttribute('data-link', '/admin-tools')
+    adminToolLink.href = 'admin-tools';
+    adminToolLink.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const url = adminToolLink.getAttribute('data-link');
+      history.pushState(null, null, url);
+      handleSidebarOptionalLinks(url);
+    });
+    const icon = getAdminSidebarIcons();
+    icon.className = 'sidebar-list-icon';
+    adminToolLink.appendChild(icon);
+    adminTools.appendChild(adminToolLink);
+    optionalListFlex.appendChild(adminTools);
+  }
+
+  return optionalListFlex;
 }
 
 function setSidebarTribeChat(optionalListFlex, tribe, memberStatus) {
