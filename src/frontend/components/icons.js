@@ -13,6 +13,7 @@ import applicationsSVG from '../assets/imgs/applications.svg';
 import xSVG from '../assets/imgs/x.svg';
 import genericTribeSVG from '../assets/imgs/generic-tribe.svg';
 import logoutSVG from '../assets/imgs/logout.svg';
+import adminSVG from '../assets/imgs/admin-tools.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -125,6 +126,14 @@ function getOptionalSidebarIcons(url) {
   }
 }
 
+function getAdminSidebarIcons() {
+  const admin = new Image();
+  admin.src = adminSVG;
+  admin.alt = 'A guy';
+
+  return admin;
+}
+
 function getDashboardIcons(dashboardGrid) {
   const gatheringIcon = new Image();
   const formTribeIcon = new Image();
@@ -169,6 +178,7 @@ export {
   getSidebarIcons,
   getOptionalSidebarIcons,
   getLogo,
+  getAdminSidebarIcons,
   getXIcon,
   getGenericTribeIcon,
   getSearchBarIcons,
