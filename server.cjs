@@ -239,25 +239,64 @@ chatroomNameSpace.on('connection', (socket) => {
   socket.on('user disconnect', (chatroom) => {
     console.log(`Disconnecting socket id: ${socket.id}, leaving ${chatroom}`);
     handleTribeLogoutDbUpdate(socket, chatroom);
-    socket.disconnect()
+    socket.disconnect();
   });
 });
 
+async function joinNotificationRooms(socket) {
+  socket.join('yapp-notifications');
+  
+  const friends = await tribesMac('get-friend-ids', socket.decoded.id);
+
+  const userName = socket.decoded.userName; 
+
+  friends.forEach(async (friend) => {
+    const friendId = friend.user_id.toString();
+    try {
+      const friendSocketId = await redisNotificationsClient.get(friendId);
+      if (friendSocketId !== null) {
+        try {
+          const friendSocket = io.sockets.sockets.get(friendSocketId);
+          console.log('friendSocket => ', friendSocket);
+          if (friendSocket) {
+            friendSocket.join(`${userName}'s room`);
+          }
+        } catch (error) {
+          logger.error("Error getting friendSocket from io.sockets.sockets => friendId = ", friendId);
+        }
+      } 
+    } catch (error) {
+      logger.error("Error getting friendSocketId from redisNotificationsClient => friendId = ", friendId);
+    }
+  });
+
+//  const tribes = await tribesMac('get-tribe-ids', socket.decoded.id);
+}
+
 notificationsNameSpace.on('connection', (socket) => {
   try {
-    console.log(`A new client connected to inbox: ${socket.id}`);
+    console.log(`A new client connected to notifications: ${socket.id}`);
     socket.emit('connection', { message: `A new client has connected to their inbox! with socket id of ${socket.id}`});
     const userId = socket.decoded.id.toString();
     const socketId = socket.id.toString();
+    io.sockets.sockets.set(socketId, socket);
     redisNotificationsClient.set(userId, socketId);
   } catch (error) {
-    socket.emit('connect_error', {
-      code: err.code,
-      message: err.message,
+    socket.emit('connection-error', {
+      code: error.code,
+      message: error.message,
     });
-    console.log(`Error connecting client to inbox: ${error}`);
+    console.log(`Error connecting client to notifications: ${error}`);
   }
+
+  joinNotificationRooms(socket);
+
+  socket.on('user-disconnect', () => {
+    socket.disconnect();
+  })
+
 });
+
 
 // FOR DEBUGGING!
 // app.use((req, res, next) => {
