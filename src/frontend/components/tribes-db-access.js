@@ -442,7 +442,7 @@ async function authenticateUser(username, password) {
 }
 
 async function getAdminDashboard() {
-  return fetch('/api/admin/get-dashboard', {
+  return fetch('/api/admin/admin-tools', {
     method: 'GET',
     credentials: 'include',
   })
@@ -450,15 +450,11 @@ async function getAdminDashboard() {
     if (!response.ok) {
       throw new Error('You do not have admin privileges')
     }
-    return response.text().then(text => {
-      try {
-          const json = JSON.parse(text);
-          return json;
-        } catch (error) {
-          console.error('authenticateUser::Error parsing JSON', error);
-          throw new Error('Error parsing JSON');
-        }
-      });
+    response.text().then(data => {
+      console.log("data >= ", data);
+      return data;
+
+    });
   });
 }
 
