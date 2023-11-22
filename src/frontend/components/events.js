@@ -14,7 +14,6 @@ function emitSidebarLinkEvent(memberStatus) {
 }
 
 function emitNewInboxMsgEvent(inbox, msg) {
-  console.log("emitNewInboxMsgEvent::msg => ", msg);
   const newInboxMsgEvent = new CustomEvent('new-inbox-msg', {
     bubbles: true,
     cancelable: true,
@@ -27,7 +26,6 @@ function emitNewInboxMsgEvent(inbox, msg) {
 }
 
 function emitUpdateSearchbarEvent(searchbar) {
-  console.log("emitUpdateSearchbarEvent::searchbar => ", searchbar);
   const updateSearchBarEvent = new CustomEvent('update-searchbar', {
     bubbles: true,
     cancelable: true,
@@ -37,7 +35,6 @@ function emitUpdateSearchbarEvent(searchbar) {
 }
 
 function emitSetupSearchbarEvent(element) {
-  console.log("emitSetupSearchbarEvent::element => ", element);
   const setupSearchBarEvent = new CustomEvent('setup-searchbar', {
     bubbles: true,
     cancelable: true,
