@@ -87,7 +87,7 @@ async function handleTribeLogoutDbUpdate(socket, chatroom) {
   }
 }
 
-io.on("connect_error", (err) => {
+io.on('connection-error', (err) => {
   logger.error(err.req);
   logger.error(err.code);
   logger.error(err.message);
@@ -99,7 +99,6 @@ const chatroomNameSpace = io.of('/tribe-chat');
 
 function validateSocketJWT(socket, next) {
   if (socket.request.headers.cookie){
-    console.log(socket.request.headers);
     const cookies = socket.request.headers.cookie;
     const parts = cookies.split(';');
     const signature = parts[0].split('=')[1];
@@ -129,13 +128,14 @@ chatroomNameSpace.on('connection', (socket) => {
     console.log(`A new client connected: ${socket.id}`);
     socket.emit('connection', { message: `A new client has connected! with socket id of ${socket.id}`});
   } catch (error) {
-    socket.emit('connect_error', {
+    socket.emit('connection-error', {
       code: err.code,
       message: err.message,
     });
-    console.log(`Error connecting client: ${error}`);
+    console.log(`Error connecting client userId: ${socket.decoded.userId} => ${error}`);
   }
-
+  
+  // FOR DEBUGGING ONLY - REMOVE FOR PROD
   socket.use((packet, next) => {
     console.log('Received packet: ', packet);
     next();
@@ -297,9 +297,15 @@ notificationsNameSpace.on('connection', (socket) => {
 
   joinNotificationRooms(socket);
 
-  socket.on('user-disconnect', () => {
+  socket.on('user disconnect', () => {
     socket.disconnect();
-  })
+  });
+
+  socket.on('disconnect', async () => {
+    console.log(`${socket.decoded.userName} disconnected`);
+    const loggedOut = await tribesMac('update-user-logout', socket.decoded.id);
+    console.log(`Log out recorded: ${loggedOut}`);
+  });
 
 });
 
