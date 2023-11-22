@@ -254,12 +254,12 @@ async function joinNotificationRooms(socket) {
     const friendId = friend.user_id.toString();
     try {
       const friendSocketId = await redisNotificationsClient.get(friendId);
+      console.log(`friendId = ${friendId}, friendSocketId = ${friendSocketId}`);
       if (friendSocketId !== null) {
         try {
           const friendSocket = io.sockets.sockets.get(friendSocketId);
-          console.log('friendSocket => ', friendSocket);
           if (friendSocket) {
-            friendSocket.join(`${userName}'s room`);
+            friendSocket.join(`${userName}'s-notifications`);
           }
         } catch (error) {
           logger.error("Error getting friendSocket from io.sockets.sockets => friendId = ", friendId);
@@ -270,7 +270,13 @@ async function joinNotificationRooms(socket) {
     }
   });
 
-//  const tribes = await tribesMac('get-tribe-ids', socket.decoded.id);
+  const tribes = await tribesMac('get-users-tribe-memberships', socket.decoded.id);
+
+  tribes.forEach((tribe) => {
+    const tribeName = tribe.tribe_name.replaceAll(' ', '-').toLowerCase();
+    socket.join(`${tribeName}-notifications`);
+    console.log(`user joining ${tribeName}-notifications`);
+  });
 }
 
 notificationsNameSpace.on('connection', (socket) => {
