@@ -124,7 +124,6 @@ export default function Welcome() {
         updateAppState('userColor', authenticated.userColor);
 
         const lastTribeLogins = await getLastTribeLogins();
-        console.log("lastTribeLogins => ", lastTribeLogins);
         updateAppState('header-tribe-suggestions', lastTribeLogins);
 
         const app = await App();
