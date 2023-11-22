@@ -104,9 +104,8 @@ function updateUserLogout(user) {
         logger.error(err)
         reject(new Error('Failed to update user logout'));
       } else {
-        const login = res.rows[0].last_logout;
-        logger.info('Updated user login => ', login);
-        resolve(login);
+        const logout = res.rows[0].last_logout;
+        resolve(logout);
       }
     })
   })
