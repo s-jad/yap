@@ -113,7 +113,7 @@ function updateUserLogout(user) {
 
 function getPwHash(user) {
   return new Promise((resolve, reject) => {
-    const query = `SELECT user_id, password, user_color FROM users WHERE user_name = '${user}'`;
+    const query = `SELECT user_id, password, user_color, user_role FROM users WHERE user_name = '${user}'`;
 
     pg_client.query(query, (err, res) => {
       if (err) {
@@ -126,7 +126,8 @@ function getPwHash(user) {
         resolve({
           userId: row.user_id,
           passwordHash: row.password,
-          userColor: row.user_color
+          userColor: row.user_color,
+          userRole: row.user_role,
         });
       }
     });

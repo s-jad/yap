@@ -355,7 +355,7 @@ app.post('/api/authenticate-user', async (req, res) => {
 
   try {
     const userData = await tribesMac('get-password', username);
-    const { userId, passwordHash, userColor } = userData;
+    const { userId, passwordHash, userColor, userRole } = userData;
 
     try {
       const authenticated = await comparePwHash(password, passwordHash);
@@ -363,7 +363,7 @@ app.post('/api/authenticate-user', async (req, res) => {
       if (!authenticated) {
         res.status(401).json({ message: 'Incorrect Password.' })    
       } else {
-        const token = jwt.sign({ userName: username, id: userId }, jwtSecret, { expiresIn: '3h' });
+        const token = jwt.sign({ userName: username, id: userId, role: userRole }, jwtSecret, { expiresIn: '3h' });
         const parts = token.split('.');
         // Set JWT header and signature in HttpOnly cookie
         res.cookie('jwt_signature', `${parts[0]}.${parts[1]}`, { 
@@ -381,6 +381,7 @@ app.post('/api/authenticate-user', async (req, res) => {
         res.status(200).json({ 
           message: 'Login Succesful.',
           userColor,
+          userRole,
         });
       } 
     } catch (error) {
@@ -408,7 +409,7 @@ app.post('/api/create-user', async (req, res) => {
   try {
     const { username, userId, userColor } = await tribesMac('create-user', req.body);
 
-    const token = jwt.sign({ userName: username, id: userId }, jwtSecret, { expiresIn: '3h' });
+    const token = jwt.sign({ userName: username, id: userId, role: userRole }, jwtSecret, { expiresIn: '3h' });
     const parts = token.split('.');
     // Set JWT header and signature in HttpOnly cookie
     res.cookie('jwt_signature', `${parts[0]}.${parts[1]}`, { 
@@ -422,8 +423,8 @@ app.post('/api/create-user', async (req, res) => {
     });
     res.status(200).json({ 
       message: 'User succesfully created.',
-      userId,
-      userColor
+      userColor,
+      userRole,
     });
 
   } catch (error) {
