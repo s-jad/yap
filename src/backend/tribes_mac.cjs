@@ -134,20 +134,30 @@ function getPwHash(user) {
   });
 }
 
-function getUsersFriendIds(userId) {
+function getUsersFriendInfo(userId) {
   const query = {
     text: `
       SELECT 
-        f.user_id 
+        f.user_id,
+        u1.user_name
       FROM 
         friends f
-      WHERE f.friend_id = \$1
+      INNER JOIN
+        users u1 ON f.user_id = u1.user_id
+      INNER JOIN
+        users u2 ON f.friend_id = u2.user_id
+      WHERE f.friend_id = $1
       UNION ALL
       SELECT 
-        f.friend_id 
+        f.friend_id,
+        u2.user_name
       FROM 
         friends f
-      WHERE f.user_id = \$1;
+      INNER JOIN
+        users u1 ON f.user_id = u1.user_id
+      INNER JOIN
+        users u2 ON f.friend_id = u2.user_id
+      WHERE f.user_id = $1
     `,
     values: [userId]
   };
@@ -327,7 +337,6 @@ function getLastTribeLogin(userId) {
 
 function createTribe(newTribeData) {
   const { userId, tribeName, tribeCta, tribeDescription, formationDate, icon, tribePrivacy } = newTribeData;
-  console.log("createTribe::newTribeData => ", newTribeData);
   
   let query;
   if (icon === undefined) {
@@ -1089,9 +1098,9 @@ async function tribesMac(req, data) {
       const tribeNames = await getUsersTribeMemberships(data);
       return tribeNames;
 
-    case 'get-friend-ids':
-      const friendIds = await getUsersFriendIds(data);
-      return friendIds;
+    case 'get-friend-info':
+      const friendInfo = await getUsersFriendInfo(data);
+      return friendInfo;
 
     case 'get-friends':
       const friends = await getFriends(data);
