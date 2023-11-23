@@ -474,7 +474,7 @@ function getApplicants(tribeName) {
 }
 
 function postJoinTribeApplication(applicationData) {
-  const { applyingUserId, tribeName } = applicationData;
+  const {userId, tribeName } = applicationData;
   return new Promise ((resolve, reject) => {
     const query = {
       text: `
@@ -490,7 +490,7 @@ function postJoinTribeApplication(applicationData) {
           FALSE
         ) RETURNING *;
       `,
-      values: [ tribeName, applyingUserId ],
+      values: [ tribeName, userId ],
     };
 
     pg_client.query(query, (err, res) => {
@@ -756,6 +756,40 @@ function getInboxMessages(userId) {
   });
 }
 
+function postNotification(notificationData) {
+  const { type, userId, content, receiverList } = notificationData;
+  const query = {
+    text: `
+      WITH new_notification AS (
+        INSERT INTO unique_notifications (
+          notification_sender,
+          notification_type,
+          notification_content
+        )
+        VALUES ($2, $1, $3)
+        RETURNING notification_id
+      ),
+      user_ids AS (
+        SELECT user_id FROM users WHERE user_name = ANY($4)
+      )
+      INSERT INTO notifications (user_id, notification_id)
+      SELECT user_id, notification_id FROM user_ids, new_notification;
+    `,
+    values: [type, userId, content, receiverList]
+  };
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+}
+
 function getNotifications(userId) {
   const query = {
     text: `
@@ -927,7 +961,7 @@ function getTribeMembers(tribe) {
 }
 
 function updateTribeMemberLogin(loginData) {
-  const { timestamp, tribe, member } = loginData;
+  const { timestamp, tribe, userId } = loginData;
   return new Promise((resolve, reject) => {
     const query = {
       text: `
@@ -941,7 +975,7 @@ function updateTribeMemberLogin(loginData) {
         )
         RETURNING *;
       `,
-      values: [timestamp, tribe, member],
+      values: [timestamp, tribe, userId],
     };
 
     pg_client.query(query, (err, res) => {
@@ -956,7 +990,7 @@ function updateTribeMemberLogin(loginData) {
 }
 
 function updateTribeMemberLogout(logoutData) {
-  const { timestamp, tribe, member } = logoutData;
+  const { timestamp, tribe, userId } = logoutData;
   return new Promise((resolve, reject) => {
     const query = {
       text: `
@@ -970,7 +1004,7 @@ function updateTribeMemberLogout(logoutData) {
         )
         RETURNING *;
       `,
-      values: [timestamp, tribe, member],
+      values: [timestamp, tribe, userId],
     };
 
     pg_client.query(query, (err, res) => {
@@ -1041,7 +1075,6 @@ function checkAdminStatus(userId) {
   });
 }
 
-
 async function tribesMac(req, data) {
   switch (req) {
     case 'create-user':
@@ -1063,6 +1096,10 @@ async function tribesMac(req, data) {
     case 'get-friends':
       const friends = await getFriends(data);
       return friends;
+
+    case 'post-notification':
+      const postRes = await postNotification(data);
+      return postRes;
 
     case 'get-notifications':
       const notifications = await getNotifications(data);
