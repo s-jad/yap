@@ -245,7 +245,7 @@ chatroomNameSpace.on('connection', (socket) => {
 async function joinNotificationRooms(socket) {
   socket.join('yapp-notifications');
   
-  const friends = await tribesMac('get-friend-ids', socket.decoded.id);
+  const friends = await tribesMac('get-friend-info', socket.decoded.id);
 
   const userName = socket.decoded.userName; 
 
@@ -258,7 +258,12 @@ async function joinNotificationRooms(socket) {
         try {
           const friendSocket = io.sockets.sockets.get(friendSocketId);
           if (friendSocket) {
+
+            console.log(`friendSocket.join::name of room => ${userName}'s-notifications`);
             friendSocket.join(`${userName}'s-notifications`);
+
+            console.log(`socket.join::name of room => ${friend.user_name}'s-notifications`);
+            socket.join(`${friend.user_name}'s-notifications`);
           }
         } catch (error) {
           logger.error("Error getting friendSocket from io.sockets.sockets => friendId = ", friendId);
@@ -274,7 +279,6 @@ async function joinNotificationRooms(socket) {
   tribes.forEach((tribe) => {
     const tribeName = tribe.tribe_name.replaceAll(' ', '-').toLowerCase();
     socket.join(`${tribeName}-notifications`);
-    console.log(`user joining ${tribeName}-notifications`);
   });
 }
 
@@ -669,18 +673,19 @@ app.post('/api/protected/post-notification', async (req, res) => {
     };
 
     const dbResult = await tribesMac('post-notification', dbData);
-    console.log("dbResult => ", dbResult);
+
     switch (type) {
       case 'yapp':
-        notificationsNameSpace.to('yapp-notifications').emit('notification', { userName, content } );
+        notificationsNameSpace.to('yapp-notifications').emit('notification', { type, userName, content } );
         break;
 
       case 'friends':
-        notificationsNameSpace.to(`${userName}'s-notifications`).emit('notification', { userName, content });
+        console.log(`postNotification::name of room => ${userName}'s-notifications`);
+        notificationsNameSpace.to(`${userName}'s-notifications`).emit('notification', { type, userName, content });
         break;
 
       case 'tribe':
-        notificationsNameSpace.to(`${receiverList}-notifications`).emit('notification', { userName, content });
+        notificationsNameSpace.to(`${receiverList}-notifications`).emit('notification', { type, userName, content });
         break;
     }
     res.send(dbResult);
