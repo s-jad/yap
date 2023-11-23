@@ -432,7 +432,7 @@ app.post('/api/create-user', async (req, res) => {
   }
 });
 
-function getUserId(req) {
+function getUserInfo(req) {
   const tokenParts = req.cookies.jwt_signature.split('.');
   let payload;
   try {
@@ -442,13 +442,15 @@ function getUserId(req) {
     throw new Error('JWT payload is not valid JSON');
   }
   
-  return payload.id;
+  const userId = payload.id;
+  const userName = payload.userName;
+  return { userId, userName };
 }
 
 app.get('/api/logout-user', async (req, res) => {
   logger.info("user logging out");
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     await tribesMac('update-user-logout', userId);
     res.json({ logout: true });
   } catch (error) {
@@ -498,7 +500,7 @@ app.get('/api/admin/admin-tools', verifyAdmin, async(req, res) => {
 
 app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     const lastLogins = await tribesMac('get-last-tribe-logins', userId);
     res.send(lastLogins);
   } catch (error) {
@@ -509,7 +511,7 @@ app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
 
 app.get('/api/protected/get-inbox-message-count', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     const count = await tribesMac('get-inbox-message-count', userId);
     res.send(count);
   } catch (error) {
@@ -520,7 +522,7 @@ app.get('/api/protected/get-inbox-message-count', async (req, res) => {
 
 app.get('/api/protected/get-notifications', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     const notifications = await tribesMac('get-notifications', userId);
     console.log("get-notifications => ", notifications);
     res.send(notifications);
@@ -532,7 +534,7 @@ app.get('/api/protected/get-notifications', async (req, res) => {
 
 app.get('/api/protected/get-inbox-messages', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     const messages = await tribesMac('get-inbox-messages', userId);
     res.send(messages);
   } catch (error) {
@@ -543,7 +545,7 @@ app.get('/api/protected/get-inbox-messages', async (req, res) => {
 
 app.get('/api/protected/get-friends', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     const friends = await tribesMac('get-friends', userId);
     res.send(friends);
   } catch (error) {
@@ -627,7 +629,7 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
 
 app.get('/api/protected/check-membership', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     const data = { 
       userId,
       tribeName: req.query.tribe,
@@ -651,12 +653,49 @@ app.get('/api/protected/check-membership', async (req, res) => {
 
 // POST ROUTES 
 
+app.post('/api/protected/post-notification', async (req, res) => {
+  console.log("in post-notification");
+  try {
+    const { userId, userName } = getUserInfo(req);
+    const receiverList = req.body.receiverList;
+    const content = req.body.content;
+    const type = req.body.type;
+
+    const dbData = {
+      type, 
+      userId, 
+      content, 
+      receiverList,
+    };
+
+    const dbResult = await tribesMac('post-notification', dbData);
+    console.log("dbResult => ", dbResult);
+    switch (type) {
+      case 'yapp':
+        notificationsNameSpace.to('yapp-notifications').emit('notification', { userName, content } );
+        break;
+
+      case 'friends':
+        notificationsNameSpace.to(`${userName}'s-notifications`).emit('notification', { userName, content });
+        break;
+
+      case 'tribe':
+        notificationsNameSpace.to(`${receiverList}-notifications`).emit('notification', { userName, content });
+        break;
+    }
+    res.send(dbResult);
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ message: 'An error occured whilst posting notification.' });
+  }
+});
+
 app.post('/api/protected/apply-for-invitation', async (req, res) => {
   try {
-    const applyingUserId = getUserId(req);
+    const { userId } = getUserInfo(req);
 
     const data = { 
-      applyingUserId,
+      userId,
       tribeName: req.body.tribeName,
     };
 
@@ -672,7 +711,7 @@ app.post('/api/protected/apply-for-invitation', async (req, res) => {
 
 app.post('/api/protected/report-user-incident', upload.none(), async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     const uneditedUserArr = req.body.involvedUsers.split(',');
     const involvedUsers = uneditedUserArr.map((user) => user.replace(' ', ''));
 
@@ -699,7 +738,7 @@ app.post('/api/protected/report-user-incident', upload.none(), async (req, res) 
 
 app.post('/api/protected/send-inbox-message', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
 
     const data = { 
       newMsg: req.body.msgData.newMsg,
@@ -721,7 +760,7 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
 
 app.post('/api/protected/reply-to-inbox-message', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
 
     const data = { 
       parentMsgId: req.body.parentMsgId,
@@ -738,21 +777,8 @@ app.post('/api/protected/reply-to-inbox-message', async (req, res) => {
   }
 });
 
-app.post('/api/protected/post-message', async (req, res) => {
-  try {
-    const sender = getUserId(req);
-    const postData = { ...req.body, sender };
-    await tribesMac('post-message', postData);
-    res.status(201).json({ message: 'Message succesfully posted.' });
-  } catch (error) {
-    logger.error(error);
-    res.status(500).json({ message: 'An error occured while posting message.' });
-  }
-});
-
-
 app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req, res) => {
-  const userId = getUserId(req);
+  const { userId } = getUserInfo(req);
 
   const privacyChoice = req.body.tribePrivacy === 'private';
   req.body.tribePrivacy = privacyChoice;
@@ -801,7 +827,7 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
 
 app.delete('/api/protected/delete-inbox-message', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const { userId } = getUserInfo(req);
     const data = { msgIds: req.body.msgIds, userId };
     const messages = await tribesMac('delete-inbox-message', data);
     logger.info("delete-user-message::messages");
@@ -817,8 +843,8 @@ app.delete('/api/protected/delete-inbox-message', async (req, res) => {
 
 app.patch('/api/protected/update-tribe-member-login', async (req, res) => {
   try {
-    const member = getUserId(req);
-    const patchData = { timestamp, tribe, member };
+    const { userId } = getUserInfo(req);
+    const patchData = { timestamp, tribe, userId };
     const result = await tribesMac('update-tribe-member-login', patchData);
     logger.info(result);
     res.status(201).json({ message: 'Login data succesfully updated.' });
@@ -830,9 +856,9 @@ app.patch('/api/protected/update-tribe-member-login', async (req, res) => {
 
 app.patch('/api/protected/update-tribe-member-logout', async (req, res) => {
   try {
-    const member = getUserId(req);
+    const { userId } = getUserInfo(req);
     const { timestamp, tribe } = req.body;
-    const patchData = { timestamp, tribe, member };
+    const patchData = { timestamp, tribe, userId };
     const result = await tribesMac('update-tribe-member-logout', patchData);
     logger.info(result);
     res.status(201).json({ message: 'Logout data succesfully updated.' });
