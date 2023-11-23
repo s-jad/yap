@@ -18,10 +18,10 @@ async function createUser(newUserData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 200: ", err);
         reject(new Error('Cant create user.'));
       } else if (res.rows.length === 0) {
-        logger.error(err);
+        logger.error("Error 201: ", err);
         reject(new Error('Cant create user.'));
       } else {
         const row = res.rows[0];
@@ -43,7 +43,7 @@ function userExists(userData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 202: ", err);
         reject(new Error('Error checking user exists'));
       } else if (res.rows.length === 0) {
         resolve(false);
@@ -73,7 +73,7 @@ function updateUserLogin(user) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err)
+        logger.error("Error 203: ", err)
         reject(new Error('Failed to update user login'));
       } else {
         const login = res.rows[0].last_login;
@@ -101,7 +101,7 @@ function updateUserLogout(user) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err)
+        logger.error("Error 204: ", err)
         reject(new Error('Failed to update user logout'));
       } else {
         const logout = res.rows[0].last_logout;
@@ -117,7 +117,7 @@ function getPwHash(user) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 205: ", err);
         reject(new Error('User with that password does not exist'));
       } else if (res.rows.length === 0) {
         reject(new Error('User with that password does not exist'));
@@ -165,7 +165,7 @@ function getUsersFriendInfo(userId) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 206: ", err);
         reject(err);
       } else {
         resolve(res.rows);
@@ -382,7 +382,7 @@ function createTribe(newTribeData) {
     pg_client.query(query, (err, res) => {
       if (err) {
         console.log("actual error");
-        logger.error(err);
+        logger.error("Error 207: ", err);
         reject(new Error('Cant create tribe.'));
       } 
       else {
@@ -411,7 +411,7 @@ function getTribes() {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 208: ", err);
         reject(err);
       } else {
         resolve(res.rows);
@@ -435,7 +435,7 @@ function checkRole(checkData) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 209: ", err);
         reject(err);
       } else {
         logger.info(res.rows[0]);
@@ -472,7 +472,7 @@ function getApplicants(tribeName) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 210: ", err);
         reject(err);
       } else {
         logger.info(res);
@@ -504,7 +504,7 @@ function postJoinTribeApplication(applicationData) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 211: ", err);
         reject(err);
       } else {
         logger.info(res);
@@ -553,7 +553,7 @@ function getChatroomMessages(tribeUrl) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 212: ", err);
         reject(err);
       } else {
         resolve(res.rows);
@@ -596,10 +596,10 @@ function postGlobalMessage(messageData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 213: ", err);
         reject(new Error('Error posting message.'));
       } else if (res.rows.length === 0) {
-        logger.error(err);
+        logger.error("Error 214: ", err);
         reject(new Error('Error posting message.'));
       } else {
         resolve(true);
@@ -654,7 +654,7 @@ function postPersonalMessage(messageData) {
         resolve(true);
       })
       .catch((err) => {
-        logger.error(err);
+        logger.error("Error 215: ", err);
         reject(new Error('Error executing postMessageQuery.'));
       });
   });
@@ -710,7 +710,7 @@ async function sendInboxMessage(msgData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 216: ", err);
         reject(err);
       } else {
         console.log("res.rows", res.rows[0]);
@@ -756,7 +756,7 @@ function getInboxMessages(userId) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 217: ", err);
         reject(new Error('Error fetching inbox messages'));
       } else {
         resolve(res.rows);
@@ -790,7 +790,7 @@ function postNotification(notificationData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 218: ", err);
         reject(err);
       } else {
         resolve(true);
@@ -821,7 +821,7 @@ function getNotifications(userId) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 219: ", err);
         reject(err);
       } else {
         console.log(res.rows);
@@ -849,7 +849,7 @@ function deleteInboxMessage(deleteMsgData) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 220: ", err);
         reject(new Error('Can not delete user messages'));
       } else {
         resolve(res);
@@ -888,7 +888,7 @@ async function replyToInboxMessage(replyMsgData) {
       new Promise((resolve, reject) => {
         pg_client.query(query, (err, res) => {
           if (err) {
-            logger.error(err);
+            logger.error("Error 221: ", err);
             reject(new Error('Can not insert reply message.'));
           } else {
             const insertRes = true; 
@@ -899,7 +899,7 @@ async function replyToInboxMessage(replyMsgData) {
       new Promise((resolve, reject) => {
         pg_client.query(updateQuery, (err, res) => {
           if (err) {
-            logger.error(err);
+            logger.error("Error 222: ", err);
             reject(new Error('Can not update message.'));
           } else {
             const updateRes = true;
@@ -910,7 +910,7 @@ async function replyToInboxMessage(replyMsgData) {
     ]);
     return { insertRes, updateRes };
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 223: ", error);
     throw error;
   }
 }
@@ -929,7 +929,7 @@ function addNewTribeMember(newMemberData) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 224: ", err);
         reject(err);
       } else {
         logger.info(res);
@@ -957,7 +957,7 @@ function getTribeMembers(tribe) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 225: ", err);
         reject(err);
       } else {
         console.log("tribes_mac::getTribeMembers::res => ", res);
@@ -989,7 +989,7 @@ function updateTribeMemberLogin(loginData) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 226: ", err);
         reject(err);
       } else {
         resolve(res);
@@ -1018,7 +1018,7 @@ function updateTribeMemberLogout(logoutData) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 227: ", err);
         reject(err);
       } else {
         resolve(res);
@@ -1053,7 +1053,7 @@ function postUserIncidentReport(incidentData) {
 
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 228: ", err);
         reject(err);
       } else {
         logger.info(res);
@@ -1074,7 +1074,7 @@ function checkAdminStatus(userId) {
   return new Promise((resolve, reject) => {
     pg_client.query(query, (err, res) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error 229: ", err);
         reject(err);
       } else {
         const admin = res.rows[0].user_role === 'admin';
