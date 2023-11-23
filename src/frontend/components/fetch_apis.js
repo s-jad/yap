@@ -1,4 +1,4 @@
-import { getAppState, showDialog, updateAppState } from './app-state';
+import { getAppState, showDialog } from './app-state';
 import { emitFocusEvent, emitSetupSearchbarEvent, emitSidebarLinkEvent } from './events';
 import { getTribeApplicationsListModal, getTribeMembersListModal } from './modals';
 import {
