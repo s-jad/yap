@@ -392,7 +392,7 @@ app.post('/api/authenticate-user', async (req, res) => {
         logger.info('User entered a password that failed comparePwHash');
         res.status(401).json({ message: 'Incorrect Password.' });
       } else {
-        logger.error(error);
+        logger.error("Error 100: ", error);
         res.status(500).json({ message: 'An error occured.' });
       }
     }
@@ -402,7 +402,7 @@ app.post('/api/authenticate-user', async (req, res) => {
       logger.info('User entered an incorrect username or password');
       res.status(401).json({ message: 'Incorrect username or password.' });
     } else {
-      logger.error(error);
+      logger.error("Error 101: ", error);
       res.status(500).json({ message: 'Database Error.' });
     }
   }
@@ -431,7 +431,7 @@ app.post('/api/create-user', async (req, res) => {
     });
 
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 102: ", error);
     res.status(500).json({ message: 'An error occured while creating the user.' });
   }
 });
@@ -458,7 +458,7 @@ app.get('/api/logout-user', async (req, res) => {
     await tribesMac('update-user-logout', userId);
     res.json({ logout: true });
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 103: ", error);
     res.status(500).json({ message: 'An error occured whilst logging the user out.' });
   }
 });
@@ -494,7 +494,7 @@ app.get('/api/admin/admin-tools', verifyAdmin, async(req, res) => {
      res.status(404).json({ message: 'Forbidden' })
    }
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 104: ", error);
     res.status(500).json({ message: 'Admin check failed.' });
   }
 });
@@ -508,7 +508,7 @@ app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
     const lastLogins = await tribesMac('get-last-tribe-logins', userId);
     res.send(lastLogins);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 105: ", error);
     res.status(500).json({ message: 'An error occured whilst getting last tribe logins.' });
   }
 });
@@ -519,7 +519,7 @@ app.get('/api/protected/get-inbox-message-count', async (req, res) => {
     const count = await tribesMac('get-inbox-message-count', userId);
     res.send(count);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 106: ", error);
     res.status(500).json({ message: 'An error occured whilst getting inbox message count.' });
   }
 });
@@ -528,10 +528,9 @@ app.get('/api/protected/get-notifications', async (req, res) => {
   try {
     const { userId } = getUserInfo(req);
     const notifications = await tribesMac('get-notifications', userId);
-    console.log("get-notifications => ", notifications);
     res.send(notifications);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 107: ", error);
     res.status(500).json({ message: 'An error occured whilst getting notifications.' });
   }
 });
@@ -542,7 +541,7 @@ app.get('/api/protected/get-inbox-messages', async (req, res) => {
     const messages = await tribesMac('get-inbox-messages', userId);
     res.send(messages);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 108: ", error);
     res.status(500).json({ message: 'An error occured whilst getting inbox messages.' });
   }
 });
@@ -553,7 +552,7 @@ app.get('/api/protected/get-friends', async (req, res) => {
     const friends = await tribesMac('get-friends', userId);
     res.send(friends);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 109: ", error);
     res.status(500).json({ message: 'An error occured whilst getting friends list.' });
   }
 });
@@ -573,7 +572,7 @@ app.get('/api/protected/get-applicants', async (req, res) => {
 
     res.send(applicants);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 110: ", error);
     res.status(500).json({ message: 'An error occured whilst getting applicants for invitation' });
   }
 });
@@ -583,7 +582,7 @@ app.get('/api/protected/get-random-tribe-suggestions', async (req, res) => {
     const randomSuggestions = await tribesMac('get-random-tribe-suggestions');
     res.send(randomSuggestions);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 111: ", error);
     res.status(500).json({ message: 'An error occured whilst getting random tribe suggestions.' })
   }
 });
@@ -596,11 +595,11 @@ app.get('/api/protected/join-a-tribe', async (req, res) => {
       res.send(tribes);
     } catch (error) {
       console.log("JSON ERROR::", error," => ", tribesJson);
-      logger.error(error);
+      logger.error("Error 112: ", error);
       res.status(500).json({ message: 'An error occurred while getting tribes.' })
     }
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 113: ", error);
     res.status(500).json({ message: 'An error occured while getting tribes.' })
   }
 });
@@ -612,7 +611,7 @@ app.get('/api/protected/get-chatroom-messages', async (req, res) => {
     const messages = await tribesMac('get-messages', tribeUrl);
     res.send(messages);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 114: ", error);
     res.status(500).json({ message: 'An error occured while getting chatroom messages.'});
   }
 });
@@ -626,7 +625,7 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
     console.log("get-tribe-members::members => ", members);
     res.send(members);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 115: ", error);
     res.status(500).json({ message: 'An error occured while fetching tribe member list.' });
   }
 });
@@ -650,7 +649,7 @@ app.get('/api/protected/check-membership', async (req, res) => {
 
     res.send(role);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 117: ", error);
     res.status(500).json({ message: 'An error occured whilst applying for an invitation.' });
   }
 });
@@ -690,7 +689,7 @@ app.post('/api/protected/post-notification', async (req, res) => {
     }
     res.send(dbResult);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 118: ", error);
     res.status(500).json({ message: 'An error occured whilst posting notification.' });
   }
 });
@@ -709,7 +708,7 @@ app.post('/api/protected/apply-for-invitation', async (req, res) => {
     logger.info(result);
     res.send(result);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 119: ", error);
     res.status(500).json({ message: 'An error occured whilst applying for an invitation.' });
   }
 });
@@ -736,7 +735,7 @@ app.post('/api/protected/report-user-incident', upload.none(), async (req, res) 
     logger.info(result);
     res.send(result);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 120: ", error);
     res.status(500).json({ message: 'An error occured whilst reporting user incident.' });
   }
 });
@@ -758,7 +757,7 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
     logger.info(toSend);
     res.status(200).json({ message: 'Message sent!' });
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 121: ", error);
     res.status(500).json({ message: 'An error occured whilst sending inbox message.' });
   }
 });
@@ -777,7 +776,7 @@ app.post('/api/protected/reply-to-inbox-message', async (req, res) => {
     logger.info(result);
     res.send(result);
   } catch (error) {
-    logger.error(error);
+    logger.error("Error 122: ", error);
     res.status(500).json({ message: 'An error occured whilst getting inbox messages.' });
   }
 });
@@ -799,11 +798,11 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
         await tribesMac('add-user-to-tribe-members', foundingMemberData);
         res.status(200).json({ newTribeName });
       } catch (error) {
-        logger.error(error);
+        logger.error("Error 123: ", error);
         res.status(500).json({ message: 'An error occurred while creating the tribe.' });
       }
     } catch (error) {
-      logger.error(error);
+      logger.error("Error 124: ", error);
       res.status(500).json({ message: 'An error occurred while creating the tribe.' });
     }
   } else {
@@ -818,7 +817,7 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
         await tribesMac('add-user-to-tribe-members', foundingMemberData);
         res.status(200).json({ newTribeName });
       } catch (error) {
-        logger.error(error);
+        logger.error("Error 125: ", error);
         res.status(500).json({ message: 'An error occurred while creating the tribe.' });
       }
     } catch (error) {
@@ -890,7 +889,7 @@ function verifyJWT(req, res, next) {
     req.userName = decoded.userName;
     next();
   } catch (error) {
-    logger.info(error);
+    logger.error("Error 126: ", error);
     next();
   }
 }
@@ -913,7 +912,7 @@ app.get('*', verifyJWT, async (req, res) => {
           res.sendFile(path.resolve(__dirname, 'dist', 'login.html'));
         }
       } catch (error) {
-        logger.error(error);
+        logger.error("Error 127: ", error);
         res.status(500).send('An error occurred');
       }
     }
@@ -921,6 +920,7 @@ app.get('*', verifyJWT, async (req, res) => {
 });
 
 app.use('/', function(err, req, res) {
+  console.log('reached generic error response.');
   logger.error(err.stack);
   res.status(500).send('Something broke!');
 });
