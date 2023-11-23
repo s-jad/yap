@@ -85,6 +85,43 @@ function getModal() {
   };
 }
 
+function getNotificationModal(type) {
+  const {
+    modal,
+    modalInner,
+    headers, 
+  } = getModal();
+
+  const headerContent = document.createElement('div');
+  headerContent.className = 'header-sub-wrapper';
+
+  headerContent.innerHTML = `
+    <h3 class="notification-type">Notify ${type}</h3>
+  `;
+  headers.appendChild(headerContent);
+
+  modalInner.classList.add('notification-modal-inner');
+  
+  const writeNotificationWrapper = document.createElement('div');
+  writeNotificationWrapper.className = 'notification-wrapper';
+  writeNotificationWrapper.innerHTML = `
+    <textarea class="notification-content"></textarea>
+    <div class="btn-wrapper">
+      <button class="send-notification-btn">Send</button>
+    </div>
+  `;
+  
+  const nContent = writeNotificationWrapper.querySelector('.notification-content');
+  const sendBtn = writeNotificationWrapper.querySelector('.send-notification-btn');
+
+  sendBtn.addEventListener('click', () => {
+    console.log("nContent => ", nContent.value);
+  });
+  
+  modalInner.appendChild(writeNotificationWrapper);
+  document.body.appendChild(modal);
+}
+
 function getFriendsCardOptionsModal(friend) {
   const {
     modal,
@@ -321,4 +358,5 @@ export {
   getTribeApplicationsListModal,
   getFriendsCardOptionsModal,
   getApplyForInvitationModal,
+  getNotificationModal,
 }
