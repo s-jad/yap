@@ -65,7 +65,8 @@ export default async function Friends() {
 
   const friends = await getFriends();
   friends.reverse();
-
+  
+  let friendsArr = [];
   friends.forEach((friend) => {
     const friendCard = document.createElement('div');
     friendCard.className = 'friend-card';
@@ -93,8 +94,9 @@ export default async function Friends() {
     });
 
     friendsList.appendChild(friendCard);
+    friendsArr.push(friend.user_name);
   });
-
+  
   friendsContainerInner.appendChild(scrollContainer);
 
   const notifyFriendsWrapper = document.createElement('div');
@@ -104,7 +106,8 @@ export default async function Friends() {
   notifyFriendsBtn.textContent = 'Notify Friends';
 
   notifyFriendsBtn.addEventListener('click', () => {
-    getNotificationModal('friends');
+    
+    getNotificationModal('friends', friendsArr);
   });
 
   notifyFriendsWrapper.appendChild(notifyFriendsBtn);
