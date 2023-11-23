@@ -64,6 +64,33 @@
       margin-bottom: 1rem;
     }
   }
+
+  & .modal-inner.notification-modal-inner {
+    & .notification-wrapper {
+      height: 60vh;
+      width: clamp(300px, 60vw, 600px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--p-block) var(--p-inline);
+      gap: var(--gap);
+
+      & textarea {
+        width: 100%;
+        height: calc(60vw - calc(var(--gap) + 100px));
+      }
+
+      & .notification-btn-wrapper {
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+
+  }
   
   & .modal-inner.gtml-modal-inner {
     height: 50vh;
