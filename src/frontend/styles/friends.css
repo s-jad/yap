@@ -1,13 +1,15 @@
 .friends-container {
   --container-height: calc(100vh - var(--header-height));
+  --nfw-height: 80px;
   height: var(--container-height);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: var(--p-block) var(--p-inline);
 
   & .friends-container-inner {
-    --fci-height: calc(var(--container-height) - var(--p-block));
+    --fci-height: calc(var(--container-height) - calc(var(--p-block) + var(--nfw-height)));
     height: var(--fci-height);
     width: 100%;
   
@@ -66,6 +68,22 @@
           box-shadow: var(--shadow), var(--shadow-inset);
         }
       }
+    }
+  }
+
+  & .notify-btn-wrapper {
+    height: var(--nfw-height);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & .notify-friends-btn {
+      background: var(--card-clr);
+      border-radius: 1rem;
+      box-shadow: var(--inset-shadow), var(--shadow);
+      padding: var(--p-block) var(--p-inline);
+      cursor: pointer;
     }
   }
 }
