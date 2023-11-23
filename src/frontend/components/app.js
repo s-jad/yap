@@ -76,23 +76,27 @@ async function clientRouting(currentRoute) {
 
 function renderNotification(n) {
   const nWrapper = document.createElement('div');
-  nWrapper.className = `notification-wrapper ${n.notification_type}`;
+  nWrapper.className = `notification-wrapper ${n.type}`;
   
   nWrapper.innerHTML = `
-    <h3 class="notification-sender">${n.notification_sender}</h3>
-    <p class="notification-content">${n.notification_content}</p>
+    <h3 class="notification-sender">${n.userName}</h3>
+    <p class="notification-content">${n.content}</p>
   `;
 
   return nWrapper;
 }
 
 function setupNotifications(appContainer) {
-  notificationsSocket.on('yapp-notification', (n) => {
+  notificationsSocket.on('notification', (n) => {
     const notification = renderNotification(n); 
     appContainer.appendChild(notification);
     setTimeout(() => {
       appContainer.removeChild(notification);
-    }, 3000);
+    }, 10000);
+
+    notification.addEventListener('click', () => {
+      appContainer.removeChild(notification);
+    });
   });
 }
 
