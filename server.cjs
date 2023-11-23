@@ -6,11 +6,8 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const liveReload = require('livereload');
 const connectLiveReload = require('connect-livereload');
-const session = require('express-session');
 const multer = require('multer');
 const upload = multer();
-
-const RedisStore = require('connect-redis').default;
 
 const liveReloadServer = liveReload.createServer();
 liveReloadServer.once('connection', () => {
@@ -29,14 +26,14 @@ const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
 const { logger } = require('./src/backend/logging.cjs');
 const { backupChatMessages } = require('./src/backend/job-scheduler.cjs');
-const { redisChatroomClient, redisNotificationsClient } = require('./src/backend/redis-client.cjs');
+const { redisChatroomClient, redisGeneralClient } = require('./src/backend/redis-client.cjs');
 
 redisChatroomClient.on('ready', function() {
   logger.info('Redis chatroom client is ready');
 });
 
-redisNotificationsClient.on('ready', function() {
-  logger.info('Redis inbox client is ready');
+redisGeneralClient.on('ready', function() {
+  logger.info('Redis general client is ready');
 });
 
 backupChatMessages(redisChatroomClient);
@@ -47,8 +44,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+
 const httpServer = require('http').createServer(app);
 const { Server } = require('socket.io');
+const { setTimeout } = require('timers/promises');
+
+// SOCKET.IO
 
 const io = new Server(httpServer, {
   cors: {
@@ -204,7 +205,6 @@ chatroomNameSpace.on('connection', (socket) => {
   socket.on('posting-message', (data) => {
     let toStore;
     if (data.receiver_name === null) {
-      console.log("receiver_name was null");
       toStore = { 
         ...data, 
         receiver_name: socket.decoded.userName, 
@@ -224,10 +224,8 @@ chatroomNameSpace.on('connection', (socket) => {
         const jsonData = JSON.parse(msgStr);
         const { tribe_name, message_timestamp } = jsonData;
         const msgKey = `${tribe_name}.${message_timestamp}`;
-        console.log("msgKey =>", msgKey);
-        console.log('msgStr =>', msgStr);
-        redisChatroomClient.set(msgKey, msgStr);
         
+        redisChatroomClient.set(msgKey, msgStr);
         chatroomNameSpace.to(tribe_name).emit('message', msgStr);
 
       } catch (error) {
@@ -243,6 +241,7 @@ chatroomNameSpace.on('connection', (socket) => {
   });
 });
 
+
 async function joinNotificationRooms(socket) {
   socket.join('yapp-notifications');
   
@@ -253,7 +252,7 @@ async function joinNotificationRooms(socket) {
   friends.forEach(async (friend) => {
     const friendId = friend.user_id.toString();
     try {
-      const friendSocketId = await redisNotificationsClient.get(friendId);
+      const friendSocketId = await redisGeneralClient.get(friendId);
       console.log(`friendId = ${friendId}, friendSocketId = ${friendSocketId}`);
       if (friendSocketId !== null) {
         try {
@@ -266,7 +265,7 @@ async function joinNotificationRooms(socket) {
         }
       } 
     } catch (error) {
-      logger.error("Error getting friendSocketId from redisNotificationsClient => friendId = ", friendId);
+      logger.error("Error getting friendSocketId from redisGeneralClient => friendId = ", friendId);
     }
   });
 
@@ -286,7 +285,7 @@ notificationsNameSpace.on('connection', (socket) => {
     const userId = socket.decoded.id.toString();
     const socketId = socket.id.toString();
     io.sockets.sockets.set(socketId, socket);
-    redisNotificationsClient.set(userId, socketId);
+    redisGeneralClient.set(userId, socketId);
   } catch (error) {
     socket.emit('connection-error', {
       code: error.code,
@@ -585,8 +584,15 @@ app.get('/api/protected/get-random-tribe-suggestions', async (req, res) => {
 
 app.get('/api/protected/join-a-tribe', async (req, res) => {
   try {
-    const tribes = await tribesMac('get-tribes');
-    res.send(tribes);
+    const tribesJson = await redisGeneralClient.lRange('tribes', 0, -1);
+    try {
+      const tribes = tribesJson.map(tribe => JSON.parse(tribe));
+      res.send(tribes);
+    } catch (error) {
+      console.log("JSON ERROR::", error," => ", tribesJson);
+      logger.error(error);
+      res.status(500).json({ message: 'An error occurred while getting tribes.' })
+    }
   } catch (error) {
     logger.error(error);
     res.status(500).json({ message: 'An error occured while getting tribes.' })
@@ -703,8 +709,7 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
     const msgData = await tribesMac('send-inbox-message', data);
     
     const { receiver_id, ...toSend } = msgData;
-    console.log("receiverId => ", receiver_id);
-    const receiverSocketId = await redisNotificationsClient.get(receiver_id.toString());
+    const receiverSocketId = await redisGeneralClient.get(receiver_id.toString());
     notificationsNameSpace.to(receiverSocketId).emit('new-inbox-message', toSend);
     logger.info(toSend);
     res.status(200).json({ message: 'Message sent!' });
@@ -890,3 +895,4 @@ app.use('/', function(err, req, res) {
 });
 
 httpServer.listen(process.env.SERVER_PORT || port, () => logger.info(`Server is running on port ${port}`));
+
