@@ -1,5 +1,5 @@
 import '../styles/friends.css';
-import { getFriendsCardOptionsModal } from './modals';
+import { getFriendsCardOptionsModal, getNotificationModal } from './modals';
 import { getFriends } from "./tribes-db-access";
 
 function checkUserActive(lastLogin, lastLogout) {
@@ -96,6 +96,19 @@ export default async function Friends() {
   });
 
   friendsContainerInner.appendChild(scrollContainer);
+
+  const notifyFriendsWrapper = document.createElement('div');
+  notifyFriendsWrapper.className = 'notify-btn-wrapper';
+  const notifyFriendsBtn = document.createElement('button');
+  notifyFriendsBtn.className = 'notify-friends-btn';
+  notifyFriendsBtn.textContent = 'Notify Friends';
+
+  notifyFriendsBtn.addEventListener('click', () => {
+    getNotificationModal('friends');
+  });
+
+  notifyFriendsWrapper.appendChild(notifyFriendsBtn);
+  friendsContainer.appendChild(notifyFriendsWrapper);
 
   return friendsContainer;
 }
