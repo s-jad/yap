@@ -11,6 +11,21 @@
   grid-template-columns: var(--header-height) 6fr;
   grid-template-rows: 1fr 6fr;
   transition: grid-template-columns 300ms ease-in-out;
+
+
+
+  .notification-wrapper {
+    position: absolute;
+    bottom:0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    background: var(--card-clr);
+    gap: var(--gap);
+    box-shadow: var(--shadow), var(--shadow-inset);
+    width: 100%;
+    padding: var(--p-block) var(--p-inline);
+  }
 }
 
 #app.hide {
