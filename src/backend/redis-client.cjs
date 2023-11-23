@@ -33,7 +33,7 @@ async function cacheTribes() {
       try {
         await redisGeneralClient.lPush('tribes', tribeString);
       } catch (error) {
-        console.error(error);
+        logger.error("Error 300: ", error);
       }
     }
   }
