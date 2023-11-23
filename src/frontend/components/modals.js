@@ -2,7 +2,7 @@ import { showDialog } from "./app-state";
 import { emitFocusEvent } from "./events";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
 import { getXIcon } from "./icons";
-import { applyForInvitation, getApplicants, getTribeMembers } from "./tribes-db-access";
+import { applyForInvitation, getApplicants, getTribeMembers, postNotification } from "./tribes-db-access";
 
 function closeModal(modal) {
   document.body.removeChild(modal);
@@ -85,7 +85,7 @@ function getModal() {
   };
 }
 
-function getNotificationModal(type) {
+function getNotificationModal(type, receivers) {
   const {
     modal,
     modalInner,
@@ -113,13 +113,32 @@ function getNotificationModal(type) {
   
   const nContent = writeNotificationWrapper.querySelector('.notification-content');
   const sendBtn = writeNotificationWrapper.querySelector('.send-notification-btn');
-
-  sendBtn.addEventListener('click', () => {
-    console.log("nContent => ", nContent.value);
+  
+  sendBtn.addEventListener('click', async () => {
+    const res = postNotification(type, nContent.value, receivers);
+  
+    if (res) {
+      showDialog(
+        document.body,
+        'Notification sent!',
+        'notification-send-success',
+        'success',
+        'center',
+      );
+    } else {
+      showDialog(
+        document.body,
+        'Ooops, something went wrong, please try again later!',
+        'notification-send-failure',
+        'fail',
+        'center',
+      );
+    }
   });
   
   modalInner.appendChild(writeNotificationWrapper);
   document.body.appendChild(modal);
+  nContent.focus();
 }
 
 function getFriendsCardOptionsModal(friend) {
