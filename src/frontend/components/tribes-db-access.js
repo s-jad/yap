@@ -1,3 +1,29 @@
+// TEST REQUEST SPEEDS 
+//async function timeRequest(url) {
+//  const startTime = new Date();
+//  const response = await fetch(url);
+//  const data = await response.json();
+//  const endTime = new Date();
+//  const duration = endTime - startTime;
+//  return { duration, data };
+//} 
+// 
+//async function compareRequests(rep, url1, url2) {
+//  let res1dur = 0;
+//  let res2dur = 0;
+//  for (let i = 0; i < rep; i++) {
+//    const result1 = await timeRequest(url1);
+//    const result2 = await timeRequest(url2);
+//    res1dur += result1.duration;
+//    res2dur += result2.duration
+//  }
+//  
+//  console.log(`request: ${url1} took an average of ${res1dur / rep}ms over ${rep} requests`);
+//  console.log(`request: ${url2} took an average of ${res2dur / rep}ms over ${rep} requests`);
+//} 
+// 
+//compareRequests(1000, '/api/protected/join-a-tribe-redis', '/api/protected/join-a-tribe-pg');
+
 async function logoutUser() {
   return fetch('/api/logout-user')
     .then(response => {
@@ -32,6 +58,7 @@ async function getTribes() {
       });
     });
 }
+
 
 async function getTribeMembers(tribe) {
   return fetch(`/api/protected/get-tribe-members?tribe=${encodeURIComponent(tribe)}`, {
@@ -205,6 +232,24 @@ async function getNotifications() {
     });
 }
 
+async function postNotification(notification) {
+  return fetch('/api/protected/post-notification', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ notification }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to post notification at this time.');
+    } else {
+      return true;
+    }
+  });
+}
+
 async function getInboxMessageCount() {
   return fetch('/api/protected/get-inbox-message-count', {
     method: 'GET',
@@ -299,34 +344,6 @@ async function getInboxMessages() {
         }
       });
     });
-}
-
-async function postChatMessage(tribe, message, receiver, timestamp, global) {
-  return fetch('/api/protected/post-message', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify({
-      tribe,
-      message,
-      receiver,
-      timestamp,
-      global,
-    })
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Unable to post message.');
-      }
-      return response.json().then(json => {
-        if (json.message === 'Data was posted successfully.') {
-          console.log('Message posted successfully.');
-        }
-        return json;
-      })
-    })
 }
 
 async function createUser(username, password, joined, userColor) {
@@ -475,7 +492,6 @@ export {
   getRandomTribeSuggestions,
   createUser,
   authenticateUser,
-  postChatMessage,
   postUserReport,
   applyForInvitation,
   getApplicants,
