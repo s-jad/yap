@@ -232,14 +232,15 @@ async function getNotifications() {
     });
 }
 
-async function postNotification(notification) {
+async function postNotification(type, content, receiverList) {
+  console.log("postNotification::", type, content, receiverList);
   return fetch('/api/protected/post-notification', {
     method: 'POST',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ notification }),
+    body: JSON.stringify({ type, content, receiverList }),
   })
   .then(response => {
     if (!response.ok) {
@@ -482,6 +483,7 @@ export {
   //  updateTribeMemberLogin,
   //  updateTribeMemberLogout,
   getNotifications,
+  postNotification,
   getMessages,
   getInboxMessages,
   getInboxMessageCount,
