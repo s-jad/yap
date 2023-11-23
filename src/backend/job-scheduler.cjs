@@ -16,11 +16,11 @@ function backupChatMessages(redisChatroomClient) {
             const result = await tribesMac('backup-chatroom-messages', parsedData);
             backupCheck.push({result: result, msgKey});
           } catch (error) {
-            logger.error(error);
+            logger.error("Error 400: ", error);
             backupCheck.push({result: false, msgKey});
           }
       } catch (error) {
-        logger.error(error);
+        logger.error("Error 401: ", error);
         backupCheck.push({result: false, msgKey});
       }
     }
