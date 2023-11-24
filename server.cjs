@@ -26,7 +26,14 @@ const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
 const { logger } = require('./src/backend/logging.cjs');
 const { backupChatMessages } = require('./src/backend/job-scheduler.cjs');
-const { redisChatroomClient, redisGeneralClient, updateTribeCache } = require('./src/backend/redis-client.cjs');
+const {
+  redisChatroomClient,
+  redisGeneralClient,
+  updateTribeCache,
+  updateActiveMembersCache,
+  getCachedActiveMembers,
+  removeMemberFromTribeCache
+} = require('./src/backend/redis-client.cjs');
 
 redisChatroomClient.on('ready', function() {
   logger.info('Redis chatroom client is ready');
@@ -47,7 +54,6 @@ app.use(cookieParser());
 
 const httpServer = require('http').createServer(app);
 const { Server } = require('socket.io');
-const { setTimeout } = require('timers/promises');
 
 // SOCKET.IO
 
@@ -127,6 +133,7 @@ chatroomNameSpace.use((socket, next) => {
 chatroomNameSpace.on('connection', (socket) => {
   try {
     console.log(`A new client connected: ${socket.id}`);
+
     socket.emit('connection', { message: `A new client has connected! with socket id of ${socket.id}`});
   } catch (error) {
     socket.emit('connection-error', {
@@ -154,14 +161,18 @@ chatroomNameSpace.on('connection', (socket) => {
     if (!socket.rooms.has(chatroom)) {
       try {
         socket.join(chatroom);
+        const activeMembers = getCachedActiveMembers(chatroom);
+        chatroomNameSpace.to(socket).emit('get active members', activeMembers);
         console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
         handleTribeLoginDbUpdate(socket, chatroom);
 
-        const updateActiveMembers = {
+        const newActiveMember = {
           username: socket.decoded.userName,
+          userColor: socket.decoded.userColor,
         };
         
-        chatroomNameSpace.to(chatroom).emit('member login', updateActiveMembers);
+        updateActiveMembersCache(chatroom, newActiveMember);
+        chatroomNameSpace.to(chatroom).emit('member login', newActiveMember);
       } catch (error) {
         console.log(`Error joining ${chatroom}: ${error}`);
       }
@@ -172,14 +183,18 @@ chatroomNameSpace.on('connection', (socket) => {
     if (!socket.rooms.has(chatroom)) {
       try {
         socket.join(chatroom);
+        const activeMembers = getCachedActiveMembers(chatroom);
+        chatroomNameSpace.to(socket).emit('get active members', activeMembers);
         console.log(`Socket ${socket.id} joined chatroom ${chatroom}`);
         handleTribeLoginDbUpdate(socket, chatroom);
         
-        const updateActiveMembers = {
+        const newActiveMember = {
           username: socket.decoded.userName,
+          userColor: socket.decoded.userColor,
         };
-        
-        chatroomNameSpace.to(chatroom).emit('member login', updateActiveMembers);
+
+        updateActiveMembersCache(chatroom, newActiveMember);
+        chatroomNameSpace.to(chatroom).emit('member login', newActiveMember);
       } catch (error) {
         console.log(`Error joining ${chatroom}: ${error}`);
       }
@@ -194,8 +209,10 @@ chatroomNameSpace.on('connection', (socket) => {
 
       const updateActiveMembers = {
         username: socket.decoded.userName,
+        userColor: socket.decoded.userColor,
       };
-
+      
+      removeMemberFromTribeCache(chatroom, updateActiveMembers);
       chatroomNameSpace.to(chatroom).emit('member logout', updateActiveMembers);
     } catch (error) {
       console.log(`Error leaving ${chatroom}: ${error}`);
@@ -289,7 +306,7 @@ notificationsNameSpace.on('connection', (socket) => {
     const userId = socket.decoded.id.toString();
     const socketId = socket.id.toString();
     io.sockets.sockets.set(socketId, socket);
-    redisGeneralClient.set(userId, socketId);
+    redisGeneralClient.set(`user:${userId}`, socketId);
   } catch (error) {
     socket.emit('connection-error', {
       code: error.code,
@@ -366,7 +383,13 @@ app.post('/api/authenticate-user', async (req, res) => {
       if (!authenticated) {
         res.status(401).json({ message: 'Incorrect Password.' })    
       } else {
-        const token = jwt.sign({ userName: username, id: userId, role: userRole }, jwtSecret, { expiresIn: '3h' });
+        const token = jwt.sign({ 
+          userName: username,
+          id: userId,
+          role: userRole,
+          userColor: userColor
+        }, jwtSecret, { expiresIn: '3h' });
+
         const parts = token.split('.');
         // Set JWT header and signature in HttpOnly cookie
         res.cookie('jwt_signature', `${parts[0]}.${parts[1]}`, { 
@@ -412,7 +435,13 @@ app.post('/api/create-user', async (req, res) => {
   try {
     const { username, userId, userColor } = await tribesMac('create-user', req.body);
 
-    const token = jwt.sign({ userName: username, id: userId, role: userRole }, jwtSecret, { expiresIn: '3h' });
+    const token = jwt.sign({
+      userName: username,
+      id: userId,
+      role: userRole,
+      userColor: userColor
+    }, jwtSecret, { expiresIn: '3h' });
+
     const parts = token.split('.');
     // Set JWT header and signature in HttpOnly cookie
     res.cookie('jwt_signature', `${parts[0]}.${parts[1]}`, { 
