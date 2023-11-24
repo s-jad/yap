@@ -60,8 +60,7 @@ async function updateTribeCache() {
 
 
 async function addMemberToTribeCache(tribe, memberData) {
-  console.log('redisGeneralClient => updating active members for ', tribe);
-  console.log('member to add => ', memberData);
+  console.log('redisGeneralClient::adding ', memberData, ' to ', tribe);
   
   try {
     const memberString = JSON.stringify(memberData);
@@ -76,8 +75,7 @@ async function addMemberToTribeCache(tribe, memberData) {
 }
 
 async function removeMemberFromTribeCache(tribe, memberData) {
-  console.log('redisGeneralClient => updating active members for ', tribe);
-  console.log('member to remove => ', memberData);
+  console.log('redisGeneralClient::removing ', memberData, ' from ', tribe);
   
   try {
     const memberString = JSON.stringify(memberData);
@@ -99,8 +97,9 @@ async function getCachedActiveMembers(tribe) {
       const activeMembers = await redisGeneralClient.lRange(`${tribe}-active`, 0, -1);
       try {
         const memberArr = [];
-        for (const member in activeMembers) {
+        for (const member of activeMembers) {
           const memberJson = JSON.parse(member);
+          console.log("memberJson => ", memberJson);
           memberArr.push(memberJson)
         }
         console.log('getCachedActiveMembers::memberArr => ', memberArr);
