@@ -58,6 +58,22 @@ async function updateTribeCache() {
   }
 }
 
+async function addMemberToTribeCache(tribe, memberData) {
+  console.log('redisGeneralClient => updating active members for ', tribe);
+  console.log('member to add => ', memberData);
+  
+  try {
+    const memberString = JSON.stringify(memberData);
+    try {
+      await redisGeneralClient.lPush(`${tribe}-active`, memberString)
+    } catch (error) {
+      logger.error("Error 303: ", error);
+    }
+  } catch (error) {
+    logger.info("Error 304: ", error)
+  }
+}
+
 setTimeout(() => {
   cacheTribes();
 }, 2000);
@@ -66,4 +82,5 @@ module.exports = {
   redisChatroomClient,
   redisGeneralClient,
   updateTribeCache,
+  addMemberToTribeCache,
 };
