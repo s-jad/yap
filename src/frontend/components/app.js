@@ -11,7 +11,7 @@ import {
   getChatroom,
 } from './fetch_apis';
 import { emitSetupSearchbarEvent } from './events';
-import { notificationsSocket } from './sockets';
+import { initialiseSocket, notificationsSocket } from './sockets';
 
 async function clientRouting(currentRoute) {
   sessionStorage.setItem('lastPage', currentRoute);
@@ -87,6 +87,8 @@ function renderNotification(n) {
 }
 
 function setupNotifications(appContainer) {
+  initialiseSocket('/notifications');
+
   notificationsSocket.on('notification', (n) => {
     const notification = renderNotification(n); 
     appContainer.appendChild(notification);
@@ -116,6 +118,8 @@ export default async function App() {
     urls.push(sidebarUrl, chatroomUrl);
   }
 
+  setupNotifications(appContainer);
+
   const header = await Header();
   const sidebar = await Sidebar(urls);
   appContainer.appendChild(header);
@@ -140,8 +144,6 @@ export default async function App() {
       emitSetupSearchbarEvent(searchable);
     }
   });
-
-  setupNotifications(appContainer);
 
   return appContainer;
 }
