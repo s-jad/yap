@@ -30,8 +30,8 @@ const {
   redisChatroomClient,
   redisGeneralClient,
   updateTribeCache,
-  updateActiveMembersCache,
   getCachedActiveMembers,
+  addMemberToTribeCache,
   removeMemberFromTribeCache
 } = require('./src/backend/redis-client.cjs');
 
@@ -171,7 +171,7 @@ chatroomNameSpace.on('connection', (socket) => {
           userColor: socket.decoded.userColor,
         };
         
-        updateActiveMembersCache(chatroom, newActiveMember);
+        addMemberToTribeCache(chatroom, newActiveMember);
         chatroomNameSpace.to(chatroom).emit('member login', newActiveMember);
       } catch (error) {
         console.log(`Error joining ${chatroom}: ${error}`);
@@ -193,7 +193,7 @@ chatroomNameSpace.on('connection', (socket) => {
           userColor: socket.decoded.userColor,
         };
 
-        updateActiveMembersCache(chatroom, newActiveMember);
+        addMemberToTribeCache(chatroom, newActiveMember);
         chatroomNameSpace.to(chatroom).emit('member login', newActiveMember);
       } catch (error) {
         console.log(`Error joining ${chatroom}: ${error}`);
@@ -254,6 +254,13 @@ chatroomNameSpace.on('connection', (socket) => {
   socket.on('user disconnect', (chatroom) => {
     console.log(`Disconnecting socket id: ${socket.id}, leaving ${chatroom}`);
     handleTribeLogoutDbUpdate(socket, chatroom);
+    const updateActiveMembers = {
+      username: socket.decoded.userName,
+      userColor: socket.decoded.userColor,
+    };
+    
+    removeMemberFromTribeCache(chatroom, updateActiveMembers);
+    chatroomNameSpace.to(chatroom).emit('member logout', updateActiveMembers);
     socket.disconnect();
   });
 });
@@ -269,8 +276,7 @@ async function joinNotificationRooms(socket) {
   friends.forEach(async (friend) => {
     const friendId = friend.user_id.toString();
     try {
-      const friendSocketId = await redisGeneralClient.get(friendId);
-      console.log(`friendId = ${friendId}, friendSocketId = ${friendSocketId}`);
+      const friendSocketId = await redisGeneralClient.get(`user:${friendId}`);
       if (friendSocketId !== null) {
         try {
           const friendSocket = io.sockets.sockets.get(friendSocketId);
@@ -651,7 +657,6 @@ app.get('/api/protected/get-tribe-members', async (req, res) => {
 
   try {
     const members = await tribesMac('get-tribe-members', tribe);
-    console.log("get-tribe-members::members => ", members);
     res.send(members);
   } catch (error) {
     logger.error("Error 115: ", error);
@@ -686,7 +691,6 @@ app.get('/api/protected/check-membership', async (req, res) => {
 // POST ROUTES 
 
 app.post('/api/protected/post-notification', async (req, res) => {
-  console.log("in post-notification");
   try {
     const { userId, userName } = getUserInfo(req);
     const receiverList = req.body.receiverList;
