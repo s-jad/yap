@@ -58,6 +58,7 @@ async function updateTribeCache() {
   }
 }
 
+
 async function addMemberToTribeCache(tribe, memberData) {
   console.log('redisGeneralClient => updating active members for ', tribe);
   console.log('member to add => ', memberData);
@@ -74,6 +75,22 @@ async function addMemberToTribeCache(tribe, memberData) {
   }
 }
 
+async function removeMemberFromTribeCache(tribe, memberData) {
+  console.log('redisGeneralClient => updating active members for ', tribe);
+  console.log('member to remove => ', memberData);
+  
+  try {
+    const memberString = JSON.stringify(memberData);
+    try {
+      await redisGeneralClient.lRem(`${tribe}-active`, 1, memberString)
+    } catch (error) {
+      logger.error("Error 305: ", error);
+    }
+  } catch (error) {
+    logger.info("Error 306: ", error)
+  }
+}
+
 setTimeout(() => {
   cacheTribes();
 }, 2000);
@@ -83,4 +100,5 @@ module.exports = {
   redisGeneralClient,
   updateTribeCache,
   addMemberToTribeCache,
+  removeMemberFromTribeCache,
 };
