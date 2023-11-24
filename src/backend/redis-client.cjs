@@ -39,6 +39,25 @@ async function cacheTribes() {
   }
 }
 
+async function updateTribeCache() {
+  logger.info('redisGeneralClient => updating tribes cache');
+  const tribes = await tribesMac('get-tribes');
+  
+  try {
+    redisGeneralClient.del('tribes');
+    for (const tribe of tribes) {
+      const tribeString = JSON.stringify(tribe);
+      try {
+        await redisGeneralClient.lPush('tribes', tribeString);
+      } catch (error) {
+        logger.error("Error 301: ", error);
+      }
+    }
+  } catch (error) {
+    logger.error("Error 302: ", error)
+  }
+}
+
 setTimeout(() => {
   cacheTribes();
 }, 2000);
@@ -46,4 +65,5 @@ setTimeout(() => {
 module.exports = {
   redisChatroomClient,
   redisGeneralClient,
+  updateTribeCache,
 };
