@@ -1,6 +1,7 @@
 import { getAppState, notificationsArr } from "./app-state";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
 import { convertAsciiToIcon } from "./icons";
+import { notificationsSocket } from "./sockets";
 import { getLastTribeLogins, getNotifications } from "./tribes-db-access";
 
 async function getNotificationLinks() {
@@ -48,6 +49,28 @@ async function getNotificationLinks() {
     });
   });
 
+  const ynAlert = notificationsFlex.querySelector('.yn-alert');
+  const fnAlert = notificationsFlex.querySelector('.fn-alert');
+  const tnAlert = notificationsFlex.querySelector('.tn-alert');
+  
+  notificationsSocket.on('notification', (data) => {
+    switch (data.type) {
+      case 'yapp':
+        ynCount += 1;
+        ynAlert.innerText = ynCount;
+        break;
+
+      case 'friends':
+        fnCount += 1;
+        fnAlert.innerText = fnCount;
+        break;
+
+      case 'tribe':
+        tnCount += 1;
+        tnAlert.innerText = tnCount;
+        break;
+    }
+  });
 
   return notificationsFlex;
 }
