@@ -26,7 +26,7 @@ const { tribesMac } = require('./src/backend/tribes_mac.cjs');
 const { comparePwHash } = require('./src/backend/pw_encryption.cjs');
 const { logger } = require('./src/backend/logging.cjs');
 const { backupChatMessages } = require('./src/backend/job-scheduler.cjs');
-const { redisChatroomClient, redisGeneralClient } = require('./src/backend/redis-client.cjs');
+const { redisChatroomClient, redisGeneralClient, updateTribeCache } = require('./src/backend/redis-client.cjs');
 
 redisChatroomClient.on('ready', function() {
   logger.info('Redis chatroom client is ready');
@@ -796,6 +796,7 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
       try {
         const foundingMemberData = { userId, tribeId, memberRole: 'founder' };
         await tribesMac('add-user-to-tribe-members', foundingMemberData);
+        updateTribeCache();
         res.status(200).json({ newTribeName });
       } catch (error) {
         logger.error("Error 123: ", error);
@@ -815,6 +816,7 @@ app.post('/api/protected/create-a-tribe', upload.single('tribeIcon'), async (req
       try {
         const foundingMemberData = { userId, tribeId, memberRole: 'founder' };
         await tribesMac('add-user-to-tribe-members', foundingMemberData);
+        updateTribeCache();
         res.status(200).json({ newTribeName });
       } catch (error) {
         logger.error("Error 125: ", error);
