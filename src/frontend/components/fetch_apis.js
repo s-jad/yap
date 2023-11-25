@@ -325,7 +325,7 @@ async function handleLogout() {
   if (logout) {
     deleteCookie('jwt_payload');
     deleteCookie('jwt_signature');
-    disconnectSocket('/inbox');
+    disconnectSocket('/notifications');
     if (getSocketInitState('/tribe-chat')) {
       disconnectSocket('/tribe-chat');
     }
