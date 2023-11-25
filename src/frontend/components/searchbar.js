@@ -56,7 +56,6 @@ export default function Searchbar(
 
   searchbar.addEventListener('change', () => {
     if (searchbar.value === '') {
-      console.log("value is ''");
       populateSearchField(searchField, searchItemClassName);
     } else {
       displayMatches(
@@ -70,7 +69,6 @@ export default function Searchbar(
 
   searchbar.addEventListener('keyup', () => {
     if (searchbar.value === '') {
-      console.log("value is ''");
       populateSearchField(searchField, searchItemClassName);
     } else {
       displayMatches(
