@@ -113,13 +113,14 @@ function getNotificationModal(type, receivers) {
   
   const nContent = writeNotificationWrapper.querySelector('.notification-content');
   const sendBtn = writeNotificationWrapper.querySelector('.send-notification-btn');
-  
+  const appContainer = document.body.querySelector('#app');
+
   sendBtn.addEventListener('click', async () => {
     const res = postNotification(type, nContent.value, receivers);
   
     if (res) {
       showDialog(
-        document.body,
+        appContainer,
         'Notification sent!',
         'notification-send-success',
         'success',
@@ -127,13 +128,14 @@ function getNotificationModal(type, receivers) {
       );
     } else {
       showDialog(
-        document.body,
+        appContainer,
         'Ooops, something went wrong, please try again later!',
         'notification-send-failure',
         'fail',
         'center',
       );
     }
+    document.body.removeChild(modal);
   });
   
   modalInner.appendChild(writeNotificationWrapper);
