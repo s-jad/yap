@@ -70,7 +70,6 @@ export default async function Friends() {
   friends.forEach((friend) => {
     const friendCard = document.createElement('div');
     friendCard.className = 'friend-card';
-    console.log("friend => ", friend)
 
     const {
       userStatus,
