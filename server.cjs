@@ -305,20 +305,14 @@ async function joinNotificationRooms(socket) {
   });
 }
 
-async function getConnectedSocketInfo() {
-  const sockets = await io.fetchSockets();
-  sockets.forEach(socket => console.log("socket => ", socket));
-}
-
 notificationsNameSpace.on('connection', (socket) => {
   try {
-    console.log(`A new client connected to notifications: ${socket.id}`);
     socket.emit('connection', { message: `A new client has connected to their inbox! with socket id of ${socket.id}`});
     const userId = socket.decoded.id.toString();
     const socketId = socket.id.toString();
+    console.log(`::Connected to notifications::\nuserID: ${userId}\nsocketID: ${socket.id}`);
     io.sockets.sockets.set(socketId, socket);
     redisGeneralClient.set(`user:${userId}`, socketId);
-    getConnectedSocketInfo();
   } catch (error) {
     socket.emit('connection-error', {
       code: error.code,
@@ -329,16 +323,14 @@ notificationsNameSpace.on('connection', (socket) => {
 
   joinNotificationRooms(socket);
 
-  socket.on('user disconnect', () => {
-    socket.disconnect();
-  });
-
-  socket.on('disconnect', async () => {
-    console.log(`${socket.decoded.userName} disconnected`);
+  socket.on('user disconnect', async () => {
+    const userName = socket.decoded.userName;
+    console.log(`${userName} disconnected`);
     const loggedOut = await tribesMac('update-user-logout', socket.decoded.id);
     console.log(`Log out recorded: ${loggedOut}`);
+    notificationsNameSpace.socketsLeave(`${userName}'s-notifications`);
+    socket.disconnect();
   });
-
 });
 
 
@@ -790,9 +782,7 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
     const msgData = await tribesMac('send-inbox-message', data);
     
     const { receiver_id, ...toSend } = msgData;
-    console.log('send-inbox-message::receiverId => ', receiver_id);
     const receiverSocketId = await redisGeneralClient.get(`user:${receiver_id}`);
-    console.log('send-inbox-message::receiverSocketId => ', receiverSocketId);
     notificationsNameSpace.to(receiverSocketId).emit('new-inbox-message', toSend);
     logger.info(toSend);
     res.status(200).json({ message: 'Message sent!' });
