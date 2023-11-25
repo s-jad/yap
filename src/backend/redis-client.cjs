@@ -99,7 +99,6 @@ async function getCachedActiveMembers(tribe) {
         const memberArr = [];
         for (const member of activeMembers) {
           const memberJson = JSON.parse(member);
-          console.log("memberJson => ", memberJson);
           memberArr.push(memberJson)
         }
         console.log('getCachedActiveMembers::memberArr => ', memberArr);

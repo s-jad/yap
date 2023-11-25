@@ -48,7 +48,6 @@ function userExists(userData) {
       } else if (res.rows.length === 0) {
         resolve(false);
       } else {
-        console.log("userExists res.rows[0] => ", res.rows[0]);
         const user = res.rows[0]
         resolve(user);
       }
@@ -713,7 +712,6 @@ async function sendInboxMessage(msgData) {
         logger.error("Error 216: ", err);
         reject(err);
       } else {
-        console.log("res.rows", res.rows[0]);
         resolve(res.rows[0]);
       }
     });
@@ -824,7 +822,6 @@ function getNotifications(userId) {
         logger.error("Error 219: ", err);
         reject(err);
       } else {
-        console.log(res.rows);
         resolve(res.rows);
       }
     });
@@ -960,7 +957,6 @@ function getTribeMembers(tribe) {
         logger.error("Error 225: ", err);
         reject(err);
       } else {
-        console.log("tribes_mac::getTribeMembers::res => ", res);
         const members = res.rows;
         console.log("tribes_mac::getTribeMembers::members => ", members);
         resolve(members);
