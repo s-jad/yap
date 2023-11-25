@@ -13,7 +13,7 @@ import {
   getLogo,
   getAdminSidebarIcons,
 } from './icons';
-import { getSocketInitState, initialiseSocket } from './sockets';
+import { notificationsSocket } from './sockets';
 import { getInboxMessages } from './tribes-db-access';
 
 async function fetchUserMessages() {
@@ -132,11 +132,6 @@ export default async function Sidebar(urls) {
   
   const inboxAnchor = sidebarListFlex.querySelector('a[data-link="/inbox"]');
 
-  let notificationsSocket
-  if (!getSocketInitState('/notifications')) {
-    notificationsSocket = initialiseSocket('/notifications')
-  }
-  
   let msgCount = await fetchUserMessages();
   const inboxMsgCount = document.createElement('div'); 
  
@@ -147,6 +142,7 @@ export default async function Sidebar(urls) {
   }
 
   notificationsSocket.on('new-inbox-message', (newMsg) => {
+    console.log("received new inbox message");
     msgCount += 1;
     inboxMsgCount.innerText = msgCount;
     updateUserMessages(newMsg);
