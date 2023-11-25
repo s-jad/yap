@@ -305,6 +305,11 @@ async function joinNotificationRooms(socket) {
   });
 }
 
+async function getConnectedSocketInfo() {
+  const sockets = await io.fetchSockets();
+  sockets.forEach(socket => console.log("socket => ", socket));
+}
+
 notificationsNameSpace.on('connection', (socket) => {
   try {
     console.log(`A new client connected to notifications: ${socket.id}`);
@@ -313,6 +318,7 @@ notificationsNameSpace.on('connection', (socket) => {
     const socketId = socket.id.toString();
     io.sockets.sockets.set(socketId, socket);
     redisGeneralClient.set(`user:${userId}`, socketId);
+    getConnectedSocketInfo();
   } catch (error) {
     socket.emit('connection-error', {
       code: error.code,
@@ -712,7 +718,6 @@ app.post('/api/protected/post-notification', async (req, res) => {
         break;
 
       case 'friends':
-        console.log(`postNotification::name of room => ${userName}'s-notifications`);
         notificationsNameSpace.to(`${userName}'s-notifications`).emit('notification', { type, userName, content });
         break;
 
@@ -785,7 +790,9 @@ app.post('/api/protected/send-inbox-message', async (req, res) => {
     const msgData = await tribesMac('send-inbox-message', data);
     
     const { receiver_id, ...toSend } = msgData;
-    const receiverSocketId = await redisGeneralClient.get(receiver_id.toString());
+    console.log('send-inbox-message::receiverId => ', receiver_id);
+    const receiverSocketId = await redisGeneralClient.get(`user:${receiver_id}`);
+    console.log('send-inbox-message::receiverSocketId => ', receiverSocketId);
     notificationsNameSpace.to(receiverSocketId).emit('new-inbox-message', toSend);
     logger.info(toSend);
     res.status(200).json({ message: 'Message sent!' });
