@@ -97,7 +97,7 @@ function setupNotifications(appContainer) {
     }, 10000);
 
     notification.addEventListener('click', () => {
-      appContainer.removeChild(notification);
+      notification.style.setProperty('display', 'none');
     });
   });
 }
