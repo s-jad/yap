@@ -14,6 +14,7 @@ import xSVG from '../assets/imgs/x.svg';
 import genericTribeSVG from '../assets/imgs/generic-tribe.svg';
 import logoutSVG from '../assets/imgs/logout.svg';
 import adminSVG from '../assets/imgs/admin-tools.svg';
+import notificationSVG from '../assets/imgs/notification.svg';
 
 function getLogo() {
   const logo = new Image();
@@ -30,6 +31,15 @@ function getXIcon() {
   x.className = 'modal-close-btn-icon';
 
   return x;
+}
+
+function getNotificationIcon() {
+  const n = new Image();
+  n.src = notificationSVG;
+  n.alt = 'Text on a page';
+  n.className = 'notification-icon';
+
+  return n;
 }
 
 function getSearchBarIcons(searchWrapper) {
@@ -180,6 +190,7 @@ export {
   getLogo,
   getAdminSidebarIcons,
   getXIcon,
+  getNotificationIcon,
   getGenericTribeIcon,
   getSearchBarIcons,
   convertAsciiToIcon,
