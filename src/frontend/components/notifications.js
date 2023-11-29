@@ -1,6 +1,5 @@
 import '../styles/notifications.css';
 import { notificationsArr } from './app-state';
-import { getNotifications } from './tribes-db-access';
 
 function filterNotifications(nContainer, dataFilter) {
   const displayedCards = Array.from(nContainer.querySelectorAll('.notification-card'));
@@ -23,6 +22,29 @@ function filterNotifications(nContainer, dataFilter) {
       card.classList.add('hidden');
     }
   });
+}
+
+function createNotificationCard(n) {
+  const nCard = document.createElement('div');
+  nCard.className = `notification-card ${n.notification_type}`;
+
+  const timestamp = n.notification_timestamp.slice(0, n.notification_timestamp.indexOf('T'));
+
+  nCard.innerHTML = `
+    <p class="notification-sender" style="color: hsl(${n.sender_color}, 100%, 70%)">${n.sender_name}</p>
+    <p class="notification-header">${n.notification_header}</p>
+    <p class="notification-content hidden">${n.notification_content}</p>
+    <p class="notification-timestamp">${timestamp}</p>
+  `;
+
+  const nContent = nCard.querySelector('.notification-content');
+
+  nCard.addEventListener('click', () => {
+    nCard.classList.toggle('expanded');
+    nContent.classList.toggle('hidden');
+  });
+  
+  return nCard;
 }
 
 export default function Notifications() {
@@ -48,17 +70,7 @@ export default function Notifications() {
   const nInner = nContainer.querySelector('.notifications-inner');
 
   notificationsArr.forEach((n) => {
-    const nCard = document.createElement('div');
-    nCard.className = `notification-card ${n.notification_type}`;
-
-    const timestamp = n.notification_timestamp.slice(0, n.notification_timestamp.indexOf('T'));
-
-    nCard.innerHTML = `
-      <p class="notification-sender" style="color: hsl(${n.sender_color}, 100%, 70%)">${n.sender_name}</p>
-      <p class="notification-content">${n.notification_content}</p>
-      <p class="notification-timestamp">${timestamp}</p>
-    `;
-
+    const nCard = createNotificationCard(n);
     nInner.appendChild(nCard);
   });
 
