@@ -71,11 +71,10 @@ const io = new Server(httpServer, {
 });
 
 async function handleTribeLoginDbUpdate(socket, chatroom) {
+  const userId = socket.decoded.id;
+  const tribe = chatroom;
+  const patchData = { tribe, userId };
   try {
-    const member = socket.decoded.id;
-    const tribe = chatroom;
-    const timestamp = new Date().toISOString();
-    const patchData = { timestamp, tribe, member };
     const res = await tribesMac('update-tribe-member-login', patchData);
   } catch (error) {
     console.error(`Error updating ${member} login of ${tribe}`);
@@ -83,11 +82,11 @@ async function handleTribeLoginDbUpdate(socket, chatroom) {
 }
 
 async function handleTribeLogoutDbUpdate(socket, chatroom) {
+  const userId = socket.decoded.id;
+  const tribe = chatroom;
+  const patchData = { tribe, userId };
+
   try {
-    const member = socket.decoded.id;
-    const tribe = chatroom;
-    const timestamp = new Date().toISOString();
-    const patchData = { timestamp, tribe, member };
     const res = await tribesMac('update-tribe-member-logout', patchData);
   } catch (error) {
     console.error(`Error updating ${member} logout of ${tribe}`);
