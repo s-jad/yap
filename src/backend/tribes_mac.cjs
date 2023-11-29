@@ -965,23 +965,19 @@ function getTribeMembers(tribe) {
     });
   });
 }
-
 function updateTribeMemberLogin(loginData) {
-  const { timestamp, tribe, userId } = loginData;
+  const { tribe, userId } = loginData;
   return new Promise((resolve, reject) => {
     const query = {
       text: `
         UPDATE tribe_members
-        SET last_login = \$1
-        WHERE (
-          tribe_id = (
-            SELECT tribe_id FROM tribes WHERE tribe_name = \$2
-          )
-          AND member_id = \$3
+        SET last_login = NOW()
+        WHERE member_id = $2 AND tribe_id IN (
+          SELECT tribe_id FROM tribes WHERE tribe_name = $1
         )
-        RETURNING *;
+        RETURNING last_login;
       `,
-      values: [timestamp, tribe, userId],
+      values: [tribe, userId],
     };
 
     pg_client.query(query, (err, res) => {
@@ -989,28 +985,26 @@ function updateTribeMemberLogin(loginData) {
         logger.error("Error 226: ", err);
         reject(err);
       } else {
-        resolve(res);
+        console.log("last_login =>", res.rows[0]);
+        resolve(res.rows[0]);
       }
     })
   });
 }
 
 function updateTribeMemberLogout(logoutData) {
-  const { timestamp, tribe, userId } = logoutData;
+  const { tribe, userId } = logoutData;
   return new Promise((resolve, reject) => {
     const query = {
       text: `
         UPDATE tribe_members
-        SET last_logout = \$1
-        WHERE (
-          tribe_id = (
-            SELECT tribe_id FROM tribes WHERE tribe_name = \$2
-          )
-          AND member_id = \$3
+        SET last_logout = NOW()
+        WHERE member_id = $2 AND tribe_id IN (
+          SELECT tribe_id FROM tribes WHERE tribe_name = $1
         )
-        RETURNING *;
+        RETURNING last_logout;
       `,
-      values: [timestamp, tribe, userId],
+      values: [tribe, userId],
     };
 
     pg_client.query(query, (err, res) => {
@@ -1018,7 +1012,8 @@ function updateTribeMemberLogout(logoutData) {
         logger.error("Error 227: ", err);
         reject(err);
       } else {
-        resolve(res);
+        console.log("last_logout => ", res.rows[0])
+        resolve(res.rows[0]);
       }
     })
   });
