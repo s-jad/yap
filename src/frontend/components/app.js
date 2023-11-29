@@ -80,7 +80,7 @@ function renderNotification(n) {
   
   nWrapper.innerHTML = `
     <h3 class="notification-sender">${n.userName}</h3>
-    <p class="notification-content">${n.content}</p>
+    <p class="notification-header">${n.header}</p>
   `;
 
   return nWrapper;
