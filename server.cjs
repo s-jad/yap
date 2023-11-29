@@ -43,7 +43,7 @@ redisGeneralClient.on('ready', function() {
   logger.info('Redis general client is ready');
 });
 
-backupChatMessages(redisChatroomClient);
+backupChatMessages();
 logger.info('Chat message backup is ready');
 
 const app = express();
@@ -405,9 +405,9 @@ app.post('/api/authenticate-user', async (req, res) => {
           httpOnly: false,
           sameSite: 'strict',
         });
-
-        await tribesMac('update-user-login', userId);
-
+        
+        const login = await tribesMac('update-user-login', userId);
+        console.log(`UserID ${userId} logged in at ${(login)}`);
         res.status(200).json({ 
           message: 'Login Succesful.',
           userColor,
@@ -488,7 +488,8 @@ app.get('/api/logout-user', async (req, res) => {
   logger.info("user logging out");
   try {
     const { userId } = getUserInfo(req);
-    await tribesMac('update-user-logout', userId);
+    const logout = await tribesMac('update-user-logout', userId);
+    console.log(`UserID ${userId} logged out at ${logout}`);
     res.json({ logout: true });
   } catch (error) {
     logger.error("Error 103: ", error);
@@ -692,12 +693,14 @@ app.post('/api/protected/post-notification', async (req, res) => {
   try {
     const { userId, userName } = getUserInfo(req);
     const receiverList = req.body.receiverList;
+    const header = req.body.header;
     const content = req.body.content;
     const type = req.body.type;
 
     const dbData = {
       type, 
-      userId, 
+      userId,
+      header,
       content, 
       receiverList,
     };
@@ -706,15 +709,15 @@ app.post('/api/protected/post-notification', async (req, res) => {
 
     switch (type) {
       case 'yapp':
-        notificationsNameSpace.to('yapp-notifications').emit('notification', { type, userName, content } );
+        notificationsNameSpace.to('yapp-notifications').emit('notification', { type, userName, header } );
         break;
 
       case 'friends':
-        notificationsNameSpace.to(`${userName}'s-notifications`).emit('notification', { type, userName, content });
+        notificationsNameSpace.to(`${userName}'s-notifications`).emit('notification', { type, userName, header });
         break;
 
       case 'tribe':
-        notificationsNameSpace.to(`${receiverList}-notifications`).emit('notification', { type, userName, content });
+        notificationsNameSpace.to(`${receiverList}-notifications`).emit('notification', { type, userName, header });
         break;
     }
     res.send(dbResult);
@@ -932,15 +935,12 @@ app.get('*', verifyJWT, async (req, res) => {
     res.status(404).send('Route not found');
   } else {
     if (req.url.startsWith('/socket.io')) {
-      logger.info("socket connection");
       res.sendStatus(200);
     } else {
-      logger.info("non-socket connection");
       try {
         if (req.userId !== undefined && req.userName !== undefined) {
           res.sendFile(path.resolve(__dirname, 'dist', 'main.html'));
         } else {
-          logger.info("user name and userId missing");
           res.sendFile(path.resolve(__dirname, 'dist', 'login.html'));
         }
       } catch (error) {
