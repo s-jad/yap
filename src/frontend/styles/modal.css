@@ -75,6 +75,10 @@
       justify-content: center;
       padding: var(--p-block) var(--p-inline);
       gap: var(--gap);
+      
+      & input {
+        width: 100%;
+      }
 
       & textarea {
         width: 100%;
