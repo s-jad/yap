@@ -90,6 +90,7 @@
           display: none;
         }
 
+
         & .notification-card {
           display: grid;
           grid-template-columns: max-content 1fr 1fr 1fr 100px;
@@ -112,8 +113,8 @@
           & .notification-sender {
             color: var(--font-clr-05);
           }
-
-          & .notification-content {
+          
+          & .notification-header {
             grid-row: 2 / 3;
             grid-column: 2 / 5;
             overflow: hidden;
@@ -121,10 +122,6 @@
             max-height: 25px;
             padding: 0px;
             border-radius: 0px;
-            transition: background 500ms ease-in-out,
-                        padding 300ms ease-in-out,
-                        border-radius 300ms ease-in-out,
-                        max-height 200ms ease-in-out;
           }
 
           & .notification-timestamp {
@@ -132,6 +129,38 @@
             grid-column: 5 / 6;
             opacity: 0.7;
             text-align: right;
+          }
+
+          & .notification-content.hidden {
+            grid-row: 3 / 4;
+            grid-column: 2 / 6;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 0px;
+            height: 0px;
+            opacity: 0;
+            padding: var(--p-block) var(--p-inline);
+            border-radius: 1rem;
+            background: var(--bg-clr);
+            transition: background 500ms ease-in-out,
+                        opacity 300ms ease-in-out,
+                        height 200ms ease-in-out,
+                        max-height 200ms ease-in-out;
+          }
+
+
+        }
+
+        & .notification-card.expanded {
+          grid-template-rows: 50px 50px 1fr;
+
+          & .notification-content {
+            grid-column: 2 / 6;
+            grid-row: 3 / 4;
+            max-height: calc(var(--inner-height) - 100px);
+            padding: var(--p-block) var(--p-inline);
+            border-radius: 1rem;
+            background: var(--bg-clr);
           }
         }
       }
