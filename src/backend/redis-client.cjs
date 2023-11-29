@@ -2,23 +2,38 @@ const Redis = require('redis');
 const { logger } = require('./logging.cjs');
 const { tribesMac } = require('./tribes_mac.cjs');
 
-const redisChatroomClient = new Redis.createClient({
-  host: process.env.DEV_HOST,
-  port: process.env.REDIS_CHATROOM_PORT,
-});
+const chatPort = process.env.REDIS_CHATROOM_PORT;
+const generalPort = process.env.REDIS_GENERAL_PORT;
+const host = process.env.DEV_HOST;
 
+const redisChatroomClient = new Redis.createClient({ url: `redis://${host}:${chatPort}` });
+const redisGeneralClient = new Redis.createClient({ url: `redis://${host}:${generalPort}` });
 
-const redisGeneralClient = new Redis.createClient({
-  host: process.env.DEV_HOST,
-  port: process.env.REDIS_GENERAL_PORT,
-});
+async function connectClients() {
+  try {
+    await redisChatroomClient.connect();
+    await redisGeneralClient.connect();
 
-redisChatroomClient.connect();
-redisGeneralClient.connect();
+    redisChatroomClient.on('connect', function() {
+      console.log('Connected to Redis chatroom server');
+      console.log("redisChatroomClient::address => ", redisChatroomClient.address);
+    });
+
+    redisGeneralClient.on('connect', function() {
+      console.log('Connected to Redis general server');
+      console.log("redisGeneralClient::address => ", redisGeneralClient.address);
+    });
+  } catch (error) {
+    console.log("ERROR connecting to redis servers => ", error);
+  }
+}
+
+connectClients();
 
 async function cacheTribes() {
   logger.info('redisGeneralClient => preloading tribes');
-
+  
+  logRedisInfo("redisGeneralClient", redisGeneralClient);
   const exists = await redisGeneralClient.exists('tribes');
 
   if (exists === 1) {
@@ -118,6 +133,14 @@ setTimeout(() => {
   cacheTribes();
 }, 2000);
 
+// FOR DEBUGGING
+async function logRedisInfo(clientName, client) {
+  const info = await client.info();
+  const infoParts = info.split('#');
+  const tcpInfo = infoParts[1];
+  console.log(`::${clientName} info::\n`, tcpInfo);
+}
+
 module.exports = {
   redisChatroomClient,
   redisGeneralClient,
@@ -125,4 +148,5 @@ module.exports = {
   addMemberToTribeCache,
   removeMemberFromTribeCache,
   getCachedActiveMembers,
+  logRedisInfo,
 };
