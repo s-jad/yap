@@ -764,25 +764,26 @@ function getInboxMessages(userId) {
 }
 
 function postNotification(notificationData) {
-  const { type, userId, content, receiverList } = notificationData;
+  const { type, userId, header, content, receiverList } = notificationData;
   const query = {
     text: `
       WITH new_notification AS (
         INSERT INTO unique_notifications (
           notification_sender,
           notification_type,
+          notification_header,
           notification_content
         )
-        VALUES ($2, $1, $3)
+        VALUES (\$2, \$1, \$3, \$4)
         RETURNING notification_id
       ),
       user_ids AS (
-        SELECT user_id FROM users WHERE user_name = ANY($4)
+        SELECT user_id FROM users WHERE user_name = ANY(\$5)
       )
       INSERT INTO notifications (user_id, notification_id)
       SELECT user_id, notification_id FROM user_ids, new_notification;
     `,
-    values: [type, userId, content, receiverList]
+    values: [type, userId, header, content, receiverList]
   };
 
   return new Promise((resolve, reject) => {
