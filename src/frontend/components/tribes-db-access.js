@@ -232,15 +232,15 @@ async function getNotifications() {
     });
 }
 
-async function postNotification(type, content, receiverList) {
-  console.log("postNotification::", type, content, receiverList);
+async function postNotification(type, header, content, receiverList) {
+  console.log("postNotification::", type, header, content, receiverList);
   return fetch('/api/protected/post-notification', {
     method: 'POST',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ type, content, receiverList }),
+    body: JSON.stringify({ type, header, content, receiverList }),
   })
   .then(response => {
     if (!response.ok) {
