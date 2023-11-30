@@ -959,7 +959,6 @@ function getTribeMembers(tribe) {
         reject(err);
       } else {
         const members = res.rows;
-        console.log("tribes_mac::getTribeMembers::members => ", members);
         resolve(members);
       }
     });
@@ -985,7 +984,6 @@ function updateTribeMemberLogin(loginData) {
         logger.error("Error 226: ", err);
         reject(err);
       } else {
-        console.log("last_login =>", res.rows[0]);
         resolve(res.rows[0]);
       }
     })
@@ -1012,7 +1010,6 @@ function updateTribeMemberLogout(logoutData) {
         logger.error("Error 227: ", err);
         reject(err);
       } else {
-        console.log("last_logout => ", res.rows[0])
         resolve(res.rows[0]);
       }
     })
@@ -1074,6 +1071,51 @@ function checkAdminStatus(userId) {
       }
     });
   });
+}
+
+function getMonthlyLoginStatsByUserId() {
+  const query = `
+    SELECT user_id, COALESCE(SUM(login_count)) AS total_logins
+    FROM monthly_login_stats
+    WHERE month BETWEEN 1 AND 12
+    GROUP BY user_id
+    ORDER BY user_id;
+  `;
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error("Error 230: ", err);
+        reject(err);
+      } else {
+        const loginCount = res.rows;
+        console.log("by user loginCount => ", loginCount);
+        resolve(loginCount);
+      }
+    });
+  });  
+}
+
+function getMonthlyLoginStatsByMonth() {
+  const query = `
+    SELECT month, COALESCE(SUM(login_count)) AS total_logins
+    FROM monthly_login_stats
+    GROUP BY month
+    ORDER BY month;
+  `;
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error("Error 230: ", err);
+        reject(err);
+      } else {
+        const loginCount = res.rows;
+        console.log("by month loginCount => ", loginCount);
+        resolve(loginCount);
+      }
+    });
+  });  
 }
 
 async function tribesMac(req, data) {
@@ -1193,6 +1235,14 @@ async function tribesMac(req, data) {
     case 'check-admin-status':
       const admin = await checkAdminStatus(data);
       return admin;
+
+    case 'monthly-login-stats-by-user':
+      const userLoginCount = await getMonthlyLoginStatsByUserId();
+      return userLoginCount;
+
+    case 'monthly-login-stats-by-month':
+      const monthlyLoginCount = await getMonthlyLoginStatsByMonth();
+      return monthlyLoginCount;
 
     default:
       break;
