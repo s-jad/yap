@@ -18,6 +18,7 @@ const importedList = {
   tribeChat: false,
   messagesDashboard: false,
   notificationsDashboard: false,
+  adminDashboard: false,
 };
 
 const importedComponents = {
@@ -28,6 +29,7 @@ const importedComponents = {
   tribeChat: () => { },
   messagesDashboard: () => { },
   notificationsDashboard: () => { },
+  adminDashboard: () => { },
 }
 
 function getComponent(fn) {
@@ -189,6 +191,27 @@ function importModules(page) {
         }
         break;
 
+      case '/admin-dashboard':
+        if (importedList.adminDashboard !== true) {
+          try {
+            const adminDashboardModule = await import(/* webpackChunkName: "admin-dashboard" */ './admin-dashboard')
+            const AdminDashboard = adminDashboardModule.default;
+            const fn = AdminDashboard;
+            importedList.adminDashboard = true;
+            importedComponents.adminDashboard = fn;
+            component = getComponent(fn)
+            resolve(component);
+          }
+          catch (error) {
+            console.error(error);
+            reject(error);
+          }
+        } else {
+          component = getComponent(importedComponents.adminDashboard);
+          resolve(component);
+        }
+        break;
+
       default:
         resolve(null);
         break;
@@ -238,24 +261,6 @@ async function handleSidebarOptionalLinks(url) {
         await getTribeMembersListModal(tribe);
       } else if (urlSplit[3] === 'applications') {
         await getTribeApplicationsListModal(tribe);
-      }
-      break;
-    
-    case 'admin-tools':
-      const appContainer = document.body.querySelector('#app');
-      const currentComponent = document.body.querySelector('.removable');
-      try {
-        const adminDashboard = await getAdminDashboard();
-        appContainer.removeChild(currentComponent);
-        appContainer.appendChild(adminDashboard);
-      } catch (error) {
-        showDialog(
-          currentComponent,
-          `${error}`,
-          'admin-login-failure',
-          'fail',
-          'center',
-        );
       }
       break;
 
