@@ -16,6 +16,28 @@ import logoutSVG from '../assets/imgs/logout.svg';
 import adminSVG from '../assets/imgs/admin-tools.svg';
 import notificationSVG from '../assets/imgs/notification.svg';
 
+import yappNSVG from '../assets/imgs/yapp-notifications.svg';
+import tribeNSVG from '../assets/imgs/tribe-notifications.svg';
+import friendNSVG from '../assets/imgs/friend-notifications.svg';
+
+function getHeaderNotificationIcons() {
+  const yapp = new Image();
+  yapp.src = yappNSVG;
+  yapp.alt = 'Yapp notifications logo';
+  const tribe = new Image();
+  tribe.src = tribeNSVG;
+  tribe.alt = 'tribe notifications logo';
+  const friend = new Image();
+  friend.src = friendNSVG;
+  friend.alt = 'friend notifications logo';
+
+  return [
+    friend,
+    tribe,
+    yapp,
+  ];
+}
+
 function getLogo() {
   const logo = new Image();
   logo.src = logoSVG;
@@ -193,6 +215,7 @@ export {
   getNotificationIcon,
   getGenericTribeIcon,
   getSearchBarIcons,
+  getHeaderNotificationIcons,
   convertAsciiToIcon,
 };
 
