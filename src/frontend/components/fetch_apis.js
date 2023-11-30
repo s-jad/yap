@@ -1,6 +1,6 @@
 import { getAppState, showDialog } from './app-state';
 import { emitFocusEvent, emitSetupSearchbarEvent, emitSidebarLinkEvent } from './events';
-import { getTribeApplicationsListModal, getTribeMembersListModal } from './modals';
+import { getFriendsListModal, getTribeApplicationsListModal, getTribeMembersListModal } from './modals';
 import {
   chatroomSocket,
   disconnectSocket,
@@ -17,7 +17,6 @@ const importedList = {
   createTribe: false,
   tribeChat: false,
   messagesDashboard: false,
-  friendsDashboard: false,
   notificationsDashboard: false,
 };
 
@@ -28,7 +27,6 @@ const importedComponents = {
   createTribe: () => { },
   tribeChat: () => { },
   messagesDashboard: () => { },
-  friendsDashboard: () => { },
   notificationsDashboard: () => { },
 }
 
@@ -124,27 +122,6 @@ function importModules(page) {
           }
         } else {
           component = getAsyncComponent(importedComponents.joinTribe);
-          resolve(component);
-        }
-        break;
-
-      case '/friends':
-        if (importedList.inbox !== true) {
-          try {
-            const friendsModule = await import(/* webpackChunkName: "friends" */ './friends')
-            const friendsDashboard = friendsModule.default;
-            const fn = friendsDashboard;
-            importedList.friendsDashboard = true;
-            importedComponents.friendsDashboard = fn;
-            component = getAsyncComponent(fn)
-            resolve(component);
-          }
-          catch (error) {
-            console.error(error);
-            reject(error);
-          }
-        } else {
-          component = getAsyncComponent(importedComponents.friendsDashboard);
           resolve(component);
         }
         break;
@@ -332,7 +309,7 @@ async function handleLogout() {
 
     setTimeout(() => {
       window.location.href = '/';
-    }, 100);
+    }, 150);
   }
 }
 
@@ -348,6 +325,11 @@ function handleClientSideLinks(page, focus) {
 
   if (page === '/logout') {
     handleLogout();
+    return;
+  }
+
+  if (page === '/friends') {
+    getFriendsListModal();
     return;
   }
 
