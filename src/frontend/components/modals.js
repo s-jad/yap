@@ -1,8 +1,9 @@
 import { showDialog } from "./app-state";
 import { emitFocusEvent } from "./events";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
-import { getXIcon } from "./icons";
-import { applyForInvitation, getApplicants, getTribeMembers, postNotification } from "./tribes-db-access";
+import { checkUserActive, checkUserTribeActivity } from "./friends";
+import { getNotificationIcon, getXIcon } from "./icons";
+import { applyForInvitation, getApplicants, getFriends, getTribeMembers, postNotification } from "./tribes-db-access";
 
 function closeModal(modal) {
   document.body.removeChild(modal);
@@ -17,20 +18,20 @@ function getScrollableModal() {
   headerContainer.className = 'modal-header-container';
   headerContainer.innerHTML = `
     <div class="modal-headers"></div>
-    <div class="modal-btn-container">
-      <button type="button" class="invisible-btn"></button>
-    </div>
+    <div class="modal-btn-container"></div>
   `;
   
   const modalBtnContainer = headerContainer.querySelector('.modal-btn-container');
-  modalBtnContainer.appendChild(getXIcon());
-
-  const headers = headerContainer.querySelector('.modal-headers');
-  const btn = headerContainer.querySelector('button');
-  btn.addEventListener('click', () => {
+  const xBtnWrapper = document.createElement('div');
+  xBtnWrapper.appendChild(getXIcon());
+  xBtnWrapper.className = 'header-btn-wrapper x-btn-wrapper';
+  xBtnWrapper.addEventListener('click', () => {
     closeModal(modal);
   });
 
+  modalBtnContainer.appendChild(xBtnWrapper);
+
+  const headers = headerContainer.querySelector('.modal-headers');
   modalInner.appendChild(headerContainer);
 
   const modalScrollOuter = document.createElement('div');
@@ -46,7 +47,8 @@ function getScrollableModal() {
     modal,
     modalInner,
     headers,
-    modalScrollInner
+    modalScrollInner,
+    modalBtnContainer
   };
 }
 
@@ -60,20 +62,20 @@ function getModal() {
   headerContainer.className = 'modal-header-container';
   headerContainer.innerHTML = `
     <div class="modal-headers"></div>
-    <div class="modal-btn-container">
-      <button type="button" class="invisible-btn"></button>
-    </div>
+    <div class="modal-btn-container"></div>
   `;
 
   const modalBtnContainer = headerContainer.querySelector('.modal-btn-container');
-  modalBtnContainer.appendChild(getXIcon());
-
   const headers = headerContainer.querySelector('.modal-headers');
 
-  const btn = headerContainer.querySelector('button');
-  btn.addEventListener('click', () => {
+  const xBtnWrapper = document.createElement('div');
+  xBtnWrapper.appendChild(getXIcon());
+  xBtnWrapper.className = 'header-btn-wrapper x-btn-wrapper';
+  xBtnWrapper.addEventListener('click', () => {
     closeModal(modal);
   });
+
+  modalBtnContainer.appendChild(xBtnWrapper);
 
   modalInner.appendChild(headerContainer);
   modal.appendChild(modalInner);
@@ -81,8 +83,82 @@ function getModal() {
   return { 
     modal,
     modalInner,
-    headers
+    headers,
+    modalBtnContainer,
   };
+}
+
+async function getFriendsListModal() {
+  const {
+    modal,
+    modalInner,
+    modalScrollInner,
+    headers,
+    modalBtnContainer,
+  } = getScrollableModal();
+  
+  modalInner.classList.add('fl-modal-inner');
+
+  const headerWrapper = document.createElement('div');
+  headerWrapper.className = 'friends-list-headers';
+  headerWrapper.innerHTML = `
+      <h3 class="friends-list-head-item">Friend</h3>
+      <h3 class="friends-list-head-item">Login</h3>
+      <h3 class="friends-list-head-item">Last Tribe Login</h3>
+  `;
+
+  headers.appendChild(headerWrapper);
+
+  const friends = await getFriends();
+  friends.reverse();
+  
+  const notificationIconWrapper = document.createElement('div');
+  notificationIconWrapper.className = 'header-btn-wrapper notification-btn-wrapper';
+  notificationIconWrapper.appendChild(getNotificationIcon());
+
+  const notificationReceivers = [];
+  
+  const friendsList = document.createElement('div');
+  friendsList.className = 'friends-list';
+
+  friends.forEach((friend) => {
+    const friendCard = document.createElement('div');
+    friendCard.className = 'friend-card';
+    
+    const {
+      userStatus,
+      userClassStatus,
+    } = checkUserActive(friend.last_login, friend.last_logout);
+
+    const {
+      tribeStatus,
+      tribeClassStatus,
+    } = checkUserTribeActivity(friend.last_tribe_login, friend.last_tribe_logout);
+
+    friendCard.innerHTML = `
+      <p class="friend-name">${friend.user_name}</p>
+      <p class="friend-active-status ${userClassStatus}">${userStatus}</p>
+      <p class="friend-last-tribe-login">${friend.tribe_name}</p>
+      <p class="friend-tribe-active-status ${tribeClassStatus}">${tribeStatus}</p>
+    `;
+
+    friendCard.addEventListener('click', () => {
+      getFriendsCardOptionsModal(friend);
+    });
+
+    friendsList.appendChild(friendCard);
+    notificationReceivers.push(friend.user_name);
+  });
+
+  modalScrollInner.appendChild(friendsList);
+  
+  notificationIconWrapper.addEventListener('click', () => {
+    getNotificationModal('friends', notificationReceivers);
+  });
+
+  modalBtnContainer.prepend(notificationIconWrapper);
+
+  document.body.appendChild(modal);
 }
 
 function getNotificationModal(type, receivers) {
@@ -105,18 +181,20 @@ function getNotificationModal(type, receivers) {
   const writeNotificationWrapper = document.createElement('div');
   writeNotificationWrapper.className = 'notification-wrapper';
   writeNotificationWrapper.innerHTML = `
-    <textarea class="notification-content"></textarea>
+    <input type="text" class="notification-header" placeholder="Title"/>
+    <textarea class="notification-content" placeholder="Body Text"></textarea>
     <div class="btn-wrapper">
       <button class="send-notification-btn">Send</button>
     </div>
   `;
   
+  const nHeader = writeNotificationWrapper.querySelector('.notification-header');
   const nContent = writeNotificationWrapper.querySelector('.notification-content');
   const sendBtn = writeNotificationWrapper.querySelector('.send-notification-btn');
   const appContainer = document.body.querySelector('#app');
 
   sendBtn.addEventListener('click', async () => {
-    const res = postNotification(type, nContent.value, receivers);
+    const res = postNotification(type, nHeader.value, nContent.value, receivers);
   
     if (res) {
       showDialog(
@@ -140,7 +218,7 @@ function getNotificationModal(type, receivers) {
   
   modalInner.appendChild(writeNotificationWrapper);
   document.body.appendChild(modal);
-  nContent.focus();
+  nHeader.focus();
 }
 
 function getFriendsCardOptionsModal(friend) {
@@ -253,7 +331,8 @@ async function getTribeMembersListModal(tribe) {
     modal,
     modalInner,
     headers,
-    modalScrollInner 
+    modalScrollInner,
+    modalBtnContainer,
   } = getScrollableModal();
   
   const headerContent = document.createElement('div');
@@ -263,7 +342,12 @@ async function getTribeMembersListModal(tribe) {
     <h3>Activity</h3>
   `;
 
-  headers.appendChild(headerContent);
+  const notificationIconWrapper = document.createElement('div');
+  notificationIconWrapper.className = 'header-btn-wrapper notification-btn-wrapper';
+  notificationIconWrapper.appendChild(getNotificationIcon());
+
+  const notificationReceivers = [];
+
   const members = await getTribeMembers(tribe);
   modalInner.classList.add('gtml-modal-inner');
   members.forEach((member) => {
@@ -306,10 +390,19 @@ async function getTribeMembersListModal(tribe) {
       }
     });
 
+    notificationReceivers.push(member.user_name);
     memberEl.appendChild(activeIndicator);
-
     modalScrollInner.appendChild(memberEl);
   });
+
+  notificationIconWrapper.addEventListener('click', () => {
+    closeModal(modal);
+    getNotificationModal('tribe', notificationReceivers);
+  });
+  
+  modalBtnContainer.prepend(notificationIconWrapper);
+
+  headers.appendChild(headerContent);
 
   document.body.appendChild(modal);
 }
@@ -380,4 +473,5 @@ export {
   getFriendsCardOptionsModal,
   getApplyForInvitationModal,
   getNotificationModal,
+  getFriendsListModal,
 }
