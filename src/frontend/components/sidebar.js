@@ -49,16 +49,16 @@ function getOptionalSidebarItems(urls, memberStatus) {
   
   if (getAppState('userRole') === 'admin') {
     const adminTools = document.createElement('li');
-    adminTools.className = 'sidebar-list-item admin-tools';
+    adminTools.className = 'sidebar-list-item admin-dashboard';
     const adminToolLink = document.createElement('a')
     adminToolLink.className = 'sidebar-list-anchor'
-    adminToolLink.setAttribute('data-link', '/admin-tools')
-    adminToolLink.href = 'admin-tools';
+    adminToolLink.setAttribute('data-link', '/admin-dashboard')
+    adminToolLink.href = 'admin-dashboard';
     adminToolLink.addEventListener('click', (ev) => {
       ev.preventDefault();
       const url = adminToolLink.getAttribute('data-link');
       history.pushState(null, null, url);
-      handleSidebarOptionalLinks(url);
+      handleClientSideLinks(url);
     });
     const icon = getAdminSidebarIcons();
     icon.className = 'sidebar-list-icon';
