@@ -34,6 +34,13 @@
       border-radius: 50%;
       cursor: pointer;
 
+      & img {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+      }
+
       & [class*="alert"] {
         position: absolute;
         background: var(--lemon-chiffon);
