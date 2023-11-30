@@ -517,15 +517,20 @@ async function verifyAdmin(req, res, next) {
   next();
 }
 
-app.get('/api/admin/admin-tools', verifyAdmin, async(req, res) => {
+app.get('/api/admin/monthly-login-stats', verifyAdmin, async(req, res) => {
   try {
-   const admin = req.admin;
-    console.log("user is admin = ", admin);
-   if (admin) {
-     res.send('')
-   } else {
-     res.status(404).json({ message: 'Forbidden' })
-   }
+    const admin = req.admin;
+    if (admin) {
+      const loginStatsByUser = await tribesMac('monthly-login-stats-by-user');
+      const loginStatsByMonth = await tribesMac('monthly-login-stats-by-month');
+      const loginStats = {
+        loginStatsByUser,
+        loginStatsByMonth,
+      };
+      res.send(loginStats);
+    } else {
+      res.status(404).json({ message: 'Forbidden' })
+    }
   } catch (error) {
     logger.error("Error 104: ", error);
     res.status(500).json({ message: 'Admin check failed.' });
