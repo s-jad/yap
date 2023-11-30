@@ -1,6 +1,6 @@
 import { getAppState, notificationsArr } from "./app-state";
 import { handleChatroomLinks, handleClientSideLinks } from "./fetch_apis";
-import { convertAsciiToIcon } from "./icons";
+import { convertAsciiToIcon, getHeaderNotificationIcons } from "./icons";
 import { notificationsSocket } from "./sockets";
 import { getLastTribeLogins, getNotifications } from "./tribes-db-access";
 
@@ -41,9 +41,10 @@ async function getNotificationLinks() {
   `;
 
   const notificationLinks = Array.from(notificationsFlex.querySelectorAll('[class^="notify"]'));
-
-  notificationLinks.forEach(link => {
+  const notificationIcons = getHeaderNotificationIcons();
+  notificationLinks.forEach((link, index) => {
     const focus = link.getAttribute('data-focus');
+    link.appendChild(notificationIcons[index])
     link.addEventListener('click', () => {
       handleClientSideLinks('/notifications', focus);
     });
