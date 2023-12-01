@@ -1052,6 +1052,8 @@ function postUserIncidentReport(incidentData) {
   });
 }
 
+// ADMIN QUERIES
+
 function checkAdminStatus(userId) {
   const query = {
     text: `
@@ -1089,7 +1091,6 @@ function getMonthlyLoginStatsByUserId() {
         reject(err);
       } else {
         const loginCount = res.rows;
-        console.log("by user loginCount => ", loginCount);
         resolve(loginCount);
       }
     });
@@ -1111,11 +1112,69 @@ function getMonthlyLoginStatsByMonth() {
         reject(err);
       } else {
         const loginCount = res.rows;
-        console.log("by month loginCount => ", loginCount);
         resolve(loginCount);
       }
     });
   });  
+}
+
+function getUserActivityStats() {
+  const query = `
+    SELECT 
+      cm1.chat_sender_id,
+      cm1.total_chat_messages_sent,
+      um1.total_inbox_messages_sent,
+      cm2.total_chat_messages_received,
+      um2.total_inbox_messages_received
+    FROM (
+      SELECT sender_id AS chat_sender_id,
+      COALESCE(SUM(sender_id))
+        as total_chat_messages_sent
+      FROM chatroom_messages
+      GROUP BY chat_sender_id
+    ) cm1
+    JOIN (
+      SELECT sender_id AS inbox_sender_id,
+      COALESCE(SUM(sender_id))
+        as total_inbox_messages_sent
+      FROM user_messages
+      GROUP BY inbox_sender_id
+    ) um1 
+    ON cm1.chat_sender_id = um1.inbox_sender_id
+    JOIN (
+      SELECT receiver_id AS chat_receiver_id,
+      COALESCE(SUM(receiver_id))
+        as total_chat_messages_received
+      FROM chatroom_messages
+      GROUP BY chat_receiver_id
+    ) cm2
+    ON um1.inbox_sender_id = cm2.chat_receiver_id
+    JOIN (
+      SELECT receiver_id AS inbox_receiver_id,
+      COALESCE(SUM(receiver_id))
+        as total_inbox_messages_received
+      FROM user_messages
+      GROUP BY inbox_receiver_id
+    ) um2
+    ON cm2.chat_receiver_id = um2.inbox_receiver_id
+    ORDER BY
+      cm1.total_chat_messages_sent,
+      cm2.total_chat_messages_received,
+      um1.total_inbox_messages_sent,
+      um2.total_inbox_messages_received;
+  `;
+
+  return new Promise((resolve, reject) => {
+    pg_client.query(query, (err, res) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      } else {
+        const userActivityStats = res.rows;
+        resolve(userActivityStats);
+      }
+    });
+  });
 }
 
 async function tribesMac(req, data) {
@@ -1243,6 +1302,10 @@ async function tribesMac(req, data) {
     case 'monthly-login-stats-by-month':
       const monthlyLoginCount = await getMonthlyLoginStatsByMonth();
       return monthlyLoginCount;
+
+    case 'user-activity-stats':
+      const userActivityStats = await getUserActivityStats();
+      return userActivityStats;
 
     default:
       break;
