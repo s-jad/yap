@@ -5,6 +5,7 @@
     "scripts": {
         "build": "webpack",
         "start": "node -r dotenv/config server.cjs",
+        "trace": "nodemon -r dotenv/config --trace-warnings server.cjs --ext cjs,sql,js,css,json",
         "watch": "nodemon -r dotenv/config server.cjs --ext cjs,sql,js,css,json",
         "test": "echo \"Error: no test specified\" && exit 1",
         "gh-deploy-init": "git push origin && git subtree push --prefix dist origin gh-pages",
@@ -20,6 +21,7 @@
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
         "crypto-browserify": "^3.12.0",
+        "d3": "^7.8.5",
         "express": "^4.18.2",
         "express-session": "^1.17.3",
         "jsonwebtoken": "^9.0.2",
