@@ -537,11 +537,13 @@ app.get('/api/admin/monthly-login-stats', verifyAdmin, async(req, res) => {
   }
 });
 
-app.get('/api/admin/active-user-stats', verifyAdmin, async(req, res) => {
+
+app.get('/api/admin/user-activity-stats', verifyAdmin, async(req, res) => {
   try {
     const admin = req.admin;
     if (admin) {
-      const userActivityStats = await tribesMac('active-user-stats');
+      const userActivityStats = await tribesMac('user-activity-stats');
+      console.log("userActivityStats => ", userActivityStats);
       res.send(userActivityStats);
     } else {
       res.status(404).json({ message: 'Forbidden' })
@@ -551,6 +553,7 @@ app.get('/api/admin/active-user-stats', verifyAdmin, async(req, res) => {
     res.status(500).json({ message: 'Admin check failed.' });
   }
 });
+
 
 app.get('/api/admin/misc-stats', verifyAdmin, async(req, res) => {
   try {
