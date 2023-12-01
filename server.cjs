@@ -537,6 +537,21 @@ app.get('/api/admin/monthly-login-stats', verifyAdmin, async(req, res) => {
   }
 });
 
+app.get('/api/admin/active-user-stats', verifyAdmin, async(req, res) => {
+  try {
+    const admin = req.admin;
+    if (admin) {
+      const userActivityStats = await tribesMac('active-user-stats');
+      res.send(userActivityStats);
+    } else {
+      res.status(404).json({ message: 'Forbidden' })
+    }
+  } catch (error) {
+    logger.error("Error 104: ", error);
+    res.status(500).json({ message: 'Admin check failed.' });
+  }
+});
+
 // PROTECTED ROUTES
 
 
