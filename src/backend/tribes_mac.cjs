@@ -1121,47 +1121,36 @@ function getMonthlyLoginStatsByMonth() {
 function getUserActivityStats() {
   const query = `
     SELECT 
-      cm1.chat_sender_id,
+      cm1.sender_id AS user_id,
       cm1.total_chat_messages_sent,
-      um1.total_inbox_messages_sent,
       cm2.total_chat_messages_received,
+      um1.total_inbox_messages_sent,
       um2.total_inbox_messages_received
     FROM (
-      SELECT sender_id AS chat_sender_id,
-      COALESCE(SUM(sender_id))
-        as total_chat_messages_sent
-      FROM chatroom_messages
-      GROUP BY chat_sender_id
+      SELECT sender_id, COUNT(sender_id) AS total_chat_messages_sent
+      FROM chatroom_messages cm1
+      GROUP BY sender_id
     ) cm1
     JOIN (
-      SELECT sender_id AS inbox_sender_id,
-      COALESCE(SUM(sender_id))
-        as total_inbox_messages_sent
-      FROM user_messages
-      GROUP BY inbox_sender_id
-    ) um1 
-    ON cm1.chat_sender_id = um1.inbox_sender_id
-    JOIN (
-      SELECT receiver_id AS chat_receiver_id,
-      COALESCE(SUM(receiver_id))
-        as total_chat_messages_received
+      SELECT receiver_id, COUNT(receiver_id) as total_chat_messages_received 
       FROM chatroom_messages
-      GROUP BY chat_receiver_id
+      GROUP BY receiver_id
     ) cm2
-    ON um1.inbox_sender_id = cm2.chat_receiver_id
+    ON cm1.sender_id = cm2.receiver_id
     JOIN (
-      SELECT receiver_id AS inbox_receiver_id,
-      COALESCE(SUM(receiver_id))
-        as total_inbox_messages_received
+      SELECT sender_id, COUNT(sender_id) AS total_inbox_messages_sent
       FROM user_messages
-      GROUP BY inbox_receiver_id
-    ) um2
-    ON cm2.chat_receiver_id = um2.inbox_receiver_id
-    ORDER BY
-      cm1.total_chat_messages_sent,
-      cm2.total_chat_messages_received,
-      um1.total_inbox_messages_sent,
-      um2.total_inbox_messages_received;
+      GROUP BY sender_id
+    ) um1
+    ON cm2.receiver_id = um1.sender_id
+    JOIN (
+      SELECT receiver_id, COUNT(receiver_id) AS total_inbox_messages_received
+      FROM user_messages
+      GROUP BY receiver_id
+    ) um2 
+    ON um1.sender_id = um2.receiver_id
+    ORDER BY 
+      cm1.sender_id;
   `;
 
   return new Promise((resolve, reject) => {
@@ -1170,8 +1159,8 @@ function getUserActivityStats() {
         logger.error(err);
         reject(err);
       } else {
-        const userActivityStats = res.rows;
-        resolve(userActivityStats);
+        console.log(res.rows);
+        resolve(res.rows);
       }
     });
   });
