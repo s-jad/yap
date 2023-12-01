@@ -22,7 +22,7 @@ export default async function AdminDashboard() {
     </div>
     <div class="user-stats-dashboard">
       <div class="stats-headers-wrapper">
-        <h3 class="user-activity-header">Active Users</h3> 
+        <h3 class="user-activity-header displayed">Active Users</h3> 
         <h3 class="login-stats-header">Login Stats</h3> 
         <h3 class="misc-stats-header">Misc. Stats</h3> 
       </div>
@@ -43,20 +43,27 @@ export default async function AdminDashboard() {
     </div>
   `;
 
-  const headers = Array.from(admin.querySelectorAll('[class$="header"]'));
+  const headers = Array.from(admin.querySelectorAll('[class*="header"]:not([class*="headers"])'));
   const containers = Array.from(admin.querySelectorAll('.stats-container'));
   const cards = Array.from(admin.querySelectorAll('.stats-card'));
-
+  console.log("headers => ", headers);
+  console.log("cards => ", cards);
   const userActivityStats = await getUserActivityStats();
   const monthlyLoginStats = await getMonthlyLoginStats();
   //  const miscStats = await getMiscStats();
 
   headers.forEach((header, index) => {
     header.addEventListener(('click'), () => {
-      const currentlyDisplayed = admin.querySelector('.stats-card:not(.hidden)');
-      console.log("currentlyDisplayed => ", currentlyDisplayed);
+      const currentlyDisplayedCard = admin.querySelector('.stats-card:not(.hidden)');
+      const currentlyDisplayedHeader = admin.querySelector('.displayed');
+      if (currentlyDisplayedHeader === header) {
+        console.log("currentlyDisplayedHeader === header");
+        return;
+      }
+      currentlyDisplayedHeader.classList.remove('displayed');
       cards[index].classList.remove('hidden');
-      currentlyDisplayed.classList.add('hidden');
+      currentlyDisplayedCard.classList.add('hidden');
+      header.classList.add('displayed');
     });
   });
 
