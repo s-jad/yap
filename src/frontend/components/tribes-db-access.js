@@ -476,6 +476,50 @@ async function getAdminDashboard() {
   });
 }
 
+async function getMonthlyLoginStats() {
+  return fetch('/api/admin/monthly-login-stats', {
+    method: 'GET',
+    credentials: 'include',
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to fetch monthly login stats at this moment.')
+    }
+    return response.text().then(data => {
+      try {
+        const json = JSON.parse(data);
+        console.log(json);
+        return json;
+      } catch (error) {
+        console.error('authenticateUser::Error parsing JSON', error);
+        throw new Error('Error parsing JSON');
+      }
+    });
+  });
+}
+
+async function getUserActivityStats() {
+  return fetch('/api/admin/user-activity-stats', {
+    method: 'GET',
+    credentials: 'include',
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to fetch user activity stats at this moment.')
+    }
+    return response.text().then(data => {
+      try {
+        const json = JSON.parse(data);
+        console.log(json);
+        return json;
+      } catch (error) {
+        console.error('authenticateUser::Error parsing JSON', error);
+        throw new Error('Error parsing JSON');
+      }
+    });
+  });
+}
+
 export {
   getTribes,
   getTribeMembers,
@@ -500,4 +544,6 @@ export {
   checkMembership,
   logoutUser,
   getAdminDashboard,
+  getMonthlyLoginStats,
+  getUserActivityStats,
 };
