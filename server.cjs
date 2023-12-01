@@ -547,13 +547,27 @@ app.get('/api/admin/active-user-stats', verifyAdmin, async(req, res) => {
       res.status(404).json({ message: 'Forbidden' })
     }
   } catch (error) {
-    logger.error("Error 104: ", error);
+    logger.error("Error 128: ", error);
+    res.status(500).json({ message: 'Admin check failed.' });
+  }
+});
+
+app.get('/api/admin/misc-stats', verifyAdmin, async(req, res) => {
+  try {
+    const admin = req.admin;
+    if (admin) {
+      const miscStats = await tribesMac('misc-stats');
+      res.send(miscStats);
+    } else {
+      res.status(404).json({ message: 'Forbidden' })
+    }
+  } catch (error) {
+    logger.error("Error 129: ", error);
     res.status(500).json({ message: 'Admin check failed.' });
   }
 });
 
 // PROTECTED ROUTES
-
 
 app.get('/api/protected/get-last-tribe-logins', async (req, res) => {
   try {
