@@ -92,11 +92,18 @@
                     width 200ms ease-in-out;
 
         .stats-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
           height: 100%;
           width: 100%;
           background: var(--card-clr);
           border-radius: 1rem;
           box-shadow: var(--shadow), var(--shadow-inset);
+
+          svg {
+            box-shadow: var(--shadow), var(--shadow-inset);
+          }
         }
       }
 
