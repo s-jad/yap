@@ -543,6 +543,12 @@ app.get('/api/admin/user-activity-stats', verifyAdmin, async(req, res) => {
     const admin = req.admin;
     if (admin) {
       const userActivityStats = await tribesMac('user-activity-stats');
+      userActivityStats.forEach(user => {
+        user.total_chat_messages_sent = parseInt(user.total_chat_messages_sent);
+        user.total_chat_messages_received = parseInt(user.total_chat_messages_received);
+        user.total_inbox_messages_sent = parseInt(user.total_inbox_messages_sent);
+        user.total_inbox_messages_received = parseInt(user.total_inbox_messages_received);
+      });
       console.log("userActivityStats => ", userActivityStats);
       res.send(userActivityStats);
     } else {
