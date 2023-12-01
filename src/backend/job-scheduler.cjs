@@ -4,7 +4,7 @@ const { redisChatroomClient, logRedisInfo } = require('./redis-client.cjs');
 const { tribesMac } = require('./tribes_mac.cjs');
 
 function backupChatMessages() {
-  logRedisInfo("redisChatroomClient", redisChatroomClient);
+  // logRedisInfo("redisChatroomClient", redisChatroomClient);
   return scheduler.scheduleJob('*/30 * * * *', async function() {
     const msgKeys = await redisChatroomClient.keys('*');
     const backupCheck = [];
@@ -19,7 +19,6 @@ function backupChatMessages() {
           try {
             const result = await tribesMac('backup-chatroom-messages', parsedData);
             backupCheck.push({result: result, msgKey});
-            console.log("Somehow succesfully backed up chat messages");
           } catch (error) {
             logger.error("Error 400: ", error);
             backupCheck.push({result: false, msgKey});

@@ -33,7 +33,7 @@ connectClients();
 async function cacheTribes() {
   logger.info('redisGeneralClient => preloading tribes');
   
-  logRedisInfo("redisGeneralClient", redisGeneralClient);
+  // logRedisInfo("redisGeneralClient", redisGeneralClient);
   const exists = await redisGeneralClient.exists('tribes');
 
   if (exists === 1) {
@@ -75,8 +75,6 @@ async function updateTribeCache() {
 
 
 async function addMemberToTribeCache(tribe, memberData) {
-  console.log('redisGeneralClient::adding ', memberData, ' to ', tribe);
-  
   try {
     const memberString = JSON.stringify(memberData);
     try {
@@ -90,8 +88,6 @@ async function addMemberToTribeCache(tribe, memberData) {
 }
 
 async function removeMemberFromTribeCache(tribe, memberData) {
-  console.log('redisGeneralClient::removing ', memberData, ' from ', tribe);
-  
   try {
     const memberString = JSON.stringify(memberData);
     try {
@@ -116,7 +112,6 @@ async function getCachedActiveMembers(tribe) {
           const memberJson = JSON.parse(member);
           memberArr.push(memberJson)
         }
-        console.log('getCachedActiveMembers::memberArr => ', memberArr);
         return memberArr;
       } catch (error) {
         logger.error("Error 307: ", error);
