@@ -5,8 +5,8 @@ import * as d3 from 'd3';
 function renderUserActivityChart(userActivityData) {
   const userActivtyContainer = document.body.querySelector('.stats-container.user-activity');
   const rect = userActivtyContainer.getBoundingClientRect();
-
-  const margin = {top: 30, right: 30, bottom: 70, left: 60},
+  
+  const margin = {top: 50, right: 30, bottom: 30, left: 40},
     height = rect.height - margin.top - margin.bottom,
     width = rect.width - margin.left - margin.right;
   
@@ -24,7 +24,7 @@ function renderUserActivityChart(userActivityData) {
   const xScale = d3.scaleBand()
     .range([0, width])
     .padding(0.2)
-    .domain(userActivityData.map(function(d, i) { return d.user_id; }));
+    .domain(userActivityData.map(function(d) { return d.user_id; }));
 
   const yScale = d3.scaleLinear()
     .range([height, 0])
@@ -44,7 +44,7 @@ function renderUserActivityChart(userActivityData) {
     .data(userActivityData)
     .enter()
     .append('rect')
-      .attr('x', function(d) { return xScale(d.chat_sender_id); })
+      .attr('x', function(d) { return xScale(d.user_id); })
       .attr('y', function(d) { return yScale(d.total_chat_messages_sent); })
       .attr('width', xScale.bandwidth())
       .attr('height', function(d) { return height - yScale(d.total_chat_messages_sent); })
@@ -60,6 +60,29 @@ export default async function AdminDashboard() {
   admin.className = 'admin-dashboard removable';
 
   admin.innerHTML = `
+    <div class="admin-dashboard-view-switch">
+      <label for="view-stats">
+        Statistics
+        <input 
+          id="view-stats"
+          type="radio" 
+          class="view-radio-btn"
+          name="switch-dashboard-view"
+          value="statistics"
+          checked
+        />
+      </label>
+      <label for="view-actions-grid">
+        Actions
+        <input 
+          id="view-actions-grid"
+          type="radio" 
+          class="view-radio-btn"
+          name="switch-dashboard-view"
+          value="actions"
+        />
+      </label>
+    </div>
     <div class="admin-functions-grid">
       <div class="admin-function-card notify-users">
         <h3>Notify Users</h3>
@@ -83,7 +106,42 @@ export default async function AdminDashboard() {
       
       <div class="stats-cards-wrapper">
         <div class="stats-card user-activity">
-          <div class="stats-container user-activity"></div>
+          <div class="stats-container user-activity">
+            <div class="filter-btn-wrapper">
+              <p>Filter by: </p>
+              <label for"ua-user">
+                UserId
+                <input 
+                  id="ua-user"
+                  type="radio" 
+                  class="ua-radio-btn"
+                  name="filter-user-activity"
+                  value="user"
+                  checked
+                />
+              </label>
+              <label for="ua-category">
+                Category
+                <input 
+                  id="ua-category"
+                  type="radio" 
+                  class="ua-radio-btn"
+                  name="filter-user-activity"
+                  value="category"
+                />
+              </label>
+              <label for="ua-totals">
+                Totals
+                <input 
+                  id="ua-totals"
+                  type="radio" 
+                  class="ua-radio-btn"
+                  name="filter-user-activity"
+                  value="user"
+                />
+              </label>
+            </div>
+          </div>
         </div>
 
         <div class="stats-card login-stats hidden">
@@ -96,6 +154,17 @@ export default async function AdminDashboard() {
       </div>
     </div>
   `;
+  
+  const viewActionsGrid = admin.querySelector('[for="view-actions-grid"]');
+  const viewStats = admin.querySelector('[for="view-stats"]');
+
+  viewActionsGrid.addEventListener(('click'), () => {
+    admin.classList.add('actions');
+  });
+
+  viewStats.addEventListener(('click'), () => {
+    admin.classList.remove('actions');
+  });
 
   const headers = Array.from(admin.querySelectorAll('[class*="header"]:not([class*="headers"])'));
   const containers = Array.from(admin.querySelectorAll('.stats-container'));
