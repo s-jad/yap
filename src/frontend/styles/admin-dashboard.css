@@ -1,15 +1,35 @@
 .admin-dashboard {
   display: grid;
-  grid-template-rows: 10vh 1fr;
+  grid-template-rows: 4rem 1fr;
   height: 100%;
   width: 100%;
+  
+  .admin-dashboard-view-switch {
+    display: flex;
+    align-items: center;
+    background: var(--card-clr);
+    padding-left: 1rem;
+    gap: calc(var(--gap) * 3);
+
+    label {
+      display: flex;
+      align-items: center;
+      color: var(--font-clr);
+
+      input[type="radio"] {
+        height: 15px;
+        width: 15px;
+      }
+    }
+  }
 
   .admin-functions-grid {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: space-evenly;
     gap: var(--gap);
     padding: var(--p-block) var(--p-inline);
+    overflow: hidden;
 
     .admin-function-card {
       display: flex;
@@ -92,17 +112,34 @@
                     width 200ms ease-in-out;
 
         .stats-container {
+          position: relative;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
           height: 100%;
           width: 100%;
           background: var(--card-clr);
           border-radius: 1rem;
           box-shadow: var(--shadow), var(--shadow-inset);
 
-          svg {
-            box-shadow: var(--shadow), var(--shadow-inset);
+          .filter-btn-wrapper {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            display: flex;
+            gap: var(--gap);
+            
+            label {
+              display: flex;
+              align-items: center;
+              gap: var(--gap);
+
+              input[type="radio"] {
+                height: 20px;
+                width: 20px;
+              }
+            }
           }
         }
       }
@@ -113,5 +150,15 @@
         opacity: 0;
       }
     }
+  }
+}
+
+.admin-dashboard.actions {
+  .admin-functions-grid {
+    display: flex;
+  }
+
+  .user-stats-dashboard {
+    display: none;
   }
 }
