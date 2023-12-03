@@ -1,86 +1,8 @@
 import '../styles/admin-dashboard.css';
 import { getMonthlyLoginStats, getUserActivityStats } from './tribes-db-access';
 import * as d3 from 'd3';
-import { getModal } from './modals';
 
-let currentFilterValues = [];
-
-function getUserActivityFilterModal(value) {
-  const {
-    modal,
-    modalInner,
-    headers
-  } = getModal();
-
-  modalInner.classList.add('ua-filter-modal');
-
-  modalInner.innerHTML = `
-    <div class="filter-message-type">
-      <div class="chatroom-messages">
-        <h3>Total chatroom messages: </h3>
-        <label for="tims">
-          Sent:
-          <input 
-            type="checkbox"
-            id="timr"
-            value="total_chatroom_messages_sent"
-          />
-        </label>
-        <label for="timr">
-          Received:
-          <input 
-            type="checkbox"
-            id="timr"
-            value="total_chatroom_messages_received"
-          />
-        </label>
-      </div>
-      <div class="inbox-messages">
-        <h3>Total inbox messages: </h3>
-        <label for="tims">
-          Sent:
-          <input 
-            type="checkbox"
-            id="timr"
-            value="total_inbox_messages_sent"
-          />
-        </label>
-        <label for="timr">
-          Received:
-          <input 
-            type="checkbox"
-            id="timr"
-            value="total_inbox_messages_received"
-          />
-        </label>
-      </div>
-    </div>
-    <button class="filter-btn">Filter</button>
-    <button class="cancel-btn">Cancel</button>
-  `;
-
-  const filterBtn = modalInner.querySelector('.filter-btn');
-
-  filterBtn.addEventListener(('click'), () => {
-    const checkboxes = Array.from(modalInner.querySelectorAll('input[type="checkbox"]'));
-    const filterValues = [];
-    checkboxes.forEach((checkbox) => {
-      filterValues.push(checkbox.value);
-    });
-    currentFilterValues = newValues;
-    document.body.removeChild(modal);
-  });
-
-  cancelBtn.addEventListener(('click'), () => {
-    document.body.removeChild(modal);
-  });
-
-  const cancelBtn = modalInner.querySelector('.cancel-btn');
-
-  document.body.appendChild(modal);
-}
-
-function renderUserActivityChart(userActivityData) {
+function renderUserActivityChartByCategory(userActivityData, category) {
   const userActivtyContainer = document.body.querySelector('.stats-container.user-activity');
   const rect = userActivtyContainer.getBoundingClientRect();
   
@@ -141,15 +63,24 @@ function filterProps(arr, propsToExclude) {
   });
 }
 
+function filterUser(arr, userToInclude) {
+  return arr.filter((user) => {
+    return user.user_name === userToInclude;
+  });
+}
+
 function filterUserActivityInterface(userActivityData, filterType, filterScheme) {
   let filteredData
   switch (filterType) {
     case 'user':
-
+      filteredData = filterUser(userActivityData, filterScheme);
+      console.log("filteredData => ", filteredData);
+      renderUserActivityChartByUser(filteredData);
       break;
 
     case 'category':
       filteredData = filterProps(userActivityData, filterScheme);
+      renderUserActivityChartByCategory(filteredData);
       break;
 
     case 'totals':
@@ -161,6 +92,46 @@ function filterUserActivityInterface(userActivityData, filterType, filterScheme)
   }
 
   return filteredData;
+}
+
+function getUserActivityFilterOptions(userActivityData, container, btnValue) {
+  const filterOptionsWrapper = document.createElement('div');
+  filterOptionsWrapper.className = 'filter-options-wrapper';
+  const filterOptionsInner = document.createElement('div');
+  filterOptionsInner.className = 'filter-options-inner';
+  filterOptionsWrapper.appendChild(filterOptionsInner);
+
+  switch (btnValue) {
+    case 'user':
+      const userSearch = document.createElement('input');
+      userSearch.type = 'text';
+      userSearch.className = 'user-search-input';
+      userSearch.placeholder = 'User to analyze...';
+      const generateChartBtn = document.createElement('button');
+      generateChartBtn.className = 'generate-chart-btn';
+      generateChartBtn.textContent = 'Generate';
+      generateChartBtn.addEventListener(('click'), () => {
+        if (userSearch.value !== undefined) {
+          const user = userSearch.value;
+          filterUserActivityInterface(userActivityData, 'user', user);
+        }
+      });
+      filterOptionsInner.appendChild(userSearch);
+      filterOptionsInner.appendChild(generateChartBtn);
+      container.appendChild(filterOptionsWrapper);
+      break;
+    case 'category':
+      filterOptionsInner.innerHTML = `
+
+      `;
+      break;
+    case 'totals':
+      
+      break;
+
+    default:
+      break;
+  }
 }
 
 export default async function AdminDashboard() {
@@ -299,14 +270,14 @@ export default async function AdminDashboard() {
   
   userActivityFilterBtns.forEach((btn) => {
     btn.addEventListener(('click'), () => {
-      getUserActivityFilterModal(btn.value);
+      getUserActivityFilterOptions(userActivityStats, containers[0], btn.value);
     });
   });
 
   setTimeout(() => {
-    renderUserActivityChart(userActivityStats, containers[0]);
-    renderMonthlyLoginChart(monthlyLoginStats, containers[1]);
-    renderMonthlyLoginChart(monthlyLoginStats, containers[2]);
+    renderUserActivityChartByCategory(userActivityStats, containers[0]);
+    // renderMonthlyLoginChart(monthlyLoginStats, containers[1]);
+    // renderMonthlyLoginChart(monthlyLoginStats, containers[2]);
   }, 1000);
 
   return admin;
