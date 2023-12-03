@@ -1,5 +1,3 @@
-import '../styles/friends.css';
-
 function checkUserActive(lastLogin, lastLogout) {
   const loggedIn = lastLogin > lastLogout;
 
