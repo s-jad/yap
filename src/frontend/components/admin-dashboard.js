@@ -20,12 +20,10 @@ function renderUserActivityChartByUser(userActivityData, userName) {
 
   const yMax = Math.max(...valuesArr);
 
-  const margin = {top: 120, right: 30, bottom: 30, left: 30},
+  const margin = {top: 90, right: 30, bottom: 30, left: 30},
     height = rect.height - margin.top - margin.bottom,
     width = rect.width - margin.left - margin.right;
   
-  console.log("height => ", height);
-
   const svg = d3.select(userActivtyContainer)
     .append('svg')
       .attr('width', width + margin.left + margin.right)
@@ -46,7 +44,6 @@ function renderUserActivityChartByUser(userActivityData, userName) {
   svg.append('text')
     .attr('x', width / 5)
     .attr('y', -20)
-    .attr('text-anchor', 'center')
     .style('font-size', '1.6rem')
     .style('fill', '#dec4e3')
     .text(userName); 
@@ -56,7 +53,6 @@ function renderUserActivityChartByUser(userActivityData, userName) {
     .call(d3.axisBottom(xScale))
     .selectAll('text')
       .attr('transform', 'translate(-10,0)')
-      .style('text-anchor', 'center');
 
   svg.append('g')
     .call(d3.axisLeft(yScale));
@@ -101,7 +97,7 @@ function renderUserActivityChartByCategory(userActivityData, category) {
   svg.append('text')
     .attr('x', width / 5)
     .attr('y', -20)
-    .attr('text-anchor', 'middle')
+    .attr('text-anchor', 'center')
     .style('font-size', '1.6rem')
     .style('fill', '#dec4e3')
     .text(`${category}`); 
@@ -156,32 +152,49 @@ function filterCategory(arr, category) {
   return filteredArr;
 }
 
+function accumulateTotals(arr) {
+  const accumulatedObj = {
+    total_inbox_messages_sent: 0,
+    total_inbox_messages_received: 0,
+    total_chat_messages_sent: 0,
+    total_chat_messages_received: 0,
+  };
+
+  arr.forEach((user) => {
+    accumulatedObj.total_inbox_messages_sent += user.total_inbox_messages_sent;
+    accumulatedObj.total_inbox_messages_received += user.total_inbox_messages_received;
+    accumulatedObj.total_chat_messages_sent += user.total_chat_messages_sent;
+    accumulatedObj.total_chat_messages_received += user.total_chat_messages_received;
+  });
+  
+  return accumulatedObj;
+}
+
 function filterUserActivityInterface(userActivityData, filterType, filterScheme) {
-  let filteredData
+  let dataToRender
   switch (filterType) {
     case 'user':
-      filteredData = filterUser(userActivityData, filterScheme);
-      console.log("filteredData => ", filteredData);
-      const userName = filteredData.user_name;
-      delete filteredData.user_name;
-      delete filteredData.user_id;
-      renderUserActivityChartByUser(filteredData, userName);
+      dataToRender = filterUser(userActivityData, filterScheme);
+      console.log("dataToRender => ", dataToRender);
+      const userName = dataToRender.user_name;
+      delete dataToRender.user_name;
+      delete dataToRender.user_id;
+      renderUserActivityChartByUser(dataToRender, userName);
       break;
 
     case 'category':
-      filteredData = filterCategory(userActivityData, filterScheme);
-      renderUserActivityChartByCategory(filteredData, filterScheme);
+      dataToRender = filterCategory(userActivityData, filterScheme);
+      renderUserActivityChartByCategory(dataToRender, filterScheme);
       break;
 
     case 'totals':
-      
+      dataToRender = accumulateTotals(userActivityData);
+      renderUserActivityChartByUser(dataToRender, 'Yapp totals');
       break;
 
     default:
       break;
   }
-
-  return filteredData;
 }
 
 function getUserActivityFilterOptions(userActivityData, container, btnValue) {
@@ -283,7 +296,7 @@ function getUserActivityFilterOptions(userActivityData, container, btnValue) {
       container.appendChild(filterOptionsWrapper);
       break;
     case 'totals':
-      
+        filterUserActivityInterface(userActivityData, 'totals');
       break;
 
     default:
@@ -344,38 +357,40 @@ export default async function AdminDashboard() {
         <div class="stats-card user-activity">
           <div class="stats-container user-activity">
             <div class="filter-btn-wrapper">
-              <p>Filter by: </p>
-              <label for"ua-user">
-                UserId
-                <input 
-                  id="ua-user"
-                  type="radio" 
-                  class="ua-radio-btn"
-                  name="filter-user-activity"
-                  value="user"
-                  checked
-                />
-              </label>
-              <label for="ua-category">
-                Category
-                <input 
-                  id="ua-category"
-                  type="radio" 
-                  class="ua-radio-btn"
-                  name="filter-user-activity"
-                  value="category"
-                />
-              </label>
-              <label for="ua-totals">
-                Totals
-                <input 
-                  id="ua-totals"
-                  type="radio" 
-                  class="ua-radio-btn"
-                  name="filter-user-activity"
-                  value="totals"
-                />
-              </label>
+              <p class="filter-options-btn">Filter by: </p>
+              <div class="filter-options-menu minimized">
+                <label for"ua-user">
+                  UserId
+                  <input 
+                    id="ua-user"
+                    type="radio" 
+                    class="ua-radio-btn"
+                    name="filter-user-activity"
+                    value="user"
+                    checked
+                  />
+                </label>
+                <label for="ua-category">
+                  Category
+                  <input 
+                    id="ua-category"
+                    type="radio" 
+                    class="ua-radio-btn"
+                    name="filter-user-activity"
+                    value="category"
+                  />
+                </label>
+                <label for="ua-totals">
+                  Totals
+                  <input 
+                    id="ua-totals"
+                    type="radio" 
+                    class="ua-radio-btn"
+                    name="filter-user-activity"
+                    value="totals"
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </div>
