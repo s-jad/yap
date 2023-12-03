@@ -46,7 +46,7 @@ function renderUserActivityChartByUser(userActivityData, userName) {
   svg.append('text')
     .attr('x', width / 5)
     .attr('y', -20)
-    .attr('text-anchor', 'middle')
+    .attr('text-anchor', 'center')
     .style('font-size', '1.6rem')
     .style('fill', '#dec4e3')
     .text(userName); 
@@ -191,6 +191,12 @@ function getUserActivityFilterOptions(userActivityData, container, btnValue) {
   filterOptionsInner.className = 'filter-options-inner';
   filterOptionsWrapper.appendChild(filterOptionsInner);
 
+  const displayedWrapper = container.querySelector('.filter-options-wrapper');
+
+  if (displayedWrapper !== null) {
+    container.removeChild(displayedWrapper);
+  }
+
   switch (btnValue) {
     case 'user':
       const userSearch = document.createElement('input');
@@ -212,29 +218,36 @@ function getUserActivityFilterOptions(userActivityData, container, btnValue) {
       break;
     case 'category':
       filterOptionsInner.innerHTML = `
-        <div class="filter-category-options-wrapper">
-          <label for="filter-option-tims">
-            Total inbox Messages Sent
-            <input 
-              id="filter-option-tims"
-              type="radio" 
-              class="filter-option-radio-btn"
-              name="filter-category-options"
-              value="total_inbox_messages_sent"
-            />
-          </label>
-          <label for="filter-option-tims">
-            Total inbox messages received 
-            <input 
-              id="filter-option-tims"
-              type="radio" 
-              class="filter-option-radio-btn"
-              name="filter-category-options"
-              value="total_inbox_messages_received"
-            />
-          </label>
-          <label for="filter-option-tcms">
-            Total chat messages sent
+        <div class="inbox-wrapper">
+          <h3>Inbox Messages:</h3>
+          <div class="filter-category-options-wrapper">
+            <label for="filter-option-tims">
+              Sent
+              <input 
+                id="filter-option-tims"
+                type="radio" 
+                class="filter-option-radio-btn"
+                name="filter-category-options"
+                value="total_inbox_messages_sent"
+              />
+            </label>
+            <label for="filter-option-tims">
+              Received 
+              <input 
+                id="filter-option-tims"
+                type="radio" 
+                class="filter-option-radio-btn"
+                name="filter-category-options"
+                value="total_inbox_messages_received"
+              />
+            </label>
+          </div>
+        </div>
+        <div class="chat-wrapper">
+          <h3>Chat Messages:</h3> 
+          <div class="filter-category-options-wrapper">
+            <label for="filter-option-tcms">
+            Sent
             <input 
               id="filter-option-tcms"
               type="radio" 
@@ -242,9 +255,9 @@ function getUserActivityFilterOptions(userActivityData, container, btnValue) {
               name="filter-category-options"
               value="total_chat_messages_sent"
             />
-          </label>
-          <label for="filter-option-tcmr">
-            Total chat messages received
+            </label>
+            <label for="filter-option-tcmr">
+            Received
             <input 
               id="filter-option-tcmr"
               type="radio" 
@@ -252,7 +265,8 @@ function getUserActivityFilterOptions(userActivityData, container, btnValue) {
               name="filter-category-options"
               value="total_chat_messages_received"
             />
-          </label>
+            </label>
+          </div>
         </div>
       `;
       const generateCategoryChartBtn = document.createElement('button');
