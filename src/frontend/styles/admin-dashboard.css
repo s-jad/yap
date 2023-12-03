@@ -125,15 +125,34 @@
 
           .filter-btn-wrapper {
             position: absolute;
+            border-radius: 1rem;
             left: 1rem;
             top: 1rem;
             display: flex;
+            flex-direction: column;
             gap: var(--gap);
+
+            .filter-options-btn {
+              position: relative;
+              cursor: pointer;
+              max-height: 25px;
+            }
+
+            .filter-options-menu {
+              padding: 1rem;
+              background: var(--card-clr);
+              border-radius: 1rem;
+              box-shadow: var(--shadow), var(--shadow-inset);
+              opacity: 0;
+              max-height: 0px;
+              transition: opacity 150ms ease-in-out,
+                          max-height 300ms ease-in-out;
+            }
             
             label {
               display: flex;
               align-items: center;
-              gap: var(--gap);
+              justify-content: space-between;
 
               input[type="radio"] {
                 height: 20px;
@@ -142,10 +161,20 @@
             }
           }
 
+          .filter-btn-wrapper:hover,
+          .filter-btn-wrapper:focus-visible {
+            .filter-options-menu {
+              display: flex;
+              flex-direction: column;
+              opacity: 1;
+              max-height: 300px;
+            }
+          }
+
           .filter-options-wrapper {
             position: absolute;
             right: 1rem;
-            top: 4.5rem;
+            top: 1rem;
             
             .filter-options-inner {
               display: flex;
