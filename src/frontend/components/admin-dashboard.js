@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 function clearPreviousChart(container) {
   const svg = container.querySelector('svg');
 
-  if (svg !== undefined) {
+  if (svg !== null) {
     container.removeChild(svg);
   }
 }
@@ -17,10 +17,10 @@ function renderUserActivityChartByUser(userActivityData, userName) {
   const rect = userActivtyContainer.getBoundingClientRect();
   const keysArr = Object.keys(userActivityData);
   const valuesArr = Object.values(userActivityData);
-  console.log("keysArr => ", keysArr);
+
   const yMax = Math.max(...valuesArr);
 
-  const margin = {top: 90, right: 30, bottom: 30, left: 30},
+  const margin = {top: 120, right: 30, bottom: 30, left: 30},
     height = rect.height - margin.top - margin.bottom,
     width = rect.width - margin.left - margin.right;
   
@@ -43,13 +43,13 @@ function renderUserActivityChartByUser(userActivityData, userName) {
     .range([height, 0])
     .domain([0, yMax]);
 
-   svg.append('text')
-     .attr('x', width / 5)
-     .attr('y', -20)
-     .attr('text-anchor', 'middle')
-     .style('font-size', '1.6rem')
-     .style('fill', '#dec4e3')
-     .text(userName); 
+  svg.append('text')
+    .attr('x', width / 5)
+    .attr('y', -20)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '1.6rem')
+    .style('fill', '#dec4e3')
+    .text(userName); 
 
   svg.append('g')
     .attr('transform', 'translate(0,' + height + ')')
@@ -74,14 +74,12 @@ function renderUserActivityChartByUser(userActivityData, userName) {
 
 function renderUserActivityChartByCategory(userActivityData, category) {
   const userActivtyContainer = document.body.querySelector('.stats-container.user-activity');
+  clearPreviousChart(userActivtyContainer);
   const rect = userActivtyContainer.getBoundingClientRect();
   
   const margin = {top: 50, right: 30, bottom: 30, left: 40},
     height = rect.height - margin.top - margin.bottom,
     width = rect.width - margin.left - margin.right;
-  
-  console.log("height => ", height);
-  console.log("width => ", width);
 
   const svg = d3.select(userActivtyContainer)
     .append('svg')
@@ -98,8 +96,16 @@ function renderUserActivityChartByCategory(userActivityData, category) {
 
   const yScale = d3.scaleLinear()
     .range([height, 0])
-    .domain([0, d3.max(userActivityData, function(d) { return d.total_chat_messages_sent; })]);
-  
+    .domain([0, d3.max(userActivityData, function(d) { return d[category]; })]);
+
+  svg.append('text')
+    .attr('x', width / 5)
+    .attr('y', -20)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '1.6rem')
+    .style('fill', '#dec4e3')
+    .text(`${category}`); 
+
   svg.append('g')
     .attr('transform', 'translate(0,' + height + ')')
     .call(d3.axisBottom(xScale))
@@ -115,9 +121,9 @@ function renderUserActivityChartByCategory(userActivityData, category) {
     .enter()
     .append('rect')
       .attr('x', function(d) { return xScale(d.user_id); })
-      .attr('y', function(d) { return yScale(d.total_chat_messages_sent); })
+      .attr('y', function(d) { return yScale(d[category]); })
       .attr('width', xScale.bandwidth())
-      .attr('height', function(d) { return height - yScale(d.total_chat_messages_sent); })
+      .attr('height', function(d) { return height - yScale(d[category]); })
       .attr('fill', '#dec4e3')
 }
 
@@ -125,18 +131,29 @@ function renderMonthlyLoginChart(monthlyLoginData) {
   console.log("monthlyLoginData => ", monthlyLoginData);
 }
 
-function filterProps(arr, propsToExclude) {
-  return arr.map((obj) => {
-    const res = { ...obj };
-    propsToExclude.forEach((prop) => delete res[prop]);
-    return res;
-  });
-}
-
 function filterUser(arr, userToInclude) {
   return arr.find((user) => {
     return user.user_name === userToInclude;
   });
+}
+
+function filterCategory(arr, category) {
+  const filteredArr = [];
+  arr.forEach((user) => {
+    const filteredUser = Object.entries(user).reduce((acc, [key, value]) => {
+      if (
+        key === category
+        || key === 'user_id'
+        || key === 'user_name'
+      ) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+    filteredArr.push(filteredUser);
+  });
+
+  return filteredArr;
 }
 
 function filterUserActivityInterface(userActivityData, filterType, filterScheme) {
@@ -152,8 +169,8 @@ function filterUserActivityInterface(userActivityData, filterType, filterScheme)
       break;
 
     case 'category':
-      filteredData = filterProps(userActivityData, filterScheme);
-      renderUserActivityChartByCategory(filteredData);
+      filteredData = filterCategory(userActivityData, filterScheme);
+      renderUserActivityChartByCategory(filteredData, filterScheme);
       break;
 
     case 'totals':
@@ -195,8 +212,61 @@ function getUserActivityFilterOptions(userActivityData, container, btnValue) {
       break;
     case 'category':
       filterOptionsInner.innerHTML = `
-
+        <div class="filter-category-options-wrapper">
+          <label for="filter-option-tims">
+            Total inbox Messages Sent
+            <input 
+              id="filter-option-tims"
+              type="radio" 
+              class="filter-option-radio-btn"
+              name="filter-category-options"
+              value="total_inbox_messages_sent"
+            />
+          </label>
+          <label for="filter-option-tims">
+            Total inbox messages received 
+            <input 
+              id="filter-option-tims"
+              type="radio" 
+              class="filter-option-radio-btn"
+              name="filter-category-options"
+              value="total_inbox_messages_received"
+            />
+          </label>
+          <label for="filter-option-tcms">
+            Total chat messages sent
+            <input 
+              id="filter-option-tcms"
+              type="radio" 
+              class="filter-option-radio-btn"
+              name="filter-category-options"
+              value="total_chat_messages_sent"
+            />
+          </label>
+          <label for="filter-option-tcmr">
+            Total chat messages received
+            <input 
+              id="filter-option-tcmr"
+              type="radio" 
+              class="filter-option-radio-btn"
+              name="filter-category-options"
+              value="total_chat_messages_received"
+            />
+          </label>
+        </div>
       `;
+      const generateCategoryChartBtn = document.createElement('button');
+      generateCategoryChartBtn.className = 'generate-chart-btn';
+      generateCategoryChartBtn.textContent = 'Generate';
+      generateCategoryChartBtn.addEventListener(('click'), () => {
+        const checked = filterOptionsInner.querySelector('input[type="radio"]:checked');
+        if (checked !== undefined) {
+          const category = checked.value;
+          filterUserActivityInterface(userActivityData, 'category', category);
+        }
+      });
+      filterOptionsInner.appendChild(generateCategoryChartBtn);
+      container.appendChild(filterOptionsWrapper);
       break;
     case 'totals':
       
@@ -346,12 +416,6 @@ export default async function AdminDashboard() {
       getUserActivityFilterOptions(userActivityStats, containers[0], btn.value);
     });
   });
-
-  setTimeout(() => {
-    renderUserActivityChartByCategory(userActivityStats, containers[0]);
-    // renderMonthlyLoginChart(monthlyLoginStats, containers[1]);
-    // renderMonthlyLoginChart(monthlyLoginStats, containers[2]);
-  }, 1000);
 
   return admin;
 }
