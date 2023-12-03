@@ -1121,36 +1121,42 @@ function getMonthlyLoginStatsByMonth() {
 function getUserActivityStats() {
   const query = `
     SELECT 
-      cm1.sender_id AS user_id,
-      cm1.total_chat_messages_sent,
-      cm2.total_chat_messages_received,
-      um1.total_inbox_messages_sent,
-      um2.total_inbox_messages_received
+      u.user_id AS user_id,
+      u.user_name AS user_name,
+      COALESCE(cm1.tcms, 0) AS total_chat_messages_sent,
+      COALESCE(cm2.tcmr, 0) AS total_chat_messages_received,
+      COALESCE(um1.tims, 0) AS total_inbox_messages_sent,
+      COALESCE(um2.timr, 0) AS total_inbox_messages_received
     FROM (
-      SELECT sender_id, COUNT(sender_id) AS total_chat_messages_sent
-      FROM chatroom_messages cm1
+      SELECT user_id, user_name
+      FROM users
+    ) u
+    LEFT JOIN (
+      SELECT sender_id, COUNT(sender_id) as tcms 
+      FROM chatroom_messages
       GROUP BY sender_id
     ) cm1
-    JOIN (
-      SELECT receiver_id, COUNT(receiver_id) as total_chat_messages_received 
+    ON u.user_id = cm1.sender_id
+    LEFT JOIN (
+      SELECT receiver_id, COUNT(receiver_id) as tcmr 
       FROM chatroom_messages
       GROUP BY receiver_id
     ) cm2
-    ON cm1.sender_id = cm2.receiver_id
-    JOIN (
-      SELECT sender_id, COUNT(sender_id) AS total_inbox_messages_sent
+    ON u.user_id = cm2.receiver_id
+    LEFT JOIN (
+      SELECT sender_id, COUNT(sender_id) AS tims
       FROM user_messages
       GROUP BY sender_id
     ) um1
-    ON cm2.receiver_id = um1.sender_id
-    JOIN (
-      SELECT receiver_id, COUNT(receiver_id) AS total_inbox_messages_received
+    ON u.user_id = um1.sender_id
+    LEFT JOIN (
+      SELECT receiver_id, COUNT(receiver_id) AS timr
       FROM user_messages
       GROUP BY receiver_id
     ) um2 
-    ON um1.sender_id = um2.receiver_id
+    ON u.user_id = um2.receiver_id
     ORDER BY 
-      cm1.sender_id;
+      u.user_id;
   `;
 
   return new Promise((resolve, reject) => {
