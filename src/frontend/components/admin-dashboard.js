@@ -42,7 +42,7 @@ function renderUserActivityChartByUser(userActivityData, userName) {
     .domain([0, yMax]);
 
   svg.append('text')
-    .attr('x', width / 5)
+    .attr('x', 120)
     .attr('y', -20)
     .style('font-size', '1.6rem')
     .style('fill', '#dec4e3')
@@ -95,7 +95,7 @@ function renderUserActivityChartByCategory(userActivityData, category) {
     .domain([0, d3.max(userActivityData, function(d) { return d[category]; })]);
 
   svg.append('text')
-    .attr('x', width / 5)
+    .attr('x', 120)
     .attr('y', -20)
     .attr('text-anchor', 'center')
     .style('font-size', '1.6rem')
@@ -135,8 +135,8 @@ function filterUser(arr, userToInclude) {
 
 function filterCategory(arr, category) {
   const filteredArr = [];
-  arr.forEach((user) => {
-    const filteredUser = Object.entries(user).reduce((acc, [key, value]) => {
+  arr.forEach((obj) => {
+    const filteredUser = Object.entries(obj).reduce((acc, [key, value]) => {
       if (
         key === category
         || key === 'user_id'
@@ -153,21 +153,18 @@ function filterCategory(arr, category) {
 }
 
 function accumulateTotals(arr) {
-  const accumulatedObj = {
-    total_inbox_messages_sent: 0,
-    total_inbox_messages_received: 0,
-    total_chat_messages_sent: 0,
-    total_chat_messages_received: 0,
-  };
-
-  arr.forEach((user) => {
+  return arr.reduce((accumulatedObj, user) => {
     accumulatedObj.total_inbox_messages_sent += user.total_inbox_messages_sent;
     accumulatedObj.total_inbox_messages_received += user.total_inbox_messages_received;
     accumulatedObj.total_chat_messages_sent += user.total_chat_messages_sent;
     accumulatedObj.total_chat_messages_received += user.total_chat_messages_received;
+    return accumulatedObj;
+  }, {
+    total_inbox_messages_sent: 0,
+    total_inbox_messages_received: 0,
+    total_chat_messages_sent: 0,
+    total_chat_messages_received: 0,
   });
-  
-  return accumulatedObj;
 }
 
 function filterUserActivityInterface(userActivityData, filterType, filterScheme) {
